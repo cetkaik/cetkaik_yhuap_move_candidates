@@ -16,18 +16,6 @@ pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
 
-fn is_water([row, col]: Coord) -> bool {
-    (row == 4 && col == 2)
-        || (row == 4 && col == 3)
-        || (row == 4 && col == 4)
-        || (row == 4 && col == 5)
-        || (row == 4 && col == 6)
-        || (row == 2 && col == 4)
-        || (row == 3 && col == 4)
-        || (row == 5 && col == 4)
-        || (row == 6 && col == 4)
-}
-
 fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> absolute::Coord {
     let [row, col] = coord;
 
@@ -462,15 +450,7 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-
-fn rotate_coord(c: Coord) -> Coord {
-    [(8 - c[0]), (8 - c[1])]
-}
-
 use cetkaik_core::relative::*;
-
-/// [row, col]
-pub type Coord = [usize; 2];
 
 pub use cetkaik_core::absolute;
 
@@ -554,14 +534,9 @@ fn rotate_board(b: Board) -> Board {
 type Board = [Row; 9];
 type Row = [Option<Piece>; 9];
 
-
-
 use calculate_movable::TamOrUpwardPiece;
 
 pub use cetkaik_core::{Color, Profession};
-
-
-
 
 #[derive(Debug)]
 pub struct PureGameState {
