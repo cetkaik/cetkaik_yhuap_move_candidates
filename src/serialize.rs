@@ -92,26 +92,22 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_prof(prof),
             serialize_absolute_coord(dest)
         ),
-        PureOpponentMove::PotentialWaterEntry(
-            PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
-                src,
-                dest,
-                is_water_entry_ciurl,
-            },
-        ) => format!(
+        PureOpponentMove::NonTamMoveSrcDst {
+            src,
+            dest,
+            is_water_entry_ciurl,
+        } => format!(
             "{}片{}{}",
             serialize_absolute_coord(src),
             serialize_absolute_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
-        PureOpponentMove::PotentialWaterEntry(
-            PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcStepDstFinite {
-                src,
-                dest,
-                is_water_entry_ciurl,
-                step,
-            },
-        ) => format!(
+        PureOpponentMove::NonTamMoveSrcStepDstFinite {
+            src,
+            dest,
+            is_water_entry_ciurl,
+            step,
+        } => format!(
             "{}片{}{}{}",
             serialize_absolute_coord(src),
             serialize_absolute_coord(step),
