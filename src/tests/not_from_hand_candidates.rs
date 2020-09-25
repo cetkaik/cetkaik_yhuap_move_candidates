@@ -1,4 +1,4 @@
-use crate::serialize::*;
+use crate::pure_move::*;
 
 #[test]
 fn test_simple_board_sample_3() {

@@ -1,11 +1,54 @@
 use super::*;
 use cetkaik_core::{serialize_prof, serialize_color};
 
-/// Serializes [`PureMove`](../enum.PureMove.html) in textual form.
+#[derive(Clone, Copy)]
+pub enum PureMove {
+    NonTamMoveSrcDst {
+        src: absolute::Coord,
+        dest: absolute::Coord,
+        is_water_entry_ciurl: bool,
+    },
+
+    NonTamMoveSrcStepDstFinite {
+        src: absolute::Coord,
+        step: absolute::Coord,
+        dest: absolute::Coord,
+        is_water_entry_ciurl: bool,
+    },
+    InfAfterStep {
+        src: absolute::Coord,
+        step: absolute::Coord,
+        planned_direction: absolute::Coord,
+    },
+    NonTamMoveFromHand {
+        color: Color,
+        prof: Profession,
+        dest: absolute::Coord,
+    },
+    TamMoveNoStep {
+        src: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
+    },
+    TamMoveStepsDuringFormer {
+        src: absolute::Coord,
+        step: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
+    },
+    TamMoveStepsDuringLatter {
+        src: absolute::Coord,
+        step: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
+    },
+}
+
+/// Serializes [`PureMove`](./enum.PureMove.html) in textual form.
 /// # Examples
 /// ```
 /// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
+/// use cerke_rust::pure_move::*;
 /// use cetkaik_core::*;
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::InfAfterStep {

@@ -459,50 +459,8 @@ struct Rotated {
     rotated_coord: Coord,
 }
 
-pub mod serialize;
-
-#[derive(Clone, Copy)]
-pub enum PureMove {
-    NonTamMoveSrcDst {
-        src: absolute::Coord,
-        dest: absolute::Coord,
-        is_water_entry_ciurl: bool,
-    },
-
-    NonTamMoveSrcStepDstFinite {
-        src: absolute::Coord,
-        step: absolute::Coord,
-        dest: absolute::Coord,
-        is_water_entry_ciurl: bool,
-    },
-    InfAfterStep {
-        src: absolute::Coord,
-        step: absolute::Coord,
-        planned_direction: absolute::Coord,
-    },
-    NonTamMoveFromHand {
-        color: Color,
-        prof: Profession,
-        dest: absolute::Coord,
-    },
-    TamMoveNoStep {
-        src: absolute::Coord,
-        first_dest: absolute::Coord,
-        second_dest: absolute::Coord,
-    },
-    TamMoveStepsDuringFormer {
-        src: absolute::Coord,
-        step: absolute::Coord,
-        first_dest: absolute::Coord,
-        second_dest: absolute::Coord,
-    },
-    TamMoveStepsDuringLatter {
-        src: absolute::Coord,
-        step: absolute::Coord,
-        first_dest: absolute::Coord,
-        second_dest: absolute::Coord,
-    },
-}
+pub mod pure_move;
+use pure_move::PureMove;
 
 pub struct Config {
     pub allow_kut2tam2: bool,
