@@ -70,7 +70,7 @@ mod get_opponent_pieces_rotated {
         format!(
             "{} {}",
             serialize_coord(r.rotated_coord),
-            serialize_piece(r.rotated_piece)
+            serialize_piece(r.rotated_piece.into())
         )
     }
     #[test]

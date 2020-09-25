@@ -1,6 +1,5 @@
 use super::*;
 
-
 pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
     ia_is_down: true,
     tam_itself_is_tam_hue: true,

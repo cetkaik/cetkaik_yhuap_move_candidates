@@ -13,9 +13,10 @@ pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove>
 }
 
 mod calculate_movable;
+pub use calculate_movable::calculate_movable_positions_for_either_side;
 
 fn is_water([row, col]: Coord) -> bool {
-     (row == 4 && col == 2)
+    (row == 4 && col == 2)
         || (row == 4 && col == 3)
         || (row == 4 && col == 4)
         || (row == 4 && col == 5)
@@ -60,8 +61,8 @@ fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
 }
 
 pub struct MovablePositions {
-    finite: Vec<Coord>,
-    infinite: Vec<Coord>,
+    pub finite: Vec<Coord>,
+    pub infinite: Vec<Coord>,
 }
 
 fn can_get_occupied_by(
@@ -71,7 +72,7 @@ fn can_get_occupied_by(
     board: Board,
     tam_itself_is_tam_hue: bool,
 ) -> bool {
-     if piece_to_move == Piece::Tam2 {
+    if piece_to_move == Piece::Tam2 {
         let [i, j] = dest;
         let dest_piece = board[i][j];
         /* It is allowed to enter an empty square */
@@ -104,7 +105,7 @@ fn can_get_occupied_by_non_tam(
             .into_iter()
             .filter(|[a, b]| {
                 let piece = board[*a][*b];
-                 match piece {
+                match piece {
                     None => false,
                     Some(Piece::Tam2) => false,
                     Some(Piece::NonTam2Piece {
@@ -143,7 +144,10 @@ fn can_get_occupied_by_non_tam(
     }
 }
 
-pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureOpponentMove> {
+pub fn not_from_hand_candidates_(
+    config: Config,
+    game_state: &PureGameState,
+) -> Vec<PureOpponentMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,
@@ -203,11 +207,11 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                     .collect::<Vec<_>>();
                 let candidates_inf: Vec<Coord> =
                     guide_list_green.iter().map(|c| rotate_coord(*c)).collect();
-                 [
+                [
                   &candidates.iter().flat_map(|final_dest| {
                       let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
-                          Piece::Tam2 => panic!(),
-                          Piece::NonTam2Piece{color, prof, side: _} => (color, prof)
+                          TamOrUpwardPiece::Tam2 => panic!(),
+                          TamOrUpwardPiece::NonTam2Piece{color, prof} => (color, prof)
                       };
                      if can_get_occupied_by(
                         Side::Downward,
@@ -235,8 +239,8 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                   }).collect::<Vec<PureOpponentMove>>()[..],
                   &candidates_inf.iter().flat_map(|planned_dest| {
                     let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
-                        Piece::Tam2 => panic!(),
-                        Piece::NonTam2Piece{color, prof, side: _} => (color, prof)
+                        TamOrUpwardPiece::Tam2 => panic!(),
+                        TamOrUpwardPiece::NonTam2Piece{color, prof} => (color, prof)
                     };
                     if
                       !can_get_occupied_by(
@@ -268,7 +272,7 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
             };
 
             match rotated_piece {
-                Piece::Tam2 => {
+                TamOrUpwardPiece::Tam2 => {
                     /* avoid self-occlusion */
                     let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
                     subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None;
@@ -326,7 +330,10 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                                     game_state.ia_is_down,
                                                 ),
                                                 src: to_absolute_coord(src, game_state.ia_is_down),
-                                                step: to_absolute_coord(step, game_state.ia_is_down),
+                                                step: to_absolute_coord(
+                                                    step,
+                                                    game_state.ia_is_down,
+                                                ),
                                             }]
                                             .into_iter()
                                         })
@@ -337,10 +344,9 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                         );
                     }
                 }
-                Piece::NonTam2Piece {
+                TamOrUpwardPiece::NonTam2Piece {
                     color: rotated_piece_color,
                     prof: rotated_piece_prof,
-                    side: _,
                 } => {
                     if dest_piece == None {
                         // cannot step
@@ -384,7 +390,7 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                         ) {
                             ans.append(&mut candidates_when_stepping(rotated_piece));
                         } else {
-                            ans.append(   
+                            ans.append(
                                 &mut [
                                     &[PureOpponentMove::PotentialWaterEntry(
                                         PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
@@ -422,7 +428,7 @@ fn get_opponent_pieces_rotated(game_state: &PureGameState) -> Vec<Rotated> {
             if let Some(p) = piece {
                 match p {
                     Piece::Tam2 => ans.push(Rotated {
-                        rotated_piece: p,
+                        rotated_piece: TamOrUpwardPiece::Tam2,
                         rotated_coord: rotate_coord(coord),
                     }),
                     Piece::NonTam2Piece {
@@ -512,7 +518,7 @@ pub enum AbsoluteColumn {
 pub type AbsoluteCoord = (AbsoluteRow, AbsoluteColumn);
 
 struct Rotated {
-    rotated_piece: Piece,
+    rotated_piece: TamOrUpwardPiece,
     rotated_coord: Coord,
 }
 
@@ -567,7 +573,7 @@ pub enum PureOpponentMove {
 }
 
 pub struct Config {
-    allow_kut2tam2: bool,
+    pub allow_kut2tam2: bool,
 }
 
 #[cfg(test)]
@@ -629,24 +635,48 @@ pub enum Piece {
     },
 }
 
+use calculate_movable::TamOrUpwardPiece;
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Color {
-    Kok1,  // Red, 赤
-    Huok2, // Black, 黒
+    /// Red, 赤
+    Kok1,
+
+    /// Black, 黒
+    Huok2,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Profession {
-    Nuak1, // Vessel, 船, felkana
-    Kauk2, // Pawn, 兵, elmer
-    Gua2,  // Rook, 弓, gustuer
-    Kaun1, // Bishop, 車, vadyrd
-    Dau2,  // Tiger, 虎, stistyst
-    Maun1, // Horse, 馬, dodor
-    Kua2,  // Clerk, 筆, kua
-    Tuk2,  // Shaman, 巫, terlsk
-    Uai1,  // General, 将, varxle
-    Io,    // King, 王, ales
+    /// Vessel, 船, felkana
+    Nuak1,
+
+    /// Pawn, 兵, elmer
+    Kauk2,
+
+    /// Rook, 弓, gustuer
+    Gua2,
+
+    /// Bishop, 車, vadyrd
+    Kaun1,
+
+    /// Tiger, 虎, stistyst
+    Dau2,
+
+    /// Horse, 馬, dodor
+    Maun1,
+
+    /// Clerk, 筆, kua
+    Kua2,
+
+    /// Shaman, 巫, terlsk
+    Tuk2,
+
+    /// General, 将, varxle
+    Uai1,
+
+    /// King, 王, ales
+    Io,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -657,27 +687,27 @@ pub enum Side {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct NonTam2PieceDownward {
-    color: Color,
-    prof: Profession,
+    pub color: Color,
+    pub prof: Profession,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct NonTam2PieceUpward {
-    color: Color,
-    prof: Profession,
+    pub color: Color,
+    pub prof: Profession,
 }
 
 #[derive(Debug)]
 pub struct PureGameState {
-    f: Field,
-    ia_is_down: bool,
-    tam_itself_is_tam_hue: bool,
-    opponent_has_just_moved_tam: bool,
+    pub f: Field,
+    pub ia_is_down: bool,
+    pub tam_itself_is_tam_hue: bool,
+    pub opponent_has_just_moved_tam: bool,
 }
 
 #[derive(Debug)]
 pub struct Field {
-    current_board: Board,
-    hop1zuo1of_upward: Vec<NonTam2PieceUpward>,
-    hop1zuo1of_downward: Vec<NonTam2PieceDownward>,
+    pub current_board: Board,
+    pub hop1zuo1of_upward: Vec<NonTam2PieceUpward>,
+    pub hop1zuo1of_downward: Vec<NonTam2PieceDownward>,
 }
