@@ -17,10 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Split off modules into separate files">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/calculate_movable.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/calculate_movable.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/serialize.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/serialize.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +155,7 @@
       <updated>1600980810662</updated>
       <workItem from="1600980813593" duration="170000" />
       <workItem from="1600981022364" duration="3110000" />
-      <workItem from="1600986772611" duration="7545000" />
+      <workItem from="1600986772611" duration="8184000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit: port parts of the test cases into rust">
       <created>1600984097229</created>
@@ -212,22 +209,22 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="93" y="93" width="1350" height="638" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.1536.824@0.0.1536.824" timestamp="1601013195727" />
-    <state width="1493" height="210" key="GridCell.Tab.0.bottom" timestamp="1601013243485">
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom" timestamp="1601013560531">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1601013243485" />
-    <state width="1493" height="210" key="GridCell.Tab.0.center" timestamp="1601013243485">
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1601013560531" />
+    <state width="1493" height="210" key="GridCell.Tab.0.center" timestamp="1601013560531">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1601013243485" />
-    <state width="1493" height="210" key="GridCell.Tab.0.left" timestamp="1601013243485">
+    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1601013560531" />
+    <state width="1493" height="210" key="GridCell.Tab.0.left" timestamp="1601013560531">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1601013243485" />
-    <state width="1493" height="210" key="GridCell.Tab.0.right" timestamp="1601013243485">
+    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1601013560531" />
+    <state width="1493" height="210" key="GridCell.Tab.0.right" timestamp="1601013560531">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1601013243485" />
+    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1601013560531" />
     <state width="1493" height="261" key="GridCell.Tab.1.bottom" timestamp="1601009150431">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

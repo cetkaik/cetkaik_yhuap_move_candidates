@@ -1,4 +1,4 @@
-fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove> {
+pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
         for empty_square in empty_squares(&game_state) {
@@ -143,7 +143,7 @@ fn can_get_occupied_by_non_tam(
     }
 }
 
-fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureOpponentMove> {
+pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureOpponentMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,
@@ -516,7 +516,7 @@ pub struct Rotated {
     rotated_coord: Coord,
 }
 
-mod serialize;
+pub mod serialize;
 
 #[derive(Clone, Copy)]
 pub enum PureOpponentMoveWithPotentialWaterEntry {
@@ -566,7 +566,7 @@ pub enum PureOpponentMove {
     },
 }
 
-struct Config {
+pub struct Config {
     allow_kut2tam2: bool,
 }
 
