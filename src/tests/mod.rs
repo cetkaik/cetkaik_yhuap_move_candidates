@@ -42,7 +42,6 @@ fn run_test<T, F, F2>(
 
 mod test_not_from_hand_candidates_with_kut2tam2;
 
-/* 1 fails*/
 mod not_from_hand_candidates;
 
 mod empty_squares {
