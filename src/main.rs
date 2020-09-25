@@ -1,44 +1,51 @@
 fn from_hand_candidates(gameState: &PureGameState) -> Vec<PureOpponentMove> {
     let mut ans = vec![];
     for piece in &gameState.f.hop1zuo1OfDownward {
-        for empty_square in empty_squares(&gameState) {ans.push(
-            PureOpponentMove::NonTamMoveFromHand {
-              color: piece.color,
-              prof: piece.prof,
-              dest: toAbsoluteCoord_(empty_square, gameState.IA_is_down)
-            }
-        )}
+        for empty_square in empty_squares(&gameState) {
+            ans.push(PureOpponentMove::NonTamMoveFromHand {
+                color: piece.color,
+                prof: piece.prof,
+                dest: toAbsoluteCoord_(empty_square, gameState.IA_is_down),
+            })
+        }
     }
     ans
 }
 
-fn toAbsoluteCoord_(
-    coord: Coord,
-    IA_is_down: bool
-  ) -> AbsoluteCoord {
-      let [row, col] = coord;
-      
+fn toAbsoluteCoord_(coord: Coord, IA_is_down: bool) -> AbsoluteCoord {
+    let [row, col] = coord;
+
     let columns = vec![
-      AbsoluteColumn::K,
-      AbsoluteColumn::L,
-      AbsoluteColumn::N,
-      AbsoluteColumn::T,
-      AbsoluteColumn::Z,
-      AbsoluteColumn::X,
-      AbsoluteColumn::C,
-      AbsoluteColumn::M,
-      AbsoluteColumn::P
+        AbsoluteColumn::K,
+        AbsoluteColumn::L,
+        AbsoluteColumn::N,
+        AbsoluteColumn::T,
+        AbsoluteColumn::Z,
+        AbsoluteColumn::X,
+        AbsoluteColumn::C,
+        AbsoluteColumn::M,
+        AbsoluteColumn::P,
     ];
-  
-    let rows = vec![AbsoluteRow::A, AbsoluteRow::E, AbsoluteRow::I, AbsoluteRow::U, AbsoluteRow::O, AbsoluteRow::Y, AbsoluteRow::AI, AbsoluteRow::AU, AbsoluteRow::IA];
-  
+
+    let rows = vec![
+        AbsoluteRow::A,
+        AbsoluteRow::E,
+        AbsoluteRow::I,
+        AbsoluteRow::U,
+        AbsoluteRow::O,
+        AbsoluteRow::Y,
+        AbsoluteRow::AI,
+        AbsoluteRow::AU,
+        AbsoluteRow::IA,
+    ];
+
     return (
-      rows[if IA_is_down {row } else  {8 - row}],
-      columns[if IA_is_down {col} else {8 - col}]
+        rows[if IA_is_down { row } else { 8 - row }],
+        columns[if IA_is_down { col } else { 8 - col }],
     );
-  }
- 
-/*  
+}
+
+/*
 pub struct MovablePositions {
     finite: Vec<Coord>,
     infinite: Vec<Coord>
@@ -51,7 +58,7 @@ fn calculateMovablePositions(
     tam_itself_is_tam_hue: bool
 ) -> MovablePositions {
     unimplemented!()
-}  
+}
 */
 
 fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<PureOpponentMove> {
@@ -66,14 +73,14 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
               rotateBoard(gameState.f.currentBoard),
               gameState.tam_itself_is_tam_hue
             );
-      
+
            let candidates: Vec<Coord> = [
               ...guideListYellow.map(rotateCoord),
               ...guideListGreen.map(rotateCoord)
             ];
-      
+
             const src: Coord = rotateCoord(rotated_coord);
-      
+
             return candidates.flatMap((dest: Coord): PureOpponentMove[] => {
               function is_ciurl_required(
                 dest: Coord,
@@ -87,12 +94,12 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                 );
               }
               const destPiece = gameState.f.currentBoard[dest[0]][dest[1]];
-      
+
               const candidates_when_stepping = (
                 rotated_piece: NonTam2PieceUpward
               ) => {
                 const step = dest; // less confusing
-      
+
                 /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
                 const subtracted_rotated_board = rotateBoard(
                   gameState.f.currentBoard
@@ -100,7 +107,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                 subtracted_rotated_board[rotated_coord[0]][
                   rotated_coord[1]
                 ] = null; /* must remove the piece to prevent self-occlusion */
-      
+
                 const {
                   finite: guideListYellow,
                   infinite: guideListGreen
@@ -110,7 +117,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                   subtracted_rotated_board,
                   gameState.tam_itself_is_tam_hue
                 );
-      
+
                 const candidates: Coord[] = guideListYellow.map(rotateCoord);
                 const candidates_inf: Coord[] = guideListGreen.map(rotateCoord);
                 return [
@@ -177,7 +184,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                   })
                 ];
               };
-      
+
               if (rotated_piece === "Tam2") {
                 /* avoid self-occlusion */
                 const subtracted_rotated_board = rotateBoard(
@@ -286,7 +293,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                 }
               } else if (destPiece.side === Side.Upward) {
                 // opponent's piece; stepping and taking both attainable
-      
+
                 // except when protected by tam2 hue a uai1
                 if (
                   !canGetOccupiedBy(
@@ -303,7 +310,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                 ) {
                   return candidates_when_stepping(rotated_piece);
                 }
-      
+
                 return [
                   {
                     type: "NonTamMove",
@@ -325,15 +332,13 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
               }
             });
           }
-      
+
           */
 
     unimplemented!()
 }
 
-fn get_opponent_pieces_rotated (
-    gameState: &PureGameState
-)-> Vec<Rotated> {
+fn get_opponent_pieces_rotated(gameState: &PureGameState) -> Vec<Rotated> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
@@ -341,14 +346,20 @@ fn get_opponent_pieces_rotated (
             let piece = gameState.f.currentBoard[rand_i][rand_j];
             if let Some(p) = piece {
                 match p {
-                    Piece::Tam2 => ans.push(Rotated{ rotated_piece: p, rotated_coord: rotateCoord(coord) }),
-                    Piece::NonTam2Piece {side: Side::Downward, prof, color} => {
-                        let rot_piece = NonTam2PieceUpward {
-                            prof,
-                            color,
-                        };
-                        ans.push(Rotated { rotated_piece: rot_piece.into(), rotated_coord: rotateCoord(coord) })
-                        ;
+                    Piece::Tam2 => ans.push(Rotated {
+                        rotated_piece: p,
+                        rotated_coord: rotateCoord(coord),
+                    }),
+                    Piece::NonTam2Piece {
+                        side: Side::Downward,
+                        prof,
+                        color,
+                    } => {
+                        let rot_piece = NonTam2PieceUpward { prof, color };
+                        ans.push(Rotated {
+                            rotated_piece: rot_piece.into(),
+                            rotated_coord: rotateCoord(coord),
+                        });
                     }
                     _ => {}
                 }
@@ -357,7 +368,6 @@ fn get_opponent_pieces_rotated (
     }
     ans
 }
-    
 
 fn empty_squares(gameState: &PureGameState) -> Vec<Coord> {
     let mut ans = vec![];

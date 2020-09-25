@@ -16,10 +16,7 @@
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Initial commit: port parts of the test cases into rust">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
-    </list>
+    <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Split off modules into separate files" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -87,7 +84,7 @@
       <updated>1600980810662</updated>
       <workItem from="1600980813593" duration="170000" />
       <workItem from="1600981022364" duration="3110000" />
-      <workItem from="1600986772611" duration="1192000" />
+      <workItem from="1600986772611" duration="1468000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit: port parts of the test cases into rust">
       <created>1600984097229</created>
@@ -96,7 +93,14 @@
       <option name="project" value="LOCAL" />
       <updated>1600984097229</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Split off modules into separate files">
+      <created>1600996052309</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1600996052309</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -122,7 +126,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit: port parts of the test cases into rust" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit: port parts of the test cases into rust" />
+    <MESSAGE value="Split off modules into separate files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Split off modules into separate files" />
   </component>
   <component name="WindowStateProjectService">
     <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1600981102579">

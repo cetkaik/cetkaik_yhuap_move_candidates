@@ -41,12 +41,11 @@ where
     set1 == set2
 }
 
-
 mod test_not_from_hand_candidates_with_kut2tam2 {
     use crate::serialize::*;
 
     #[test]
-fn test_tamCornerSample() {
+    fn test_tamCornerSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
@@ -73,7 +72,7 @@ fn test_tamCornerSample() {
     }
 
     #[test]
-fn test_tamItselfIsNotTamHueSample() {
+    fn test_tamItselfIsNotTamHueSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
@@ -100,7 +99,7 @@ fn test_tamItselfIsNotTamHueSample() {
     }
 
     #[test]
-fn test_initialBoardSample() {
+    fn test_initialBoardSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
@@ -130,7 +129,7 @@ fn test_initialBoardSample() {
 mod not_from_hand_candidates {
     use crate::serialize::*;
     #[test]
-fn test_simpleBoardSample_3() {
+    fn test_simpleBoardSample_3() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -142,7 +141,7 @@ fn test_simpleBoardSample_3() {
         );
     }
     #[test]
-fn test_simpleBoardSample_1_IA_is_down_true() {
+    fn test_simpleBoardSample_1_IA_is_down_true() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -171,7 +170,7 @@ fn test_simpleBoardSample_1_IA_is_down_true() {
         );
     }
     #[test]
-fn test_simpleBoardSample_2_IA_is_down_false() {
+    fn test_simpleBoardSample_2_IA_is_down_false() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -200,7 +199,7 @@ fn test_simpleBoardSample_2_IA_is_down_false() {
         );
     }
     #[test]
-fn test_initialBoardSample() {
+    fn test_initialBoardSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -212,7 +211,7 @@ fn test_initialBoardSample() {
         );
     }
     #[test]
-fn test_complicatedBoardSample_1() {
+    fn test_complicatedBoardSample_1() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -533,7 +532,7 @@ fn test_complicatedBoardSample_1() {
         );
     }
     #[test]
-fn test_complicatedBoardSample_2() {
+    fn test_complicatedBoardSample_2() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -884,7 +883,7 @@ fn test_complicatedBoardSample_2() {
         );
     }
     #[test]
-fn test_tamCornerSample() {
+    fn test_tamCornerSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -907,7 +906,7 @@ fn test_tamCornerSample() {
         );
     }
     #[test]
-fn test_tamItselfIsNotTamHueSample() {
+    fn test_tamItselfIsNotTamHueSample() {
         assert_eq!(
             super::runTest(
                 super::not_from_hand_candidates,
@@ -923,7 +922,7 @@ fn test_tamItselfIsNotTamHueSample() {
 mod empty_squares {
     use crate::serialize::*;
     #[test]
-fn test_initialBoardSample() {
+    fn test_initialBoardSample() {
         assert_eq!(
             super::runTest(
                 crate::empty_squares,
@@ -944,7 +943,7 @@ fn test_initialBoardSample() {
 mod get_opponent_pieces_rotated {
     use crate::serialize::*;
     #[test]
-fn test_initialBoardSample() {
+    fn test_initialBoardSample() {
         assert_eq!(
             super::runTest(
                 crate::get_opponent_pieces_rotated,
@@ -986,7 +985,7 @@ fn test_initialBoardSample() {
 mod from_hand_candidates {
     use crate::serialize::*;
     #[test]
-fn test_initialBoardSample() {
+    fn test_initialBoardSample() {
         assert_eq!(
             super::runTest(
                 crate::from_hand_candidates,
@@ -998,7 +997,7 @@ fn test_initialBoardSample() {
         );
     }
     #[test]
-fn test_simpleBoardSample_4() {
+    fn test_simpleBoardSample_4() {
         assert_eq!(
             super::runTest(
                 crate::from_hand_candidates,
