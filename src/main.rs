@@ -98,7 +98,36 @@ fn canGetOccupiedByNonTam(
     board: Board,
     tam_itself_is_tam_hue: bool,
 ) -> bool {
-    unimplemented!()
+    /* Intentionally does not verify whether the piece itself is of opponent */
+    let isProtectedByOpponentTamHueAUai = |side: Side, coord: Coord|
+        calculate_movable::eightNeighborhood(coord).into_iter().filter(|[a, b]| {
+        let piece = board[*a][*b];
+        match piece {
+            None => return false,
+            Some(Piece::Tam2) => return false,
+            Some(Piece::NonTam2Piece{side: piece_side, prof: piece_prof, color: _}) => return 
+                piece_prof == Profession::Uai1 &&
+                piece_side != side &&
+                calculate_movable::isTamHue([*a, *b], board, tam_itself_is_tam_hue)
+            
+        }
+    }).collect::<Vec<_>>().len() > 0;
+
+    let [i, j] = dest;
+    let destPiece = board[i][j];
+
+    match destPiece {
+        Some(Piece::Tam2) => return false, /* Tam2 can never be taken */
+
+        None => return true, /* It is always allowed to enter an empty square */
+        Some(Piece::NonTam2Piece{side: piece_side, prof: _, color: _}) => return piece_side != side /* cannot take your own piece */ &&
+        !isProtectedByOpponentTamHueAUai(
+          side,
+          dest
+        ) /* must not be protected by tam2 hue a uai1 */
+
+    }
+
 }
 
 fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<PureOpponentMove> {
