@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn complicatedBoard() -> Board {
+pub fn complicated_board() -> Board {
     [
         [
             None,
@@ -296,7 +296,7 @@ pub fn complicatedBoard() -> Board {
     ]
 }
 
-pub fn tamCorner() -> Board {
+pub fn tam_corner() -> Board {
     [
         [None, None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None, None],
@@ -372,99 +372,99 @@ pub fn tamCorner() -> Board {
     ]
 }
 
-pub fn simpleBoardSample_1() -> PureGameState {
+pub fn simple_board_sample_1() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: simpleBoard,
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: SIMPLE_BOARD,
         },
     }
 }
 
-pub fn simpleBoardSample_2() -> PureGameState {
+pub fn simple_board_sample_2() -> PureGameState {
     PureGameState {
-        IA_is_down: false,
+        ia_is_down: false,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: simpleBoard,
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: SIMPLE_BOARD,
         },
     }
 }
 
-pub fn simpleBoardSample_3() -> PureGameState {
+pub fn simple_board_sample_3() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: rotateBoard(simpleBoard),
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: rotate_board(SIMPLE_BOARD),
         },
     }
 }
 
-pub fn simpleBoardSample_4() -> PureGameState {
+pub fn simple_board_sample_4() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![NonTam2PieceDownward {
+            hop1zuo1of_downward: vec![NonTam2PieceDownward {
                 color: Color::Huok2,
                 prof: Profession::Gua2,
             }],
-            hop1zuo1OfUpward: vec![NonTam2PieceUpward {
+            hop1zuo1of_upward: vec![NonTam2PieceUpward {
                 color: Color::Kok1,
                 prof: Profession::Kauk2,
             }],
-            currentBoard: rotateBoard(simpleBoard),
+            current_board: rotate_board(SIMPLE_BOARD),
         },
     }
 }
 
-pub fn complicatedBoardSample_1() -> PureGameState {
+pub fn complicated_board_sample_1() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: complicatedBoard(),
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: complicated_board(),
         },
     }
 }
 
-pub fn complicatedBoardSample_2() -> PureGameState {
+pub fn complicated_board_sample_2() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: rotateBoard(complicatedBoard()),
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: rotate_board(complicated_board()),
         },
     }
 }
 
-pub fn tamCornerSample() -> PureGameState {
+pub fn tam_corner_sample() -> PureGameState {
     PureGameState {
-        IA_is_down: true,
+        ia_is_down: true,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
-            hop1zuo1OfDownward: vec![],
-            hop1zuo1OfUpward: vec![],
-            currentBoard: tamCorner(),
+            hop1zuo1of_downward: vec![],
+            hop1zuo1of_upward: vec![],
+            current_board: tam_corner(),
         },
     }
 }

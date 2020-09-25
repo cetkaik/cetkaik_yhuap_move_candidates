@@ -1,10 +1,10 @@
 use super::*;
 
-pub fn serializeCoord(coord: Coord) -> String {
+pub fn serialize_coord(coord: Coord) -> String {
     format!("[{},{}]", coord[0], coord[1])
 }
 
-pub fn serializeAbsoluteCoord(coord: AbsoluteCoord) -> String {
+pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
     let (row, column) = coord;
     format!(
         "{}{}",
@@ -33,7 +33,7 @@ pub fn serializeAbsoluteCoord(coord: AbsoluteCoord) -> String {
     )
 }
 
-pub fn serializeProf(prof: Profession) -> &'static str {
+pub fn serialize_prof(prof: Profession) -> &'static str {
     match prof {
         Profession::Nuak1 => "船",
         Profession::Kauk2 => "兵",
@@ -48,57 +48,57 @@ pub fn serializeProf(prof: Profession) -> &'static str {
     }
 }
 
-pub fn serializeColor(color: Color) -> &'static str {
+pub fn serialize_color(color: Color) -> &'static str {
     match color {
         Color::Huok2 => "黒",
         Color::Kok1 => "赤",
     }
 }
 
-pub fn serializeSide(side: Side) -> &'static str {
+pub fn serialize_side(side: Side) -> &'static str {
     match side {
         Side::Upward => "↑",
         Side::Downward => "↓",
     }
 }
 
-pub fn serializePiece(p: Piece) -> String {
+pub fn serialize_piece(p: Piece) -> String {
     match p {
         Piece::Tam2 => "皇".to_string(),
         Piece::NonTam2Piece { prof, color, side } => format!(
             "{}{}{}",
-            serializeColor(color),
-            serializeProf(prof),
-            serializeSide(side)
+            serialize_color(color),
+            serialize_prof(prof),
+            serialize_side(side)
         ),
     }
 }
 
-pub fn serializeRotated(r: Rotated) -> String {
+pub fn serialize_rotated(r: Rotated) -> String {
     format!(
         "{} {}",
-        serializeCoord(r.rotated_coord),
-        serializePiece(r.rotated_piece)
+        serialize_coord(r.rotated_coord),
+        serialize_piece(r.rotated_piece)
     )
 }
 
-pub fn serializePureOpponentMove(mov: PureOpponentMove) -> String {
+pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
     match mov {
         PureOpponentMove::InfAfterStep {
             src,
             step,
-            plannedDirection,
+            planned_direction: plannedDirection,
         } => format!(
             "{}片{}心{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(step),
-            serializeAbsoluteCoord(plannedDirection)
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(step),
+            serialize_absolute_coord(plannedDirection)
         ),
         PureOpponentMove::NonTamMoveFromHand { color, prof, dest } => format!(
             "{}{}{}",
-            serializeColor(color),
-            serializeProf(prof),
-            serializeAbsoluteCoord(dest)
+            serialize_color(color),
+            serialize_prof(prof),
+            serialize_absolute_coord(dest)
         ),
         PureOpponentMove::PotentialWaterEntry(
             PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
@@ -108,8 +108,8 @@ pub fn serializePureOpponentMove(mov: PureOpponentMove) -> String {
             },
         ) => format!(
             "{}片{}{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(dest),
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
         PureOpponentMove::PotentialWaterEntry(
@@ -121,44 +121,44 @@ pub fn serializePureOpponentMove(mov: PureOpponentMove) -> String {
             },
         ) => format!(
             "{}片{}{}{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(step),
-            serializeAbsoluteCoord(dest),
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(step),
+            serialize_absolute_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
         PureOpponentMove::TamMoveNoStep {
             src,
-            firstDest,
-            secondDest,
+            first_dest,
+            second_dest,
         } => format!(
             "{}皇{}{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(firstDest),
-            serializeAbsoluteCoord(secondDest)
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(first_dest),
+            serialize_absolute_coord(second_dest)
         ),
         PureOpponentMove::TamMoveStepsDuringFormer {
             src,
-            firstDest,
-            secondDest,
+            first_dest,
+            second_dest,
             step,
         } => format!(
             "{}皇{}[{}]{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(step),
-            serializeAbsoluteCoord(firstDest),
-            serializeAbsoluteCoord(secondDest)
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(step),
+            serialize_absolute_coord(first_dest),
+            serialize_absolute_coord(second_dest)
         ),
         PureOpponentMove::TamMoveStepsDuringLatter {
             src,
-            firstDest,
-            secondDest,
+            first_dest,
+            second_dest,
             step,
         } => format!(
             "{}皇[{}]{}{}",
-            serializeAbsoluteCoord(src),
-            serializeAbsoluteCoord(firstDest),
-            serializeAbsoluteCoord(step),
-            serializeAbsoluteCoord(secondDest)
+            serialize_absolute_coord(src),
+            serialize_absolute_coord(first_dest),
+            serialize_absolute_coord(step),
+            serialize_absolute_coord(second_dest)
         ),
     }
 }
