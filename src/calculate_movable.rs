@@ -139,7 +139,68 @@ fn apply_deltas_if_zero_or_one_intervention(
     ans
 }
 
-/// Returns the list of all possible locations that a piece can move to.
+/// Returns the list of all possible locations that a piece can move to / step on.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// assert_eq!(
+///     calculate_movable_positions_for_either_side(
+///         [2, 0], /* if, at [2,0], */
+///         Piece::NonTam2Piece {
+///             color: Color::Huok2,
+///             prof: Profession::Kua2,
+///             side: Side::Downward,
+///         }, /* a black Kua2 belonging to the opponent exists, */
+///         [
+///             [
+///                 Some(Piece::NonTam2Piece {
+///                     color: Color::Huok2,
+///                     prof: Profession::Gua2,
+///                     side: Side::Downward,
+///                 }), /* while the opponent's Gua2 is in [0,0] and */
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///             ],
+///             [None, None, None, None, None, None, None, None, None],
+///             [None, None, None, None, None, None, None, None, None],
+///             [None, None, None, None, None, None, None, None, None],
+///             [None, None, None, None, None, None, None, None, None],
+///             [None, None, None, None, None, None, None, None, None],
+///             [
+///                 Some(Piece::NonTam2Piece {
+///                     color: Color::Huok2,
+///                     prof: Profession::Kauk2,
+///                     side: Side::Upward,
+///                 }), /* your Kauk2 in [6,0], */
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///                 None,
+///             ],
+///             [None, None, None, None, None, None, None, None, None],
+///             [None, None, None, None, None, None, None, None, None],
+///         ],
+///         false
+///     ),
+///     MovablePositions {
+///         /* then the opponent's Gua2 can either move one step to the side, */
+///         finite: vec![[2, 1]],
+///         infinite: vec![[3, 0], [4, 0], [5, 0], [6, 0], [1, 0], [0, 0]]
+///         /* or it can run to anywhere from [0,0] to [6,0].
+///          * Note that you need two calls to this function in order to handle stepping. */
+///     }
+/// );
+/// ```
 pub fn calculate_movable_positions_for_either_side(
     coord: Coord,
     piece: Piece,

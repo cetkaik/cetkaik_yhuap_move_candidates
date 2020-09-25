@@ -61,6 +61,7 @@ fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
     )
 }
 
+#[derive(Debug, Eq, Clone, PartialEq)]
 pub struct MovablePositions {
     pub finite: Vec<Coord>,
     pub infinite: Vec<Coord>,

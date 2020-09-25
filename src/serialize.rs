@@ -1,6 +1,6 @@
 use super::*;
 
-/// Serializes `Coord` in JSON-style.
+/// Serializes [`Coord`](../type.Coord.html) in JSON-style.
 /// # Examples
 /// ```
 /// use cerke_rust::*;
@@ -12,7 +12,7 @@ pub fn serialize_coord(coord: Coord) -> String {
     format!("[{},{}]", coord[0], coord[1])
 }
 
-/// Serializes `AbsoluteCoord`.
+/// Serializes [`AbsoluteCoord`](../type.AbsoluteCoord.html).
 /// # Examples
 /// ```
 /// use cerke_rust::*;
@@ -51,7 +51,7 @@ pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
     )
 }
 
-/// Serializes `Profession`.
+/// Serializes [`Profession`](../enum.Profession.html).
 /// # Examples
 /// ```
 /// use cerke_rust::*;
@@ -76,7 +76,7 @@ pub fn serialize_prof(prof: Profession) -> &'static str {
     }
 }
 
-/// Serializes `Color`.
+/// Serializes [`Color`](../enum.Color.html).
 /// # Examples
 /// ```
 /// use cerke_rust::*;
@@ -100,7 +100,7 @@ fn serialize_side(side: Side) -> &'static str {
     }
 }
 
-/// Serializes `Piece`.
+/// Serializes [`Piece`](../enum.Piece.html).
 /// # Examples
 /// ```
 /// use cerke_rust::*;
@@ -125,7 +125,7 @@ pub fn serialize_piece(p: Piece) -> String {
     }
 }
 
-/// Serializes `PureMove` in textual form.
+/// Serializes [`PureMove`](../enum.PureMove.html) in textual form.
 /// # Examples
 /// ```
 /// use cerke_rust::*;
