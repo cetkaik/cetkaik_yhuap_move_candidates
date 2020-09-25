@@ -17,10 +17,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Split off modules into separate files">
-      <change afterPath="$PROJECT_DIR$/src/tests/from_hand_candidates.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tests/not_from_hand_candidates.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tests/test_not_from_hand_candidates_with_kut2tam2.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tests/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,10 +54,70 @@
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Cargo.Test tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_itself_is_not_tam_hue_sample">
     <configuration name="Run" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="run --package cerke_rust --bin cerke_rust" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test empty_squares" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package cerke_rust --bin cerke_rust tests::empty_squares" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test from_hand_candidates" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package cerke_rust --bin cerke_rust tests::from_hand_candidates" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test get_opponent_pieces_rotated" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package cerke_rust --bin cerke_rust tests::get_opponent_pieces_rotated" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_corner_sample" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package cerke_rust --bin cerke_rust tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_corner_sample -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_itself_is_not_tam_hue_sample" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package cerke_rust --bin cerke_rust tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_itself_is_not_tam_hue_sample -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="emulateTerminal" value="false" />
       <option name="backtrace" value="SHORT" />
@@ -74,6 +132,15 @@
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Cargo.Test tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_itself_is_not_tam_hue_sample" />
+        <item itemvalue="Cargo.Test tests::test_not_from_hand_candidates_with_kut2tam2::test_tam_corner_sample" />
+        <item itemvalue="Cargo.Test from_hand_candidates" />
+        <item itemvalue="Cargo.Test get_opponent_pieces_rotated" />
+        <item itemvalue="Cargo.Test empty_squares" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
@@ -89,7 +156,7 @@
       <updated>1600980810662</updated>
       <workItem from="1600980813593" duration="170000" />
       <workItem from="1600981022364" duration="3110000" />
-      <workItem from="1600986772611" duration="4464000" />
+      <workItem from="1600986772611" duration="5957000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit: port parts of the test cases into rust">
       <created>1600984097229</created>
@@ -139,22 +206,42 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="223" y="67" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1536.824@0.0.1536.824" timestamp="1600981102579" />
-    <state width="1493" height="210" key="GridCell.Tab.0.bottom" timestamp="1600984138163">
+    <state x="93" y="93" width="1350" height="638" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1601010057717">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1600984138163" />
-    <state width="1493" height="210" key="GridCell.Tab.0.center" timestamp="1600984138163">
+    <state x="93" y="93" width="1350" height="638" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.1536.824@0.0.1536.824" timestamp="1601010057717" />
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom" timestamp="1601010033784">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1600984138163" />
-    <state width="1493" height="210" key="GridCell.Tab.0.left" timestamp="1600984138162">
+    <state width="1493" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1601010033784" />
+    <state width="1493" height="210" key="GridCell.Tab.0.center" timestamp="1601010033782">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1600984138162" />
-    <state width="1493" height="210" key="GridCell.Tab.0.right" timestamp="1600984138163">
+    <state width="1493" height="210" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1601010033782" />
+    <state width="1493" height="210" key="GridCell.Tab.0.left" timestamp="1601010033780">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1600984138163" />
+    <state width="1493" height="210" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1601010033780" />
+    <state width="1493" height="210" key="GridCell.Tab.0.right" timestamp="1601010033783">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1493" height="210" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1601010033783" />
+    <state width="1493" height="261" key="GridCell.Tab.1.bottom" timestamp="1601009150431">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1493" height="261" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1601009150431" />
+    <state width="1493" height="261" key="GridCell.Tab.1.center" timestamp="1601009150431">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1493" height="261" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1601009150431" />
+    <state width="1493" height="261" key="GridCell.Tab.1.left" timestamp="1601009150431">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1493" height="261" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1601009150431" />
+    <state width="1493" height="261" key="GridCell.Tab.1.right" timestamp="1601009150431">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state width="1493" height="261" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1601009150431" />
     <state x="431" y="145" key="search.everywhere.popup" timestamp="1600980889811">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

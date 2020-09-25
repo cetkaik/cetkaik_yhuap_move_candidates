@@ -131,7 +131,7 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             first_dest,
             second_dest,
         } => format!(
-            "{}皇{}{}",
+            "{}皇[{}]{}",
             serialize_absolute_coord(src),
             serialize_absolute_coord(first_dest),
             serialize_absolute_coord(second_dest)
