@@ -15,7 +15,7 @@ fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove> {
 mod calculate_movable;
 
 fn is_water([row, col]: Coord) -> bool {
-    return (row == 4 && col == 2)
+     (row == 4 && col == 2)
         || (row == 4 && col == 3)
         || (row == 4 && col == 4)
         || (row == 4 && col == 5)
@@ -23,7 +23,7 @@ fn is_water([row, col]: Coord) -> bool {
         || (row == 2 && col == 4)
         || (row == 3 && col == 4)
         || (row == 5 && col == 4)
-        || (row == 6 && col == 4);
+        || (row == 6 && col == 4)
 }
 
 fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
@@ -53,10 +53,10 @@ fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
         AbsoluteRow::IA,
     ];
 
-    return (
+    (
         rows[if ia_is_down { row } else { 8 - row }],
         columns[if ia_is_down { col } else { 8 - col }],
-    );
+    )
 }
 
 pub struct MovablePositions {
@@ -71,14 +71,14 @@ fn can_get_occupied_by(
     board: Board,
     tam_itself_is_tam_hue: bool,
 ) -> bool {
-    return if piece_to_move == Piece::Tam2 {
+     if piece_to_move == Piece::Tam2 {
         let [i, j] = dest;
         let dest_piece = board[i][j];
         /* It is allowed to enter an empty square */
         dest_piece == None
     } else {
         can_get_occupied_by_non_tam(side, dest, board, tam_itself_is_tam_hue)
-    };
+    }
 }
 
 fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
@@ -88,7 +88,7 @@ fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
             let [i, j] = a;
             board[*i][*j] == None
         })
-        .map(|a| *a)
+        .copied()
         .collect()
 }
 
@@ -104,7 +104,7 @@ fn can_get_occupied_by_non_tam(
             .into_iter()
             .filter(|[a, b]| {
                 let piece = board[*a][*b];
-                return match piece {
+                 match piece {
                     None => false,
                     Some(Piece::Tam2) => false,
                     Some(Piece::NonTam2Piece {
@@ -116,17 +116,16 @@ fn can_get_occupied_by_non_tam(
                             && piece_side != side
                             && calculate_movable::is_tam_hue([*a, *b], board, tam_itself_is_tam_hue)
                     }
-                };
+                }
             })
-            .collect::<Vec<_>>()
-            .len()
+            .count()
             > 0
     };
 
     let [i, j] = dest;
     let dest_piece = board[i][j];
 
-    return match dest_piece {
+    match dest_piece {
         Some(Piece::Tam2) => false, /* Tam2 can never be taken */
 
         None => true, /* It is always allowed to enter an empty square */
@@ -141,7 +140,7 @@ fn can_get_occupied_by_non_tam(
                 dest
             )
         } /* must not be protected by tam2 hue a uai1 */
-    };
+    }
 }
 
 fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureOpponentMove> {
@@ -177,7 +176,7 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
 
         for dest in candidates {
             fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
-                return is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1;
+                is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1
             }
             let dest_piece = game_state.f.current_board[dest[0]][dest[1]];
 
@@ -204,14 +203,13 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                     .collect::<Vec<_>>();
                 let candidates_inf: Vec<Coord> =
                     guide_list_green.iter().map(|c| rotate_coord(*c)).collect();
-                return [
+                 [
                   &candidates.iter().flat_map(|final_dest| {
                       let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
                           Piece::Tam2 => panic!(),
                           Piece::NonTam2Piece{color, prof, side: _} => (color, prof)
                       };
-                    return if
-                    can_get_occupied_by(
+                     if can_get_occupied_by(
                         Side::Downward,
                         *final_dest,
                         Piece::NonTam2Piece {
@@ -233,7 +231,7 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                                 src
                             )
                         })].into_iter()
-                    } else { vec![].into_iter() };
+                    } else { vec![].into_iter() }
                   }).collect::<Vec<PureOpponentMove>>()[..],
                   &candidates_inf.iter().flat_map(|planned_dest| {
                     let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
@@ -264,9 +262,9 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                           game_state.ia_is_down
                       ),
                     };
-                    return vec![obj].into_iter();
+                    vec![obj].into_iter()
                   }).collect::<Vec<PureOpponentMove>>()[..]
-                ].concat();
+                ].concat()
             };
 
             match rotated_piece {
@@ -280,7 +278,7 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                         let fst_dst: Coord = dest;
                         ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
-                            return if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
+                            if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
                                 None /* the neighbor is utterly occupied */ ||
                                 *neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
@@ -296,12 +294,12 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                                 let step: Coord = *neighbor;
                                 empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
                                     .iter().flat_map(|snd_dst| {
-                                    return vec![PureOpponentMove::TamMoveStepsDuringLatter {
+                                    vec![PureOpponentMove::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
                                         second_dest: to_absolute_coord(*snd_dst, game_state.ia_is_down),
                                         src: to_absolute_coord(src, game_state.ia_is_down),
                                         step: to_absolute_coord(step, game_state.ia_is_down),
-                                    }].into_iter();
+                                    }].into_iter()
                                 }).collect::<Vec<PureOpponentMove>>().into_iter()
                             }
                         }).collect::<Vec<PureOpponentMove>>());
@@ -480,7 +478,7 @@ impl From<NonTam2PieceDownward> for Piece {
 }
 
 fn rotate_coord(c: Coord) -> Coord {
-    return [(8 - c[0]), (8 - c[1])];
+    [(8 - c[0]), (8 - c[1])]
 }
 
 pub type Coord = [usize; 2];
@@ -619,10 +617,10 @@ fn rotate_board(b: Board) -> Board {
             ans[i][j] = rotate_piece_or_null(b[8 - i][8 - j]);
         }
     }
-    return ans;
+    ans
 }
 
-const INITIAL_MOVES_NO_KUT_TAM: [&'static str; 240] = [
+const INITIAL_MOVES_NO_KUT_TAM: [&str; 240] = [
     "KA片LAKA",
     "KA片KE心KA", /* 黒筆 */
     "LA片TIXO水",
