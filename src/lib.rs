@@ -146,10 +146,7 @@ fn can_get_occupied_by_non_tam(
 }
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
-pub fn not_from_hand_candidates_(
-    config: Config,
-    game_state: &PureGameState,
-) -> Vec<PureMove> {
+pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,

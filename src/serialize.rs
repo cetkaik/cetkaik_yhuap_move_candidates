@@ -1,5 +1,13 @@
 use super::*;
 
+/// Serializes `Coord` in JSON-style.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+///
+/// assert_eq!(serialize_coord([5,6]), "[5,6]")
+/// ```
 pub fn serialize_coord(coord: Coord) -> String {
     format!("[{},{}]", coord[0], coord[1])
 }
@@ -9,11 +17,11 @@ pub fn serialize_coord(coord: Coord) -> String {
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
-/// 
+///
 /// assert_eq!(serialize_absolute_coord((AbsoluteRow::E, AbsoluteColumn::N)), "NE");
 /// assert_eq!(serialize_absolute_coord((AbsoluteRow::AU, AbsoluteColumn::Z)), "ZAU");
 /// ```
-/// 
+///
 pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
     let (row, column) = coord;
     format!(
@@ -48,11 +56,11 @@ pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
-/// 
+///
 /// assert_eq!(serialize_prof(Profession::Nuak1), "船");
 /// assert_eq!(serialize_prof(Profession::Kaun1), "車");
 /// ```
-/// 
+///
 pub fn serialize_prof(prof: Profession) -> &'static str {
     match prof {
         Profession::Nuak1 => "船",
@@ -68,17 +76,16 @@ pub fn serialize_prof(prof: Profession) -> &'static str {
     }
 }
 
-
 /// Serializes `Color`.
 /// # Examples
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
-/// 
+///
 /// assert_eq!(serialize_color(Color::Kok1), "赤");
 /// assert_eq!(serialize_color(Color::Huok2), "黒");
 /// ```
-/// 
+///
 pub fn serialize_color(color: Color) -> &'static str {
     match color {
         Color::Huok2 => "黒",
@@ -86,13 +93,26 @@ pub fn serialize_color(color: Color) -> &'static str {
     }
 }
 
-pub fn serialize_side(side: Side) -> &'static str {
+fn serialize_side(side: Side) -> &'static str {
     match side {
         Side::Upward => "↑",
         Side::Downward => "↓",
     }
 }
 
+/// Serializes `Piece`.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+///
+/// assert_eq!(serialize_piece(Piece::Tam2), "皇");
+/// assert_eq!(serialize_piece(Piece::NonTam2Piece {
+///     prof: Profession::Uai1,
+///     color: Color::Kok1,
+///     side: Side::Downward
+/// }), "赤将↓");
+/// ```
 pub fn serialize_piece(p: Piece) -> String {
     match p {
         Piece::Tam2 => "皇".to_string(),
@@ -105,6 +125,61 @@ pub fn serialize_piece(p: Piece) -> String {
     }
 }
 
+/// Serializes `PureMove` in textual form.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::InfAfterStep {
+///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
+///     step: (AbsoluteRow::E, AbsoluteColumn::T),
+///     planned_direction: (AbsoluteRow::E, AbsoluteColumn::N)
+/// }), "ZA片TE心NE");
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveFromHand {
+///     color: Color::Huok2,
+///     prof: Profession::Gua2,
+///     dest: (AbsoluteRow::IA, AbsoluteColumn::L)
+/// }), "黒弓LIA");
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveSrcDst {
+///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
+///     dest: (AbsoluteRow::E, AbsoluteColumn::N),
+///     is_water_entry_ciurl: true
+/// }), "ZA片NE水");
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveSrcStepDstFinite {
+///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
+///     step: (AbsoluteRow::E, AbsoluteColumn::T),
+///     dest: (AbsoluteRow::E, AbsoluteColumn::N),
+///     is_water_entry_ciurl: false
+/// }), "ZA片TENE");
+///
+/// // Note that [] denotes the first destination.
+/// // Since the first destination is neither the stepping square nor the final square,
+/// // it is not to be written in the standard notation.
+/// // Hence this additional information is denoted by [].
+/// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveStepsDuringFormer {
+///     src: (AbsoluteRow::E, AbsoluteColumn::K),
+///     step: (AbsoluteRow::I, AbsoluteColumn::L),
+///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
+///     second_dest: (AbsoluteRow::E, AbsoluteColumn::L)
+/// }), "KE皇LI[KI]LE");
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveNoStep {
+///     src: (AbsoluteRow::E, AbsoluteColumn::K),
+///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
+///     second_dest: (AbsoluteRow::E, AbsoluteColumn::K)
+/// }), "KE皇[KI]KE");
+///
+/// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveStepsDuringLatter {
+///     src: (AbsoluteRow::E, AbsoluteColumn::K),
+///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
+///     step: (AbsoluteRow::I, AbsoluteColumn::L),
+///     second_dest: (AbsoluteRow::E, AbsoluteColumn::L)
+/// }), "KE皇[KI]LILE");
+/// ```
 pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
     match mov {
         PureMove::InfAfterStep {
