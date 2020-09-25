@@ -40,10 +40,9 @@ fn run_test<T, F, F2>(
     assert_eq!(set1, set2)
 }
 
-/* 2 fails*/
 mod test_not_from_hand_candidates_with_kut2tam2;
 
-/* 4 fails*/
+/* 1 fails*/
 mod not_from_hand_candidates;
 
 mod empty_squares {

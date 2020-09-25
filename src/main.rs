@@ -386,25 +386,25 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                             game_state.tam_itself_is_tam_hue,
                         ) {
                             ans.append(&mut candidates_when_stepping(rotated_piece));
+                        } else {
+                            ans.append(   
+                                &mut [
+                                    &[PureOpponentMove::PotentialWaterEntry(
+                                        PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
+                                            src: toAbsoluteCoord_(src, game_state.ia_is_down),
+                                            dest: toAbsoluteCoord_(dest, game_state.ia_is_down),
+                                            is_water_entry_ciurl: is_ciurl_required(
+                                                dest,
+                                                rotated_piece_prof,
+                                                src,
+                                            ),
+                                        },
+                                    )][..],
+                                    &candidates_when_stepping(rotated_piece)[..],
+                                ]
+                                .concat(),
+                            );
                         }
-
-                        ans.append(
-                            &mut [
-                                &[PureOpponentMove::PotentialWaterEntry(
-                                    PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
-                                        src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                                        dest: toAbsoluteCoord_(dest, game_state.ia_is_down),
-                                        is_water_entry_ciurl: is_ciurl_required(
-                                            dest,
-                                            rotated_piece_prof,
-                                            src,
-                                        ),
-                                    },
-                                )][..],
-                                &candidates_when_stepping(rotated_piece)[..],
-                            ]
-                            .concat(),
-                        );
                     } else {
                         ans.append(&mut candidates_when_stepping(rotated_piece));
                     }
@@ -1192,6 +1192,7 @@ const INITIAL_BOARD: Board = [
     ],
 ];
 
+#[derive(Debug)]
 pub struct PureGameState {
     f: Field,
     ia_is_down: bool,
@@ -1199,6 +1200,7 @@ pub struct PureGameState {
     opponent_has_just_moved_tam: bool,
 }
 
+#[derive(Debug)]
 pub struct Field {
     current_board: Board,
     hop1zuo1of_upward: Vec<NonTam2PieceUpward>,
