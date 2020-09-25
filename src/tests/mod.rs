@@ -47,13 +47,13 @@ mod not_from_hand_candidates;
 mod test_cases;
 
 mod empty_squares {
-    use crate::serialize::*;
+    use cetkaik_core::*;
     #[test]
     fn test_initial_board_sample() {
         super::run_test(
             crate::empty_squares,
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-            serialize_coord,
+            relative::serialize_coord,
             &[
                 "[1,2]", "[1,4]", "[1,6]", "[3,0]", "[3,1]", "[3,2]", "[3,3]", "[3,4]", "[3,5]",
                 "[3,6]", "[3,7]", "[3,8]", "[4,0]", "[4,1]", "[4,2]", "[4,3]", "[4,5]", "[4,6]",
@@ -65,13 +65,12 @@ mod empty_squares {
 }
 
 mod get_opponent_pieces_rotated {
-    use crate::serialize::*;
-    use cetkaik_core::relative::serialize_piece;
+    use cetkaik_core::relative;
     fn serialize_rotated(r: crate::Rotated) -> String {
         format!(
             "{} {}",
-            serialize_coord(r.rotated_coord),
-            serialize_piece(r.rotated_piece.into())
+            relative::serialize_coord(r.rotated_coord),
+            relative::serialize_piece(r.rotated_piece.into())
         )
     }
     #[test]

@@ -9,6 +9,6 @@ dependencies = [
 
 [[package]]
 name = "cetkaik_core"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c3bf4564d2cc87a25e6e7ddafde21d037990dc303214853e4c22d21e631bc00"
+checksum = "3a2aa8b75be93305a8e35f4b536f638059882f7c2b5f4c02d4cdbc933f288398"

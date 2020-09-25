@@ -1,58 +1,6 @@
 use super::*;
 use cetkaik_core::{serialize_prof, serialize_color};
 
-/// Serializes [`Coord`](../type.Coord.html) in JSON-style.
-/// # Examples
-/// ```
-/// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
-///
-/// assert_eq!(serialize_coord([5,6]), "[5,6]")
-/// ```
-pub fn serialize_coord(coord: Coord) -> String {
-    format!("[{},{}]", coord[0], coord[1])
-}
-
-/// Serializes [`absolute::Coord`](../type.absolute::Coord.html).
-/// # Examples
-/// ```
-/// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
-/// use cetkaik_core::*;
-///
-/// assert_eq!(serialize_absolute_coord((absolute::Row::E, absolute::Column::N)), "NE");
-/// assert_eq!(serialize_absolute_coord((absolute::Row::AU, absolute::Column::Z)), "ZAU");
-/// ```
-///
-pub fn serialize_absolute_coord(coord: absolute::Coord) -> String {
-    let (row, column) = coord;
-    format!(
-        "{}{}",
-        match column {
-            absolute::Column::K => "K",
-            absolute::Column::L => "L",
-            absolute::Column::M => "M",
-            absolute::Column::N => "N",
-            absolute::Column::P => "P",
-            absolute::Column::Z => "Z",
-            absolute::Column::X => "X",
-            absolute::Column::C => "C",
-            absolute::Column::T => "T",
-        },
-        match row {
-            absolute::Row::A => "A",
-            absolute::Row::E => "E",
-            absolute::Row::I => "I",
-            absolute::Row::O => "O",
-            absolute::Row::U => "U",
-            absolute::Row::Y => "Y",
-            absolute::Row::IA => "IA",
-            absolute::Row::AI => "AI",
-            absolute::Row::AU => "AU",
-        }
-    )
-}
-
 /// Serializes [`PureMove`](../enum.PureMove.html) in textual form.
 /// # Examples
 /// ```
@@ -117,15 +65,15 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             planned_direction,
         } => format!(
             "{}片{}心{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(step),
-            serialize_absolute_coord(planned_direction)
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(step),
+            absolute::serialize_coord(planned_direction)
         ),
         PureMove::NonTamMoveFromHand { color, prof, dest } => format!(
             "{}{}{}",
             serialize_color(color),
             serialize_prof(prof),
-            serialize_absolute_coord(dest)
+            absolute::serialize_coord(dest)
         ),
         PureMove::NonTamMoveSrcDst {
             src,
@@ -133,8 +81,8 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             is_water_entry_ciurl,
         } => format!(
             "{}片{}{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(dest),
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
         PureMove::NonTamMoveSrcStepDstFinite {
@@ -144,9 +92,9 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             step,
         } => format!(
             "{}片{}{}{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(step),
-            serialize_absolute_coord(dest),
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(step),
+            absolute::serialize_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
         PureMove::TamMoveNoStep {
@@ -155,9 +103,9 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             second_dest,
         } => format!(
             "{}皇[{}]{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(first_dest),
-            serialize_absolute_coord(second_dest)
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(first_dest),
+            absolute::serialize_coord(second_dest)
         ),
         PureMove::TamMoveStepsDuringFormer {
             src,
@@ -166,10 +114,10 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             step,
         } => format!(
             "{}皇{}[{}]{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(step),
-            serialize_absolute_coord(first_dest),
-            serialize_absolute_coord(second_dest)
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(step),
+            absolute::serialize_coord(first_dest),
+            absolute::serialize_coord(second_dest)
         ),
         PureMove::TamMoveStepsDuringLatter {
             src,
@@ -178,10 +126,10 @@ pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
             step,
         } => format!(
             "{}皇[{}]{}{}",
-            serialize_absolute_coord(src),
-            serialize_absolute_coord(first_dest),
-            serialize_absolute_coord(step),
-            serialize_absolute_coord(second_dest)
+            absolute::serialize_coord(src),
+            absolute::serialize_coord(first_dest),
+            absolute::serialize_coord(step),
+            absolute::serialize_coord(second_dest)
         ),
     }
 }
