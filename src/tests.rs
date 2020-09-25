@@ -23,7 +23,7 @@ fn runTest<T, F, F2>(
     sample: &PureGameState,
     serializer: F2,
     tested_against: &[&'static str],
-) -> bool
+) 
 where
     F: FnOnce(&PureGameState) -> Vec<T>,
     F2: Fn(T) -> String,
@@ -38,7 +38,7 @@ where
         .map(|s| s.to_string())
         .collect::<HashSet<String>>();
 
-    set1 == set2
+    assert_eq!(set1, set2)
 }
 
 mod test_not_from_hand_candidates_with_kut2tam2 {
@@ -46,7 +46,7 @@ mod test_not_from_hand_candidates_with_kut2tam2 {
 
     #[test]
     fn test_tamCornerSample() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
                 &crate::test_cases::tamCornerSample(),
@@ -66,14 +66,12 @@ mod test_not_from_hand_candidates_with_kut2tam2 {
                     "PAU片PIAPAU",
                     "MIA片PIAMIA",
                 ],
-            ),
-            true,
-        );
+            )
     }
 
     #[test]
     fn test_tamItselfIsNotTamHueSample() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
                 &crate::tamItselfIsNotTamHueSample,
@@ -93,14 +91,12 @@ mod test_not_from_hand_candidates_with_kut2tam2 {
                     ][..],
                 ]
                 .concat(),
-            ),
-            true,
-        );
+            )
     }
 
     #[test]
     fn test_initialBoardSample() {
-        assert_eq!(
+       
             super::runTest(
                 super::not_from_hand_candidates_with_kut2tam2,
                 &crate::initialBoardSample,
@@ -120,9 +116,7 @@ mod test_not_from_hand_candidates_with_kut2tam2 {
                     ],
                 ]
                 .concat(),
-            ),
-            true,
-        );
+            )
     }
 }
 
@@ -130,19 +124,17 @@ mod not_from_hand_candidates {
     use crate::serialize::*;
     #[test]
     fn test_simpleBoardSample_3() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::simpleBoardSample_3(),
                 serializePureOpponentMove,
                 &["PI片PU"],
-            ),
-            true,
-        );
+            )
     }
     #[test]
     fn test_simpleBoardSample_1_IA_is_down_true() {
-        assert_eq!(
+       
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::simpleBoardSample_1(),
@@ -165,13 +157,12 @@ mod not_from_hand_candidates {
                     "KA片KAI心KE",
                     "KA片KAI心KA", /* step and then plan u-turn */
                 ],
-            ),
-            true,
-        );
+            )
+        
     }
     #[test]
     fn test_simpleBoardSample_2_IA_is_down_false() {
-        assert_eq!(
+       
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::simpleBoardSample_2(),
@@ -194,25 +185,22 @@ mod not_from_hand_candidates {
                     "PIA片PI心PAU",
                     "PIA片PI心PIA", /* step and then plan u-turn */
                 ],
-            ),
-            true,
-        );
+            )
+        
     }
     #[test]
     fn test_initialBoardSample() {
-        assert_eq!(
+       
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::initialBoardSample,
                 serializePureOpponentMove,
                 &crate::INITIAL_MOVES_NO_KUT_TAM,
-            ),
-            true,
-        );
+            )
     }
     #[test]
     fn test_complicatedBoardSample_1() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::complicatedBoardSample_1(),
@@ -527,13 +515,11 @@ mod not_from_hand_candidates {
                     "PAU皇MAI[PAU]MIA",
                     "PAU皇MAI[PAU]PIA",
                 ],
-            ),
-            true,
-        );
+            )
     }
     #[test]
     fn test_complicatedBoardSample_2() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::complicatedBoardSample_2(),
@@ -878,13 +864,11 @@ mod not_from_hand_candidates {
                     "XY片ZO心XU",
                     "XY片ZO心NI",
                 ],
-            ),
-            true,
-        );
+            )
     }
     #[test]
     fn test_tamCornerSample() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::test_cases::tamCornerSample(),
@@ -901,21 +885,17 @@ mod not_from_hand_candidates {
                     "PAU片PAIPAU",
                     "MIA片MAUMIA",
                 ],
-            ),
-            true,
-        );
+            )
     }
     #[test]
     fn test_tamItselfIsNotTamHueSample() {
-        assert_eq!(
+        
             super::runTest(
                 super::not_from_hand_candidates,
                 &crate::tamItselfIsNotTamHueSample,
                 serializePureOpponentMove,
                 &crate::INITIAL_MOVES_NO_KUT_TAM,
-            ),
-            true,
-        );
+            )
     }
 }
 
@@ -923,7 +903,7 @@ mod empty_squares {
     use crate::serialize::*;
     #[test]
     fn test_initialBoardSample() {
-        assert_eq!(
+        
             super::runTest(
                 crate::empty_squares,
                 &crate::initialBoardSample,
@@ -934,9 +914,7 @@ mod empty_squares {
                     "[4,5]", "[4,6]", "[4,7]", "[4,8]", "[5,0]", "[5,1]", "[5,2]", "[5,3]",
                     "[5,4]", "[5,5]", "[5,6]", "[5,7]", "[5,8]", "[7,2]", "[7,4]", "[7,6]",
                 ],
-            ),
-            true,
-        );
+            )
     }
 }
 
@@ -944,7 +922,7 @@ mod get_opponent_pieces_rotated {
     use crate::serialize::*;
     #[test]
     fn test_initialBoardSample() {
-        assert_eq!(
+        
             super::runTest(
                 crate::get_opponent_pieces_rotated,
                 &crate::initialBoardSample,
@@ -976,9 +954,7 @@ mod get_opponent_pieces_rotated {
                     "[6,0] 黒兵↑",
                     "[4,4] 皇",
                 ],
-            ),
-            true,
-        );
+            )
     }
 }
 
@@ -986,19 +962,18 @@ mod from_hand_candidates {
     use crate::serialize::*;
     #[test]
     fn test_initialBoardSample() {
-        assert_eq!(
+        
             super::runTest(
                 crate::from_hand_candidates,
                 &crate::initialBoardSample,
                 serializePureOpponentMove,
                 &[],
-            ),
-            true,
-        );
+            )
+           
+        
     }
     #[test]
     fn test_simpleBoardSample_4() {
-        assert_eq!(
             super::runTest(
                 crate::from_hand_candidates,
                 &crate::test_cases::simpleBoardSample_4(),
@@ -1084,8 +1059,6 @@ mod from_hand_candidates {
                     "黒弓CIA",
                     "黒弓MIA",
                 ],
-            ),
-            true,
-        );
+            )
     }
 }

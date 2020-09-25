@@ -12,6 +12,22 @@ fn from_hand_candidates(gameState: &PureGameState) -> Vec<PureOpponentMove> {
     ans
 }
 
+fn eightNeighborhood(coord: Coord) -> Vec<Coord> {
+    unimplemented!()
+}
+
+fn isWater([row, col]: Coord) -> bool {
+    return (row == 4 && col == 2)
+        || (row == 4 && col == 3)
+        || (row == 4 && col == 4)
+        || (row == 4 && col == 5)
+        || (row == 4 && col == 6)
+        || (row == 2 && col == 4)
+        || (row == 3 && col == 4)
+        || (row == 5 && col == 4)
+        || (row == 6 && col == 4);
+}
+
 fn toAbsoluteCoord_(coord: Coord, IA_is_down: bool) -> AbsoluteCoord {
     let [row, col] = coord;
 
@@ -45,297 +61,306 @@ fn toAbsoluteCoord_(coord: Coord, IA_is_down: bool) -> AbsoluteCoord {
     );
 }
 
-/*
 pub struct MovablePositions {
     finite: Vec<Coord>,
-    infinite: Vec<Coord>
+    infinite: Vec<Coord>,
+}
+
+fn canGetOccupiedBy(
+    side: Side,
+    dest: Coord,
+    piece_to_move: Piece,
+    board: Board,
+    tam_itself_is_tam_hue: bool,
+) -> bool {
+    if piece_to_move == Piece::Tam2 {
+        let [i, j] = dest;
+        let destPiece = board[i][j];
+        /* It is allowed to enter an empty square */
+        return destPiece == None;
+    } else {
+        return canGetOccupiedByNonTam(side, dest, board, tam_itself_is_tam_hue);
+    }
+}
+
+fn empty_neighbors_of (board: Board, c: Coord) -> Vec<Coord>
+{eightNeighborhood(c).iter().filter(|a| {let [i, j] = a; board[*i][*j] == None}).map(|a| *a).collect()}
+
+fn canGetOccupiedByNonTam(
+    side: Side,
+    dest: Coord,
+    board: Board,
+    tam_itself_is_tam_hue: bool,
+) -> bool {
+    unimplemented!()
 }
 
 fn calculateMovablePositions(
     coord: Coord,
     piece: Piece,
     board: Board,
-    tam_itself_is_tam_hue: bool
+    tam_itself_is_tam_hue: bool,
 ) -> MovablePositions {
     unimplemented!()
 }
-*/
 
 fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<PureOpponentMove> {
-    /*let mut ans = vec![];
-    for Rotated { rotated_piece, rotated_coord} in get_opponent_pieces_rotated(&gameState)  {
-            let MovablePositions {
-              finite: guideListYellow,
-              infinite: guideListGreen
-            } = calculateMovablePositions(
-              rotated_coord,
-              rotated_piece,
-              rotateBoard(gameState.f.currentBoard),
-              gameState.tam_itself_is_tam_hue
-            );
+    let mut ans = vec![];
+    for Rotated {
+        rotated_piece,
+        rotated_coord,
+    } in get_opponent_pieces_rotated(&gameState)
+    {
+        let MovablePositions {
+            finite: guideListYellow,
+            infinite: guideListGreen,
+        } = calculateMovablePositions(
+            rotated_coord,
+            rotated_piece,
+            rotateBoard(gameState.f.currentBoard),
+            gameState.tam_itself_is_tam_hue,
+        );
 
-           let candidates: Vec<Coord> = [
-              ...guideListYellow.map(rotateCoord),
-              ...guideListGreen.map(rotateCoord)
-            ];
+        let candidates: Vec<Coord> = [
+            &guideListYellow
+                .into_iter()
+                .map(rotateCoord)
+                .collect::<Vec<_>>()[..],
+            &guideListGreen
+                .into_iter()
+                .map(rotateCoord)
+                .collect::<Vec<_>>()[..],
+        ]
+        .concat();
 
-            const src: Coord = rotateCoord(rotated_coord);
+        let src: Coord = rotateCoord(rotated_coord);
 
-            return candidates.flatMap((dest: Coord): PureOpponentMove[] => {
-              function is_ciurl_required(
-                dest: Coord,
-                moving_piece_prof: Profession,
-                src: Coord
-              ) {
-                return (
-                  isWater(dest) &&
-                  !isWater(src) &&
-                  moving_piece_prof !== Profession.Nuak1
-                );
-              }
-              const destPiece = gameState.f.currentBoard[dest[0]][dest[1]];
+        for dest in candidates {
+            fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
+                return isWater(dest) && !isWater(src) && moving_piece_prof != Profession::Nuak1;
+            }
+            let destPiece = gameState.f.currentBoard[dest[0]][dest[1]];
 
-              const candidates_when_stepping = (
-                rotated_piece: NonTam2PieceUpward
-              ) => {
-                const step = dest; // less confusing
+            let candidates_when_stepping = |rotated_piece| -> Vec<PureOpponentMove> {
+                let step = dest; // less confusing
 
                 /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-                const subtracted_rotated_board = rotateBoard(
-                  gameState.f.currentBoard
-                );
-                subtracted_rotated_board[rotated_coord[0]][
-                  rotated_coord[1]
-                ] = null; /* must remove the piece to prevent self-occlusion */
+                let mut subtracted_rotated_board = rotateBoard(gameState.f.currentBoard);
+                subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
 
-                const {
-                  finite: guideListYellow,
-                  infinite: guideListGreen
+                let MovablePositions {
+                    finite: guideListYellow,
+                    infinite: guideListGreen,
                 } = calculateMovablePositions(
-                  rotateCoord(step),
-                  rotated_piece,
-                  subtracted_rotated_board,
-                  gameState.tam_itself_is_tam_hue
+                    rotateCoord(step),
+                    rotated_piece,
+                    subtracted_rotated_board,
+                    gameState.tam_itself_is_tam_hue,
                 );
 
-                const candidates: Coord[] = guideListYellow.map(rotateCoord);
-                const candidates_inf: Coord[] = guideListGreen.map(rotateCoord);
+                let candidates: Vec<Coord> = guideListYellow
+                    .iter()
+                    .map(|c| rotateCoord(*c))
+                    .collect::<Vec<_>>();
+                let candidates_inf: Vec<Coord> =
+                    guideListGreen.iter().map(|c| rotateCoord(*c)).collect();
                 return [
-                  ...candidates.flatMap(finalDest => {
-                    if (
+                  &candidates.iter().flat_map(|finalDest| {
+                      let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
+                          Piece::Tam2 => panic!(),
+                          Piece::NonTam2Piece{color, prof, side} => (color, prof)
+                      };
+                    if
                       canGetOccupiedBy(
-                        Side.Downward,
-                        finalDest,
-                        {
-                          color: rotated_piece.color,
-                          prof: rotated_piece.prof,
-                          side: Side.Downward
+                        Side::Downward,
+                        *finalDest,
+                        Piece::NonTam2Piece{
+                          color: rotated_piece_color,
+                          prof: rotated_piece_prof,
+                          side: Side::Downward
                         },
                         rotateBoard(subtracted_rotated_board),
                         gameState.tam_itself_is_tam_hue
                       )
-                    ) {
-                      const obj: PureOpponentMoveWithPotentialWaterEntry = {
-                        type: "NonTamMove",
-                        data: {
-                          type: "SrcStepDstFinite",
+                     {
+                      let obj: PureOpponentMoveWithPotentialWaterEntry = PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcStepDstFinite {
                           src: toAbsoluteCoord_(src, gameState.IA_is_down),
                           step: toAbsoluteCoord_(step, gameState.IA_is_down),
-                          dest: toAbsoluteCoord_(finalDest, gameState.IA_is_down),
+                          dest: toAbsoluteCoord_(*finalDest, gameState.IA_is_down),
                           is_water_entry_ciurl: is_ciurl_required(
-                            finalDest,
-                            rotated_piece.prof,
+                            *finalDest,
+                            rotated_piece_prof,
                             src
                           )
-                        }
                       };
-                      return [obj];
-                    } else return [];
-                  }),
-                  ...candidates_inf.flatMap(planned_dest => {
-                    if (
+                      return vec![PureOpponentMove::PotentialWaterEntry(obj)].into_iter();
+                    } else {return vec![].into_iter()};
+                  }).collect::<Vec<PureOpponentMove>>()[..],
+                  &candidates_inf.iter().flat_map(|planned_dest| {
+                    let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
+                        Piece::Tam2 => panic!(),
+                        Piece::NonTam2Piece{color, prof, side} => (color, prof)
+                    };
+                    if
                       !canGetOccupiedBy(
-                        Side.Downward,
-                        planned_dest,
-                        {
-                          color: rotated_piece.color,
-                          prof: rotated_piece.prof,
-                          side: Side.Downward
+                        Side::Downward,
+                        *planned_dest,
+                        Piece::NonTam2Piece{
+                          color: rotated_piece_color,
+                          prof: rotated_piece_prof,
+                          side: Side::Downward
                         },
                         rotateBoard(subtracted_rotated_board),
                         gameState.tam_itself_is_tam_hue
                       )
-                    ) {
-                      return [];
+                     {
+                      return vec![].into_iter();
                       // retry
                     }
-                    const obj: PureOpponentMove = {
-                      type: "InfAfterStep",
+                    let obj: PureOpponentMove = PureOpponentMove::InfAfterStep{
                       src: toAbsoluteCoord_(src, gameState.IA_is_down),
                       step: toAbsoluteCoord_(step, gameState.IA_is_down),
                       plannedDirection: toAbsoluteCoord_(
-                        planned_dest,
+                        *planned_dest,
                         gameState.IA_is_down
                       ),
-                      stepping_ciurl: null,
-                      finalResult: null
                     };
-                    return [obj];
-                  })
-                ];
-              };
+                    return vec![obj].into_iter();
+                  }).collect::<Vec<PureOpponentMove>>()[..]
+                ].concat();
+            };
 
-              if (rotated_piece === "Tam2") {
-                /* avoid self-occlusion */
-                const subtracted_rotated_board = rotateBoard(
-                  gameState.f.currentBoard
-                );
-                subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = null;
-                // FIXME: tam2 ty sak2 not handled
-                if (destPiece === null) {
-                  /* empty square; first move is completed without stepping */
-                  const fstdst: Coord = dest;
-                  return eightNeighborhood(fstdst).flatMap(
-                    (neighbor): PureOpponentMove[] => {
-                      /* if the neighbor is empty, that is the second destination */
-                      if (
-                        gameState.f.currentBoard[neighbor[0]][neighbor[1]] ==
-                          null /* the neighbor is utterly occupied */ ||
-                        coordEq(
-                          neighbor,
-                          src
-                        ) /* the neighbor is occupied by yourself, which means it is actually empty */
-                      ) {
-                        const snddst: Coord = neighbor;
-                        return [
-                          {
-                            type: "TamMove",
-                            stepStyle: "NoStep",
-                            secondDest: toAbsoluteCoord_(
-                              snddst,
-                              gameState.IA_is_down
-                            ),
-                            firstDest: toAbsoluteCoord_(fstdst, gameState.IA_is_down),
-                            src: toAbsoluteCoord_(src, gameState.IA_is_down)
-                          }
-                        ];
-                      } else {
-                        /* if not, step from there */
-                        const step: Coord = neighbor;
-                        return empty_neighbors_of(
-                          rotateBoard(subtracted_rotated_board),
-                          step
-                        ).flatMap(snddst => {
-                          return [
+            match rotated_piece {
+                Piece::Tam2 => {
+                    /* avoid self-occlusion */
+                    let mut subtracted_rotated_board = rotateBoard(gameState.f.currentBoard);
+                    subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None;
+                    // FIXME: tam2 ty sak2 not handled
+                    if destPiece == None {
+                        /* empty square; first move is completed without stepping */
+                        let fstdst: Coord = dest;
+                        ans.append(&mut eightNeighborhood(fstdst).iter().flat_map(|neighbor| {
+                            /* if the neighbor is empty, that is the second destination */
+                            if gameState.f.currentBoard[neighbor[0]][neighbor[1]] ==
+                              None /* the neighbor is utterly occupied */ ||
+                              *neighbor == src
+                            /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
-                              type: "TamMove",
-                              stepStyle: "StepsDuringLatter",
-                              firstDest: toAbsoluteCoord_(
-                                fstdst,
-                                gameState.IA_is_down
-                              ),
-                              secondDest: toAbsoluteCoord_(
-                                snddst,
-                                gameState.IA_is_down
-                              ),
-                              src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                              step: toAbsoluteCoord_(step, gameState.IA_is_down)
+                                let snddst: Coord = *neighbor;
+                                return vec![PureOpponentMove::TamMoveNoStep {
+                                    secondDest: toAbsoluteCoord_(snddst, gameState.IA_is_down),
+                                    firstDest: toAbsoluteCoord_(fstdst, gameState.IA_is_down),
+                                    src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                }].into_iter();
+                            } else {
+                                /* if not, step from there */
+                                let step: Coord = *neighbor;
+                                return empty_neighbors_of(rotateBoard(subtracted_rotated_board), step)
+                                    .iter().flat_map(|snddst| {
+                                        return vec![PureOpponentMove::TamMoveStepsDuringLatter {
+                                            firstDest: toAbsoluteCoord_(fstdst, gameState.IA_is_down),
+                                            secondDest: toAbsoluteCoord_(*snddst, gameState.IA_is_down),
+                                            src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                            step: toAbsoluteCoord_(step, gameState.IA_is_down),
+                                        }].into_iter();
+                                    }).collect::<Vec<PureOpponentMove>>().into_iter();
                             }
-                          ];
-                        });
-                      }
+                        }).collect::<Vec<PureOpponentMove>>());
+                    } else {
+                        /* not an empty square: must complete the first move */
+                        let step = dest;
+                        ans.append(&mut empty_neighbors_of(rotateBoard(subtracted_rotated_board), step)
+                            .iter().flat_map(|fstdst| {
+                                let v = empty_neighbors_of(rotateBoard(subtracted_rotated_board), *fstdst);
+                                    v.iter().flat_map(move |snddst| {
+                                        vec![PureOpponentMove::TamMoveStepsDuringFormer {
+                                            firstDest: toAbsoluteCoord_(
+                                                *fstdst,
+                                                gameState.IA_is_down,
+                                            ),
+                                            secondDest: toAbsoluteCoord_(
+                                                *snddst,
+                                                gameState.IA_is_down,
+                                            ),
+                                            src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                            step: toAbsoluteCoord_(step, gameState.IA_is_down),
+                                        }].into_iter()
+                                    }).collect::<Vec<PureOpponentMove>>().into_iter()
+                            }).collect::<Vec<PureOpponentMove>>());
                     }
-                  );
-                } else {
-                  /* not an empty square: must complete the first move */
-                  const step = dest;
-                  return empty_neighbors_of(
-                    rotateBoard(subtracted_rotated_board),
-                    step
-                  ).flatMap(fstdst =>
-                    empty_neighbors_of(
-                      rotateBoard(subtracted_rotated_board),
-                      fstdst
-                    ).flatMap(snddst => [
-                      {
-                        type: "TamMove",
-                        stepStyle: "StepsDuringFormer",
-                        firstDest: toAbsoluteCoord_(fstdst, gameState.IA_is_down),
-                        secondDest: toAbsoluteCoord_(snddst, gameState.IA_is_down),
-                        src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                        step: toAbsoluteCoord_(step, gameState.IA_is_down)
-                      }
-                    ])
-                  );
                 }
-              } else if (destPiece === null) {
-                // cannot step
-                const obj: PureOpponentMoveWithPotentialWaterEntry = {
-                  type: "NonTamMove",
-                  data: {
-                    type: "SrcDst",
-                    src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                    dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
-                    is_water_entry_ciurl: is_ciurl_required(
-                      dest,
-                      rotated_piece.prof,
-                      src
-                    )
-                  }
-                };
-                return [obj];
-              } else if (destPiece === "Tam2") {
-                // if allowed by config, allow stepping on Tam2;
-                if (config.allow_kut2tam2) {
-                  return candidates_when_stepping(rotated_piece);
-                } else {
-                  return [];
-                }
-              } else if (destPiece.side === Side.Upward) {
-                // opponent's piece; stepping and taking both attainable
-
-                // except when protected by tam2 hue a uai1
-                if (
-                  !canGetOccupiedBy(
-                    Side.Downward,
-                    dest,
+                Piece::NonTam2Piece {
+                    color: rotated_piece_color,
+                    prof: rotated_piece_prof,
+                    side: rotated_piece_side,
+                } => {
+                    if destPiece == None {
+                        // cannot step
+                        let obj: PureOpponentMoveWithPotentialWaterEntry =
+                            PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
+                                src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
+                                is_water_entry_ciurl: is_ciurl_required(
+                                    dest,
+                                    rotated_piece_prof,
+                                    src,
+                                ),
+                            };
+                            ans.append(&mut vec![PureOpponentMove::PotentialWaterEntry(obj)]);
+                    } else if destPiece == Some(Piece::Tam2) {
+                        // if allowed by config, allow stepping on Tam2;
+                        if config.allow_kut2tam2 {
+                            ans.append(&mut candidates_when_stepping(rotated_piece));
+                        } else {
+                            ans.append(&mut vec![]);
+                        }
+                    } else if let Some(Piece::NonTam2Piece {
+                        side: Side::Upward,
+                        color,
+                        prof,
+                    }) = destPiece
                     {
-                      color: rotated_piece.color,
-                      prof: rotated_piece.prof,
-                      side: Side.Downward
-                    },
-                    gameState.f.currentBoard,
-                    gameState.tam_itself_is_tam_hue
-                  )
-                ) {
-                  return candidates_when_stepping(rotated_piece);
-                }
+                        // opponent's piece; stepping and taking both attainable
 
-                return [
-                  {
-                    type: "NonTamMove",
-                    data: {
-                      type: "SrcDst",
-                      src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                      dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
-                      is_water_entry_ciurl: is_ciurl_required(
-                        dest,
-                        rotated_piece.prof,
-                        src
-                      )
+                        // except when protected by tam2 hue a uai1
+                        if !canGetOccupiedBy(
+                            Side::Downward,
+                            dest,
+                            Piece::NonTam2Piece {
+                                color: rotated_piece_color,
+                                prof: rotated_piece_prof,
+                                side: Side::Downward,
+                            },
+                            gameState.f.currentBoard,
+                            gameState.tam_itself_is_tam_hue,
+                        ) {
+                            ans.append(&mut candidates_when_stepping(rotated_piece));
+                        }
+
+                        ans.append(&mut [
+                            &[PureOpponentMove::PotentialWaterEntry(
+                                PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
+                                    src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                    dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
+                                    is_water_entry_ciurl: is_ciurl_required(
+                                        dest,
+                                        rotated_piece_prof,
+                                        src,
+                                    ),
+                                },
+                            )][..],
+                            &candidates_when_stepping(rotated_piece)[..],
+                        ]
+                        .concat());
+                    } else {
+                        ans.append(&mut candidates_when_stepping(rotated_piece));
                     }
-                  },
-                  ...candidates_when_stepping(rotated_piece)
-                ];
-              } else {
-                return candidates_when_stepping(rotated_piece);
-              }
-            });
-          }
+                }
+            }
+        }
+    }
 
-          */
-
-    unimplemented!()
+    ans
 }
 
 fn get_opponent_pieces_rotated(gameState: &PureGameState) -> Vec<Rotated> {
@@ -443,6 +468,7 @@ pub struct Rotated {
 
 mod serialize;
 
+#[derive(Clone, Copy)]
 pub enum PureOpponentMoveWithPotentialWaterEntry {
     NonTamMoveSrcDst {
         src: AbsoluteCoord,
@@ -458,6 +484,7 @@ pub enum PureOpponentMoveWithPotentialWaterEntry {
     },
 }
 
+#[derive(Clone, Copy)]
 pub enum PureOpponentMove {
     PotentialWaterEntry(PureOpponentMoveWithPotentialWaterEntry),
     InfAfterStep {

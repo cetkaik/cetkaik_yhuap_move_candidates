@@ -76,7 +76,7 @@ pub fn serializePiece(p: Piece) -> String {
 
 pub fn serializeRotated(r: Rotated) -> String {
     format!(
-        "{}{}",
+        "{} {}",
         serializeCoord(r.rotated_coord),
         serializePiece(r.rotated_piece)
     )
