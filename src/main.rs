@@ -12,9 +12,42 @@ fn from_hand_candidates(gameState: &PureGameState) -> Vec<PureOpponentMove> {
     ans
 }
 
-fn eightNeighborhood(coord: Coord) -> Vec<Coord> {
-    unimplemented!()
+mod calculate_movable {
+    use super::*;
+    pub fn eightNeighborhood(coord: Coord) -> Vec<Coord> {
+        applyDeltas(coord, &[
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            [0, -1],
+            [0, 1],
+            [1, -1],
+            [1, 0],
+            [1, 1]
+          ])
+        
+    }
+
+    fn applyDeltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
+        let [i, j] = coord;
+        return deltas.iter()
+          .map(|[delta_x, delta_y]| [i as i32 + delta_x, j as i32 + delta_y])
+          .filter(|[l, m]| 0 <= *l && *l <= 8 && 0 <= *m && *m <= 8)
+          .map(|[l, m]| [l as usize, m as usize])
+          .collect();
+    }
+      
+    pub fn calculateMovablePositions(
+        coord: Coord,
+        piece: Piece,
+        board: Board,
+        tam_itself_is_tam_hue: bool,
+    ) -> MovablePositions {
+        unimplemented!()
+    }
 }
+
+
 
 fn isWater([row, col]: Coord) -> bool {
     return (row == 4 && col == 2)
@@ -84,7 +117,7 @@ fn canGetOccupiedBy(
 }
 
 fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
-    eightNeighborhood(c)
+    calculate_movable::eightNeighborhood(c)
         .iter()
         .filter(|a| {
             let [i, j] = a;
@@ -103,14 +136,7 @@ fn canGetOccupiedByNonTam(
     unimplemented!()
 }
 
-fn calculateMovablePositions(
-    coord: Coord,
-    piece: Piece,
-    board: Board,
-    tam_itself_is_tam_hue: bool,
-) -> MovablePositions {
-    unimplemented!()
-}
+
 
 fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<PureOpponentMove> {
     let mut ans = vec![];
@@ -122,7 +148,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
         let MovablePositions {
             finite: guideListYellow,
             infinite: guideListGreen,
-        } = calculateMovablePositions(
+        } = calculate_movable::calculateMovablePositions(
             rotated_coord,
             rotated_piece,
             rotateBoard(gameState.f.currentBoard),
@@ -159,7 +185,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                 let MovablePositions {
                     finite: guideListYellow,
                     infinite: guideListGreen,
-                } = calculateMovablePositions(
+                } = calculate_movable::calculateMovablePositions(
                     rotateCoord(step),
                     rotated_piece,
                     subtracted_rotated_board,
@@ -247,7 +273,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                     if destPiece == None {
                         /* empty square; first move is completed without stepping */
                         let fstdst: Coord = dest;
-                        ans.append(&mut eightNeighborhood(fstdst).iter().flat_map(|neighbor| {
+                        ans.append(&mut calculate_movable::eightNeighborhood(fstdst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             if gameState.f.currentBoard[neighbor[0]][neighbor[1]] ==
                               None /* the neighbor is utterly occupied */ ||
