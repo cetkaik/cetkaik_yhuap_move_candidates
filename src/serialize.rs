@@ -1,4 +1,5 @@
 use super::*;
+use cetkaik_core::{serialize_prof, serialize_color};
 
 /// Serializes [`Coord`](../type.Coord.html) in JSON-style.
 /// # Examples
@@ -50,82 +51,6 @@ pub fn serialize_absolute_coord(coord: absolute::Coord) -> String {
             absolute::Row::AU => "AU",
         }
     )
-}
-
-/// Serializes `Profession`.
-/// # Examples
-/// ```
-/// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
-/// use cetkaik_core::*;
-///
-/// assert_eq!(serialize_prof(Profession::Nuak1), "船");
-/// assert_eq!(serialize_prof(Profession::Kaun1), "車");
-/// ```
-///
-pub fn serialize_prof(prof: Profession) -> &'static str {
-    match prof {
-        Profession::Nuak1 => "船",
-        Profession::Kauk2 => "兵",
-        Profession::Gua2 => "弓",
-        Profession::Kaun1 => "車",
-        Profession::Dau2 => "虎",
-        Profession::Maun1 => "馬",
-        Profession::Kua2 => "筆",
-        Profession::Tuk2 => "巫",
-        Profession::Uai1 => "将",
-        Profession::Io => "王",
-    }
-}
-
-/// Serializes [`Color`](../enum.Color.html).
-/// # Examples
-/// ```
-/// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
-///
-/// assert_eq!(serialize_color(Color::Kok1), "赤");
-/// assert_eq!(serialize_color(Color::Huok2), "黒");
-/// ```
-///
-pub fn serialize_color(color: Color) -> &'static str {
-    match color {
-        Color::Huok2 => "黒",
-        Color::Kok1 => "赤",
-    }
-}
-
-fn serialize_side(side: Side) -> &'static str {
-    match side {
-        Side::Upward => "↑",
-        Side::Downward => "↓",
-    }
-}
-
-/// Serializes [`Piece`](../enum.Piece.html).
-/// # Examples
-/// ```
-/// use cerke_rust::*;
-/// use cerke_rust::serialize::*;
-/// use cetkaik_core::*;
-///
-/// assert_eq!(serialize_piece(relative::Piece::Tam2), "皇");
-/// assert_eq!(serialize_piece(relative::Piece::NonTam2Piece {
-///     prof: Profession::Uai1,
-///     color: Color::Kok1,
-///     side: relative::Side::Downward
-/// }), "赤将↓");
-/// ```
-pub fn serialize_piece(p: Piece) -> String {
-    match p {
-        Piece::Tam2 => "皇".to_string(),
-        Piece::NonTam2Piece { prof, color, side } => format!(
-            "{}{}{}",
-            serialize_color(color),
-            serialize_prof(prof),
-            serialize_side(side)
-        ),
-    }
 }
 
 /// Serializes [`PureMove`](../enum.PureMove.html) in textual form.

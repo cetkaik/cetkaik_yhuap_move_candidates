@@ -66,6 +66,7 @@ mod empty_squares {
 
 mod get_opponent_pieces_rotated {
     use crate::serialize::*;
+    use cetkaik_core::relative::serialize_piece;
     fn serialize_rotated(r: crate::Rotated) -> String {
         format!(
             "{} {}",
