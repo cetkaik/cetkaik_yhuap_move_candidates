@@ -573,10 +573,6 @@ struct Config {
 #[cfg(test)]
 mod tests;
 
-fn main() {
-    println!("Hello, world!");
-}
-
 fn rotate_piece_or_null(p: Option<Piece>) -> Option<Piece> {
     let p = p?;
     match p {
