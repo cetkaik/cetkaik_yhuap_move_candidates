@@ -485,6 +485,7 @@ fn rotate_coord(c: Coord) -> Coord {
     [(8 - c[0]), (8 - c[1])]
 }
 
+/// [row, col]
 pub type Coord = [usize; 2];
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
