@@ -511,7 +511,7 @@ pub enum AbsoluteColumn {
 
 pub type AbsoluteCoord = (AbsoluteRow, AbsoluteColumn);
 
-pub struct Rotated {
+struct Rotated {
     rotated_piece: Piece,
     rotated_coord: Coord,
 }

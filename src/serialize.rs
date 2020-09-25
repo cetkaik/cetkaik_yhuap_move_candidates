@@ -74,14 +74,6 @@ pub fn serialize_piece(p: Piece) -> String {
     }
 }
 
-pub fn serialize_rotated(r: Rotated) -> String {
-    format!(
-        "{} {}",
-        serialize_coord(r.rotated_coord),
-        serialize_piece(r.rotated_piece)
-    )
-}
-
 pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
     match mov {
         PureOpponentMove::InfAfterStep {

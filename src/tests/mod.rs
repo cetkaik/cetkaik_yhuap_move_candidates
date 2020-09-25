@@ -66,6 +66,13 @@ mod empty_squares {
 
 mod get_opponent_pieces_rotated {
     use crate::serialize::*;
+    fn serialize_rotated(r: crate::Rotated) -> String {
+        format!(
+            "{} {}",
+            serialize_coord(r.rotated_coord),
+            serialize_piece(r.rotated_piece)
+        )
+    }
     #[test]
     fn test_initial_board_sample() {
         super::run_test(
