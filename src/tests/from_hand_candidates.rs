@@ -4,7 +4,7 @@ use crate::serialize::*;
 fn test_initial_board_sample() {
     super::run_test(
         crate::from_hand_candidates,
-        &crate::INITIAL_BOARD_SAMPLE,
+        &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         serialize_pure_opponent_move,
         &[],
     )

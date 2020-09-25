@@ -52,7 +52,7 @@ mod empty_squares {
     fn test_initial_board_sample() {
         super::run_test(
             crate::empty_squares,
-            &crate::INITIAL_BOARD_SAMPLE,
+            &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             serialize_coord,
             &[
                 "[1,2]", "[1,4]", "[1,6]", "[3,0]", "[3,1]", "[3,2]", "[3,3]", "[3,4]", "[3,5]",
@@ -70,7 +70,7 @@ mod get_opponent_pieces_rotated {
     fn test_initial_board_sample() {
         super::run_test(
             crate::get_opponent_pieces_rotated,
-            &crate::INITIAL_BOARD_SAMPLE,
+            &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             serialize_rotated,
             &[
                 "[8,8] 黒筆↑",

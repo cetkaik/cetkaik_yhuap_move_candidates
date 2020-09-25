@@ -68,9 +68,9 @@ fn test_simple_board_sample_2_ia_is_down_false() {
 fn test_initial_board_sample() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::INITIAL_BOARD_SAMPLE,
+        &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         serialize_pure_opponent_move,
-        &crate::INITIAL_MOVES_NO_KUT_TAM,
+        &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
     )
 }
 
@@ -767,8 +767,8 @@ fn test_tam_corner_sample() {
 fn test_tam_itself_is_not_tam_hue_sample() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
+        &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
         serialize_pure_opponent_move,
-        &crate::INITIAL_MOVES_NO_KUT_TAM,
+        &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
     )
 }
