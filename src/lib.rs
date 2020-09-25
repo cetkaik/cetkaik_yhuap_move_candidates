@@ -28,31 +28,31 @@ fn is_water([row, col]: Coord) -> bool {
         || (row == 6 && col == 4)
 }
 
-fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
+fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> absolute::Coord {
     let [row, col] = coord;
 
     let columns = vec![
-        AbsoluteColumn::K,
-        AbsoluteColumn::L,
-        AbsoluteColumn::N,
-        AbsoluteColumn::T,
-        AbsoluteColumn::Z,
-        AbsoluteColumn::X,
-        AbsoluteColumn::C,
-        AbsoluteColumn::M,
-        AbsoluteColumn::P,
+        absolute::Column::K,
+        absolute::Column::L,
+        absolute::Column::N,
+        absolute::Column::T,
+        absolute::Column::Z,
+        absolute::Column::X,
+        absolute::Column::C,
+        absolute::Column::M,
+        absolute::Column::P,
     ];
 
     let rows = vec![
-        AbsoluteRow::A,
-        AbsoluteRow::E,
-        AbsoluteRow::I,
-        AbsoluteRow::U,
-        AbsoluteRow::O,
-        AbsoluteRow::Y,
-        AbsoluteRow::AI,
-        AbsoluteRow::AU,
-        AbsoluteRow::IA,
+        absolute::Row::A,
+        absolute::Row::E,
+        absolute::Row::I,
+        absolute::Row::U,
+        absolute::Row::O,
+        absolute::Row::Y,
+        absolute::Row::AI,
+        absolute::Row::AU,
+        absolute::Row::IA,
     ];
 
     (
@@ -489,33 +489,7 @@ fn rotate_coord(c: Coord) -> Coord {
 /// [row, col]
 pub type Coord = [usize; 2];
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum AbsoluteRow {
-    A,
-    E,
-    I,
-    U,
-    O,
-    Y,
-    AI,
-    AU,
-    IA,
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum AbsoluteColumn {
-    K,
-    L,
-    N,
-    T,
-    Z,
-    X,
-    C,
-    M,
-    P,
-}
-
-pub type AbsoluteCoord = (AbsoluteRow, AbsoluteColumn);
+pub use cetkaik_core::absolute;
 
 struct Rotated {
     rotated_piece: TamOrUpwardPiece,
@@ -527,43 +501,43 @@ pub mod serialize;
 #[derive(Clone, Copy)]
 pub enum PureMove {
     NonTamMoveSrcDst {
-        src: AbsoluteCoord,
-        dest: AbsoluteCoord,
+        src: absolute::Coord,
+        dest: absolute::Coord,
         is_water_entry_ciurl: bool,
     },
 
     NonTamMoveSrcStepDstFinite {
-        src: AbsoluteCoord,
-        step: AbsoluteCoord,
-        dest: AbsoluteCoord,
+        src: absolute::Coord,
+        step: absolute::Coord,
+        dest: absolute::Coord,
         is_water_entry_ciurl: bool,
     },
     InfAfterStep {
-        src: AbsoluteCoord,
-        step: AbsoluteCoord,
-        planned_direction: AbsoluteCoord,
+        src: absolute::Coord,
+        step: absolute::Coord,
+        planned_direction: absolute::Coord,
     },
     NonTamMoveFromHand {
         color: Color,
         prof: Profession,
-        dest: AbsoluteCoord,
+        dest: absolute::Coord,
     },
     TamMoveNoStep {
-        src: AbsoluteCoord,
-        first_dest: AbsoluteCoord,
-        second_dest: AbsoluteCoord,
+        src: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
     },
     TamMoveStepsDuringFormer {
-        src: AbsoluteCoord,
-        step: AbsoluteCoord,
-        first_dest: AbsoluteCoord,
-        second_dest: AbsoluteCoord,
+        src: absolute::Coord,
+        step: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
     },
     TamMoveStepsDuringLatter {
-        src: AbsoluteCoord,
-        step: AbsoluteCoord,
-        first_dest: AbsoluteCoord,
-        second_dest: AbsoluteCoord,
+        src: absolute::Coord,
+        step: absolute::Coord,
+        first_dest: absolute::Coord,
+        second_dest: absolute::Coord,
     },
 }
 
@@ -632,47 +606,8 @@ pub enum Piece {
 
 use calculate_movable::TamOrUpwardPiece;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Color {
-    /// Red, 赤
-    Kok1,
+pub use cetkaik_core::{Color, Profession};
 
-    /// Black, 黒
-    Huok2,
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Profession {
-    /// Vessel, 船, felkana
-    Nuak1,
-
-    /// Pawn, 兵, elmer
-    Kauk2,
-
-    /// Rook, 弓, gustuer
-    Gua2,
-
-    /// Bishop, 車, vadyrd
-    Kaun1,
-
-    /// Tiger, 虎, stistyst
-    Dau2,
-
-    /// Horse, 馬, dodor
-    Maun1,
-
-    /// Clerk, 筆, kua
-    Kua2,
-
-    /// Shaman, 巫, terlsk
-    Tuk2,
-
-    /// General, 将, varxle
-    Uai1,
-
-    /// King, 王, ales
-    Io,
-}
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Side {

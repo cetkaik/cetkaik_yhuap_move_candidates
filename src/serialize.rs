@@ -12,50 +12,52 @@ pub fn serialize_coord(coord: Coord) -> String {
     format!("[{},{}]", coord[0], coord[1])
 }
 
-/// Serializes [`AbsoluteCoord`](../type.AbsoluteCoord.html).
+/// Serializes [`absolute::Coord`](../type.absolute::Coord.html).
 /// # Examples
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
+/// use cetkaik_core::*;
 ///
-/// assert_eq!(serialize_absolute_coord((AbsoluteRow::E, AbsoluteColumn::N)), "NE");
-/// assert_eq!(serialize_absolute_coord((AbsoluteRow::AU, AbsoluteColumn::Z)), "ZAU");
+/// assert_eq!(serialize_absolute_coord((absolute::Row::E, absolute::Column::N)), "NE");
+/// assert_eq!(serialize_absolute_coord((absolute::Row::AU, absolute::Column::Z)), "ZAU");
 /// ```
 ///
-pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
+pub fn serialize_absolute_coord(coord: absolute::Coord) -> String {
     let (row, column) = coord;
     format!(
         "{}{}",
         match column {
-            AbsoluteColumn::K => "K",
-            AbsoluteColumn::L => "L",
-            AbsoluteColumn::M => "M",
-            AbsoluteColumn::N => "N",
-            AbsoluteColumn::P => "P",
-            AbsoluteColumn::Z => "Z",
-            AbsoluteColumn::X => "X",
-            AbsoluteColumn::C => "C",
-            AbsoluteColumn::T => "T",
+            absolute::Column::K => "K",
+            absolute::Column::L => "L",
+            absolute::Column::M => "M",
+            absolute::Column::N => "N",
+            absolute::Column::P => "P",
+            absolute::Column::Z => "Z",
+            absolute::Column::X => "X",
+            absolute::Column::C => "C",
+            absolute::Column::T => "T",
         },
         match row {
-            AbsoluteRow::A => "A",
-            AbsoluteRow::E => "E",
-            AbsoluteRow::I => "I",
-            AbsoluteRow::O => "O",
-            AbsoluteRow::U => "U",
-            AbsoluteRow::Y => "Y",
-            AbsoluteRow::IA => "IA",
-            AbsoluteRow::AI => "AI",
-            AbsoluteRow::AU => "AU",
+            absolute::Row::A => "A",
+            absolute::Row::E => "E",
+            absolute::Row::I => "I",
+            absolute::Row::O => "O",
+            absolute::Row::U => "U",
+            absolute::Row::Y => "Y",
+            absolute::Row::IA => "IA",
+            absolute::Row::AI => "AI",
+            absolute::Row::AU => "AU",
         }
     )
 }
 
-/// Serializes [`Profession`](../enum.Profession.html).
+/// Serializes `Profession`.
 /// # Examples
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
+/// use cetkaik_core::*;
 ///
 /// assert_eq!(serialize_prof(Profession::Nuak1), "船");
 /// assert_eq!(serialize_prof(Profession::Kaun1), "車");
@@ -130,29 +132,30 @@ pub fn serialize_piece(p: Piece) -> String {
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
+/// use cetkaik_core::*;
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::InfAfterStep {
-///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
-///     step: (AbsoluteRow::E, AbsoluteColumn::T),
-///     planned_direction: (AbsoluteRow::E, AbsoluteColumn::N)
+///     src: (absolute::Row::A, absolute::Column::Z),
+///     step: (absolute::Row::E, absolute::Column::T),
+///     planned_direction: (absolute::Row::E, absolute::Column::N)
 /// }), "ZA片TE心NE");
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveFromHand {
 ///     color: Color::Huok2,
 ///     prof: Profession::Gua2,
-///     dest: (AbsoluteRow::IA, AbsoluteColumn::L)
+///     dest: (absolute::Row::IA, absolute::Column::L)
 /// }), "黒弓LIA");
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveSrcDst {
-///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
-///     dest: (AbsoluteRow::E, AbsoluteColumn::N),
+///     src: (absolute::Row::A, absolute::Column::Z),
+///     dest: (absolute::Row::E, absolute::Column::N),
 ///     is_water_entry_ciurl: true
 /// }), "ZA片NE水");
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::NonTamMoveSrcStepDstFinite {
-///     src: (AbsoluteRow::A, AbsoluteColumn::Z),
-///     step: (AbsoluteRow::E, AbsoluteColumn::T),
-///     dest: (AbsoluteRow::E, AbsoluteColumn::N),
+///     src: (absolute::Row::A, absolute::Column::Z),
+///     step: (absolute::Row::E, absolute::Column::T),
+///     dest: (absolute::Row::E, absolute::Column::N),
 ///     is_water_entry_ciurl: false
 /// }), "ZA片TENE");
 ///
@@ -161,23 +164,23 @@ pub fn serialize_piece(p: Piece) -> String {
 /// // it is not to be written in the standard notation.
 /// // Hence this additional information is denoted by [].
 /// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveStepsDuringFormer {
-///     src: (AbsoluteRow::E, AbsoluteColumn::K),
-///     step: (AbsoluteRow::I, AbsoluteColumn::L),
-///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
-///     second_dest: (AbsoluteRow::E, AbsoluteColumn::L)
+///     src: (absolute::Row::E, absolute::Column::K),
+///     step: (absolute::Row::I, absolute::Column::L),
+///     first_dest: (absolute::Row::I, absolute::Column::K),
+///     second_dest: (absolute::Row::E, absolute::Column::L)
 /// }), "KE皇LI[KI]LE");
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveNoStep {
-///     src: (AbsoluteRow::E, AbsoluteColumn::K),
-///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
-///     second_dest: (AbsoluteRow::E, AbsoluteColumn::K)
+///     src: (absolute::Row::E, absolute::Column::K),
+///     first_dest: (absolute::Row::I, absolute::Column::K),
+///     second_dest: (absolute::Row::E, absolute::Column::K)
 /// }), "KE皇[KI]KE");
 ///
 /// assert_eq!(serialize_pure_opponent_move(PureMove::TamMoveStepsDuringLatter {
-///     src: (AbsoluteRow::E, AbsoluteColumn::K),
-///     first_dest: (AbsoluteRow::I, AbsoluteColumn::K),
-///     step: (AbsoluteRow::I, AbsoluteColumn::L),
-///     second_dest: (AbsoluteRow::E, AbsoluteColumn::L)
+///     src: (absolute::Row::E, absolute::Column::K),
+///     first_dest: (absolute::Row::I, absolute::Column::K),
+///     step: (absolute::Row::I, absolute::Column::L),
+///     second_dest: (absolute::Row::E, absolute::Column::L)
 /// }), "KE皇[KI]LILE");
 /// ```
 pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
