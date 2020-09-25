@@ -1,8 +1,9 @@
-pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove> {
+/// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
+pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
         for empty_square in empty_squares(&game_state) {
-            ans.push(PureOpponentMove::NonTamMoveFromHand {
+            ans.push(PureMove::NonTamMoveFromHand {
                 color: piece.color,
                 prof: piece.prof,
                 dest: to_absolute_coord(empty_square, game_state.ia_is_down),
@@ -144,10 +145,11 @@ fn can_get_occupied_by_non_tam(
     }
 }
 
+/// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 pub fn not_from_hand_candidates_(
     config: Config,
     game_state: &PureGameState,
-) -> Vec<PureOpponentMove> {
+) -> Vec<PureMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,
@@ -184,7 +186,7 @@ pub fn not_from_hand_candidates_(
             }
             let dest_piece = game_state.f.current_board[dest[0]][dest[1]];
 
-            let candidates_when_stepping = |rotated_piece| -> Vec<PureOpponentMove> {
+            let candidates_when_stepping = |rotated_piece| -> Vec<PureMove> {
                 let step = dest; // less confusing
 
                 /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
@@ -226,7 +228,7 @@ pub fn not_from_hand_candidates_(
                                 rotate_board(subtracted_rotated_board),
                                 game_state.tam_itself_is_tam_hue,
                             ) {
-                                vec![PureOpponentMove::NonTamMoveSrcStepDstFinite {
+                                vec![PureMove::NonTamMoveSrcStepDstFinite {
                                     src: to_absolute_coord(src, game_state.ia_is_down),
                                     step: to_absolute_coord(step, game_state.ia_is_down),
                                     dest: to_absolute_coord(*final_dest, game_state.ia_is_down),
@@ -241,7 +243,7 @@ pub fn not_from_hand_candidates_(
                                 vec![].into_iter()
                             }
                         })
-                        .collect::<Vec<PureOpponentMove>>()[..],
+                        .collect::<Vec<PureMove>>()[..],
                     &candidates_inf
                         .iter()
                         .flat_map(|planned_dest| {
@@ -263,7 +265,7 @@ pub fn not_from_hand_candidates_(
                                 return vec![].into_iter();
                                 // retry
                             }
-                            let obj: PureOpponentMove = PureOpponentMove::InfAfterStep {
+                            let obj: PureMove = PureMove::InfAfterStep {
                                 src: to_absolute_coord(src, game_state.ia_is_down),
                                 step: to_absolute_coord(step, game_state.ia_is_down),
                                 planned_direction: to_absolute_coord(
@@ -273,7 +275,7 @@ pub fn not_from_hand_candidates_(
                             };
                             vec![obj].into_iter()
                         })
-                        .collect::<Vec<PureOpponentMove>>()[..],
+                        .collect::<Vec<PureMove>>()[..],
                 ]
                 .concat()
             };
@@ -295,7 +297,7 @@ pub fn not_from_hand_candidates_(
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
                                 let snd_dst: Coord = *neighbor;
-                                vec![PureOpponentMove::TamMoveNoStep {
+                                vec![PureMove::TamMoveNoStep {
                                     second_dest: to_absolute_coord(snd_dst, game_state.ia_is_down),
                                     first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
                                     src: to_absolute_coord(src, game_state.ia_is_down),
@@ -305,15 +307,15 @@ pub fn not_from_hand_candidates_(
                                 let step: Coord = *neighbor;
                                 empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
                                     .iter().flat_map(|snd_dst| {
-                                    vec![PureOpponentMove::TamMoveStepsDuringLatter {
+                                    vec![PureMove::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
                                         second_dest: to_absolute_coord(*snd_dst, game_state.ia_is_down),
                                         src: to_absolute_coord(src, game_state.ia_is_down),
                                         step: to_absolute_coord(step, game_state.ia_is_down),
                                     }].into_iter()
-                                }).collect::<Vec<PureOpponentMove>>().into_iter()
+                                }).collect::<Vec<PureMove>>().into_iter()
                             }
-                        }).collect::<Vec<PureOpponentMove>>());
+                        }).collect::<Vec<PureMove>>());
                     } else {
                         /* not an empty square: must complete the first move */
                         let step = dest;
@@ -327,7 +329,7 @@ pub fn not_from_hand_candidates_(
                                     );
                                     v.iter()
                                         .flat_map(move |snd_dst| {
-                                            vec![PureOpponentMove::TamMoveStepsDuringFormer {
+                                            vec![PureMove::TamMoveStepsDuringFormer {
                                                 first_dest: to_absolute_coord(
                                                     *fst_dst,
                                                     game_state.ia_is_down,
@@ -344,10 +346,10 @@ pub fn not_from_hand_candidates_(
                                             }]
                                             .into_iter()
                                         })
-                                        .collect::<Vec<PureOpponentMove>>()
+                                        .collect::<Vec<PureMove>>()
                                         .into_iter()
                                 })
-                                .collect::<Vec<PureOpponentMove>>(),
+                                .collect::<Vec<PureMove>>(),
                         );
                     }
                 }
@@ -357,7 +359,7 @@ pub fn not_from_hand_candidates_(
                 } => {
                     if dest_piece == None {
                         // cannot step
-                        ans.append(&mut vec![PureOpponentMove::NonTamMoveSrcDst {
+                        ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
                             src: to_absolute_coord(src, game_state.ia_is_down),
                             dest: to_absolute_coord(dest, game_state.ia_is_down),
                             is_water_entry_ciurl: is_ciurl_required(dest, rotated_piece_prof, src),
@@ -393,7 +395,7 @@ pub fn not_from_hand_candidates_(
                         } else {
                             ans.append(
                                 &mut [
-                                    &[PureOpponentMove::NonTamMoveSrcDst {
+                                    &[PureMove::NonTamMoveSrcDst {
                                         src: to_absolute_coord(src, game_state.ia_is_down),
                                         dest: to_absolute_coord(dest, game_state.ia_is_down),
                                         is_water_entry_ciurl: is_ciurl_required(
@@ -524,7 +526,7 @@ struct Rotated {
 pub mod serialize;
 
 #[derive(Clone, Copy)]
-pub enum PureOpponentMove {
+pub enum PureMove {
     NonTamMoveSrcDst {
         src: AbsoluteCoord,
         dest: AbsoluteCoord,

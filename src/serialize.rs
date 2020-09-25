@@ -4,6 +4,16 @@ pub fn serialize_coord(coord: Coord) -> String {
     format!("[{},{}]", coord[0], coord[1])
 }
 
+/// Serializes `AbsoluteCoord`.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+/// 
+/// assert_eq!(serialize_absolute_coord((AbsoluteRow::E, AbsoluteColumn::N)), "NE");
+/// assert_eq!(serialize_absolute_coord((AbsoluteRow::AU, AbsoluteColumn::Z)), "ZAU");
+/// ```
+/// 
 pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
     let (row, column) = coord;
     format!(
@@ -33,6 +43,16 @@ pub fn serialize_absolute_coord(coord: AbsoluteCoord) -> String {
     )
 }
 
+/// Serializes `Profession`.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+/// 
+/// assert_eq!(serialize_prof(Profession::Nuak1), "船");
+/// assert_eq!(serialize_prof(Profession::Kaun1), "車");
+/// ```
+/// 
 pub fn serialize_prof(prof: Profession) -> &'static str {
     match prof {
         Profession::Nuak1 => "船",
@@ -48,6 +68,17 @@ pub fn serialize_prof(prof: Profession) -> &'static str {
     }
 }
 
+
+/// Serializes `Color`.
+/// # Examples
+/// ```
+/// use cerke_rust::*;
+/// use cerke_rust::serialize::*;
+/// 
+/// assert_eq!(serialize_color(Color::Kok1), "赤");
+/// assert_eq!(serialize_color(Color::Huok2), "黒");
+/// ```
+/// 
 pub fn serialize_color(color: Color) -> &'static str {
     match color {
         Color::Huok2 => "黒",
@@ -74,9 +105,9 @@ pub fn serialize_piece(p: Piece) -> String {
     }
 }
 
-pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
+pub fn serialize_pure_opponent_move(mov: PureMove) -> String {
     match mov {
-        PureOpponentMove::InfAfterStep {
+        PureMove::InfAfterStep {
             src,
             step,
             planned_direction,
@@ -86,13 +117,13 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_absolute_coord(step),
             serialize_absolute_coord(planned_direction)
         ),
-        PureOpponentMove::NonTamMoveFromHand { color, prof, dest } => format!(
+        PureMove::NonTamMoveFromHand { color, prof, dest } => format!(
             "{}{}{}",
             serialize_color(color),
             serialize_prof(prof),
             serialize_absolute_coord(dest)
         ),
-        PureOpponentMove::NonTamMoveSrcDst {
+        PureMove::NonTamMoveSrcDst {
             src,
             dest,
             is_water_entry_ciurl,
@@ -102,7 +133,7 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_absolute_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
-        PureOpponentMove::NonTamMoveSrcStepDstFinite {
+        PureMove::NonTamMoveSrcStepDstFinite {
             src,
             dest,
             is_water_entry_ciurl,
@@ -114,7 +145,7 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_absolute_coord(dest),
             if is_water_entry_ciurl { "水" } else { "" }
         ),
-        PureOpponentMove::TamMoveNoStep {
+        PureMove::TamMoveNoStep {
             src,
             first_dest,
             second_dest,
@@ -124,7 +155,7 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_absolute_coord(first_dest),
             serialize_absolute_coord(second_dest)
         ),
-        PureOpponentMove::TamMoveStepsDuringFormer {
+        PureMove::TamMoveStepsDuringFormer {
             src,
             first_dest,
             second_dest,
@@ -136,7 +167,7 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
             serialize_absolute_coord(first_dest),
             serialize_absolute_coord(second_dest)
         ),
-        PureOpponentMove::TamMoveStepsDuringLatter {
+        PureMove::TamMoveStepsDuringLatter {
             src,
             first_dest,
             second_dest,

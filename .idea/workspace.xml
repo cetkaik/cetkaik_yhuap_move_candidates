@@ -17,9 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Split off modules into separate files">
-      <change beforePath="$PROJECT_DIR$/src/calculate_movable.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/calculate_movable.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests/test_cases.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/test_cases.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/serialize.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/serialize.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -157,7 +155,7 @@
       <updated>1600980810662</updated>
       <workItem from="1600980813593" duration="170000" />
       <workItem from="1600981022364" duration="3110000" />
-      <workItem from="1600986772611" duration="9173000" />
+      <workItem from="1600986772611" duration="9209000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit: port parts of the test cases into rust">
       <created>1600984097229</created>
