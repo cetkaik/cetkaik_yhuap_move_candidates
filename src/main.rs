@@ -83,8 +83,16 @@ fn canGetOccupiedBy(
     }
 }
 
-fn empty_neighbors_of (board: Board, c: Coord) -> Vec<Coord>
-{eightNeighborhood(c).iter().filter(|a| {let [i, j] = a; board[*i][*j] == None}).map(|a| *a).collect()}
+fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
+    eightNeighborhood(c)
+        .iter()
+        .filter(|a| {
+            let [i, j] = a;
+            board[*i][*j] == None
+        })
+        .map(|a| *a)
+        .collect()
+}
 
 fn canGetOccupiedByNonTam(
     side: Side,
@@ -269,24 +277,35 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                     } else {
                         /* not an empty square: must complete the first move */
                         let step = dest;
-                        ans.append(&mut empty_neighbors_of(rotateBoard(subtracted_rotated_board), step)
-                            .iter().flat_map(|fstdst| {
-                                let v = empty_neighbors_of(rotateBoard(subtracted_rotated_board), *fstdst);
-                                    v.iter().flat_map(move |snddst| {
-                                        vec![PureOpponentMove::TamMoveStepsDuringFormer {
-                                            firstDest: toAbsoluteCoord_(
-                                                *fstdst,
-                                                gameState.IA_is_down,
-                                            ),
-                                            secondDest: toAbsoluteCoord_(
-                                                *snddst,
-                                                gameState.IA_is_down,
-                                            ),
-                                            src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                                            step: toAbsoluteCoord_(step, gameState.IA_is_down),
-                                        }].into_iter()
-                                    }).collect::<Vec<PureOpponentMove>>().into_iter()
-                            }).collect::<Vec<PureOpponentMove>>());
+                        ans.append(
+                            &mut empty_neighbors_of(rotateBoard(subtracted_rotated_board), step)
+                                .iter()
+                                .flat_map(|fstdst| {
+                                    let v = empty_neighbors_of(
+                                        rotateBoard(subtracted_rotated_board),
+                                        *fstdst,
+                                    );
+                                    v.iter()
+                                        .flat_map(move |snddst| {
+                                            vec![PureOpponentMove::TamMoveStepsDuringFormer {
+                                                firstDest: toAbsoluteCoord_(
+                                                    *fstdst,
+                                                    gameState.IA_is_down,
+                                                ),
+                                                secondDest: toAbsoluteCoord_(
+                                                    *snddst,
+                                                    gameState.IA_is_down,
+                                                ),
+                                                src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                                step: toAbsoluteCoord_(step, gameState.IA_is_down),
+                                            }]
+                                            .into_iter()
+                                        })
+                                        .collect::<Vec<PureOpponentMove>>()
+                                        .into_iter()
+                                })
+                                .collect::<Vec<PureOpponentMove>>(),
+                        );
                     }
                 }
                 Piece::NonTam2Piece {
@@ -306,7 +325,7 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                                     src,
                                 ),
                             };
-                            ans.append(&mut vec![PureOpponentMove::PotentialWaterEntry(obj)]);
+                        ans.append(&mut vec![PureOpponentMove::PotentialWaterEntry(obj)]);
                     } else if destPiece == Some(Piece::Tam2) {
                         // if allowed by config, allow stepping on Tam2;
                         if config.allow_kut2tam2 {
@@ -337,21 +356,23 @@ fn not_from_hand_candidates_(config: Config, gameState: &PureGameState) -> Vec<P
                             ans.append(&mut candidates_when_stepping(rotated_piece));
                         }
 
-                        ans.append(&mut [
-                            &[PureOpponentMove::PotentialWaterEntry(
-                                PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
-                                    src: toAbsoluteCoord_(src, gameState.IA_is_down),
-                                    dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
-                                    is_water_entry_ciurl: is_ciurl_required(
-                                        dest,
-                                        rotated_piece_prof,
-                                        src,
-                                    ),
-                                },
-                            )][..],
-                            &candidates_when_stepping(rotated_piece)[..],
-                        ]
-                        .concat());
+                        ans.append(
+                            &mut [
+                                &[PureOpponentMove::PotentialWaterEntry(
+                                    PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
+                                        src: toAbsoluteCoord_(src, gameState.IA_is_down),
+                                        dest: toAbsoluteCoord_(dest, gameState.IA_is_down),
+                                        is_water_entry_ciurl: is_ciurl_required(
+                                            dest,
+                                            rotated_piece_prof,
+                                            src,
+                                        ),
+                                    },
+                                )][..],
+                                &candidates_when_stepping(rotated_piece)[..],
+                            ]
+                            .concat(),
+                        );
                     } else {
                         ans.append(&mut candidates_when_stepping(rotated_piece));
                     }
