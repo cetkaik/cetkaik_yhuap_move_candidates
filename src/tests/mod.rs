@@ -44,6 +44,8 @@ mod test_not_from_hand_candidates_with_kut2tam2;
 
 mod not_from_hand_candidates;
 
+mod test_cases;
+
 mod empty_squares {
     use crate::serialize::*;
     #[test]

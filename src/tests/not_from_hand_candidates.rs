@@ -4,7 +4,7 @@ use crate::serialize::*;
 fn test_simple_board_sample_3() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::simple_board_sample_3(),
+        &crate::tests::test_cases::simple_board_sample_3(),
         serialize_pure_opponent_move,
         &["PI片PU"],
     )
@@ -14,7 +14,7 @@ fn test_simple_board_sample_3() {
 fn test_simple_board_sample_1_ia_is_down_true() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::simple_board_sample_1(),
+        &crate::tests::test_cases::simple_board_sample_1(),
         serialize_pure_opponent_move,
         &[
             "KA片LA", /* horizontal */
@@ -41,7 +41,7 @@ fn test_simple_board_sample_1_ia_is_down_true() {
 fn test_simple_board_sample_2_ia_is_down_false() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::simple_board_sample_2(),
+        &crate::tests::test_cases::simple_board_sample_2(),
         serialize_pure_opponent_move,
         &[
             "PIA片MIA", /* horizontal */
@@ -78,7 +78,7 @@ fn test_initial_board_sample() {
 fn test_complicated_board_sample_1() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::complicated_board_sample_1(),
+        &crate::tests::test_cases::complicated_board_sample_1(),
         serialize_pure_opponent_move,
         &[
             "XA片XE",
@@ -397,7 +397,7 @@ fn test_complicated_board_sample_1() {
 fn test_complicated_board_sample_2() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::complicated_board_sample_2(),
+        &crate::tests::test_cases::complicated_board_sample_2(),
         serialize_pure_opponent_move,
         &[
             "ZA片ZE",
@@ -746,7 +746,7 @@ fn test_complicated_board_sample_2() {
 fn test_tam_corner_sample() {
     super::run_test(
         super::not_from_hand_candidates,
-        &crate::test_cases::tam_corner_sample(),
+        &crate::tests::test_cases::tam_corner_sample(),
         serialize_pure_opponent_move,
         &[
             "CAI片XAI",

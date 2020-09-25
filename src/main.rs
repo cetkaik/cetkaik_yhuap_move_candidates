@@ -1265,5 +1265,3 @@ const SIMPLE_BOARD: Board = [
     [None, None, None, None, None, None, None, None, None],
     [None, None, None, None, None, None, None, None, None],
 ];
-
-mod test_cases;

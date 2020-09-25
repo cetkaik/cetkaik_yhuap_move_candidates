@@ -14,7 +14,7 @@ fn test_initial_board_sample() {
 fn test_simple_board_sample_4() {
     super::run_test(
         crate::from_hand_candidates,
-        &crate::test_cases::simple_board_sample_4(),
+        &crate::tests::test_cases::simple_board_sample_4(),
         serialize_pure_opponent_move,
         &[
             "黒弓KA",

@@ -4,7 +4,7 @@ use crate::serialize::*;
 fn test_tam_corner_sample() {
     super::run_test(
         super::not_from_hand_candidates_with_kut2tam2,
-        &crate::test_cases::tam_corner_sample(),
+        &crate::tests::test_cases::tam_corner_sample(),
         serialize_pure_opponent_move,
         &[
             "CAI片XAI",
