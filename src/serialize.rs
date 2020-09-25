@@ -87,12 +87,12 @@ pub fn serialize_pure_opponent_move(mov: PureOpponentMove) -> String {
         PureOpponentMove::InfAfterStep {
             src,
             step,
-            planned_direction: plannedDirection,
+            planned_direction,
         } => format!(
             "{}片{}心{}",
             serialize_absolute_coord(src),
             serialize_absolute_coord(step),
-            serialize_absolute_coord(plannedDirection)
+            serialize_absolute_coord(planned_direction)
         ),
         PureOpponentMove::NonTamMoveFromHand { color, prof, dest } => format!(
             "{}{}{}",

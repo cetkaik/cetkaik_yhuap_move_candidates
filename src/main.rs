@@ -5,7 +5,7 @@ fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureOpponentMove> {
             ans.push(PureOpponentMove::NonTamMoveFromHand {
                 color: piece.color,
                 prof: piece.prof,
-                dest: toAbsoluteCoord_(empty_square, game_state.ia_is_down),
+                dest: to_absolute_coord(empty_square, game_state.ia_is_down),
             })
         }
     }
@@ -26,7 +26,7 @@ fn is_water([row, col]: Coord) -> bool {
         || (row == 6 && col == 4);
 }
 
-fn toAbsoluteCoord_(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
+fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> AbsoluteCoord {
     let [row, col] = coord;
 
     let columns = vec![
@@ -152,8 +152,8 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
     } in get_opponent_pieces_rotated(&game_state)
     {
         let MovablePositions {
-            finite: guideListYellow,
-            infinite: guideListGreen,
+            finite: guide_list_yellow,
+            infinite: guide_list_green,
         } = calculate_movable::calculate_movable_positions(
             rotated_coord,
             rotated_piece,
@@ -162,11 +162,11 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
         );
 
         let candidates: Vec<Coord> = [
-            &guideListYellow
+            &guide_list_yellow
                 .into_iter()
                 .map(rotate_coord)
                 .collect::<Vec<_>>()[..],
-            &guideListGreen
+            &guide_list_green
                 .into_iter()
                 .map(rotate_coord)
                 .collect::<Vec<_>>()[..],
@@ -208,38 +208,37 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                   &candidates.iter().flat_map(|final_dest| {
                       let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
                           Piece::Tam2 => panic!(),
-                          Piece::NonTam2Piece{color, prof, side} => (color, prof)
+                          Piece::NonTam2Piece{color, prof, side: _} => (color, prof)
                       };
-                    if
-                      can_get_occupied_by(
-                          Side::Downward,
-                          *final_dest,
-                          Piece::NonTam2Piece{
-                          color: rotated_piece_color,
-                          prof: rotated_piece_prof,
-                          side: Side::Downward
+                    return if
+                    can_get_occupied_by(
+                        Side::Downward,
+                        *final_dest,
+                        Piece::NonTam2Piece {
+                            color: rotated_piece_color,
+                            prof: rotated_piece_prof,
+                            side: Side::Downward
                         },
-                          rotate_board(subtracted_rotated_board),
-                          game_state.tam_itself_is_tam_hue
-                      )
-                     {
-                      let obj: PureOpponentMoveWithPotentialWaterEntry = PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcStepDstFinite {
-                          src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                          step: toAbsoluteCoord_(step, game_state.ia_is_down),
-                          dest: toAbsoluteCoord_(*final_dest, game_state.ia_is_down),
-                          is_water_entry_ciurl: is_ciurl_required(
-                              *final_dest,
-                              rotated_piece_prof,
-                              src
-                          )
-                      };
-                      return vec![PureOpponentMove::PotentialWaterEntry(obj)].into_iter();
-                    } else {return vec![].into_iter()};
+                        rotate_board(subtracted_rotated_board),
+                        game_state.tam_itself_is_tam_hue
+                    )
+                    {
+                        vec![PureOpponentMove::PotentialWaterEntry(PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcStepDstFinite {
+                            src: to_absolute_coord(src, game_state.ia_is_down),
+                            step: to_absolute_coord(step, game_state.ia_is_down),
+                            dest: to_absolute_coord(*final_dest, game_state.ia_is_down),
+                            is_water_entry_ciurl: is_ciurl_required(
+                                *final_dest,
+                                rotated_piece_prof,
+                                src
+                            )
+                        })].into_iter()
+                    } else { vec![].into_iter() };
                   }).collect::<Vec<PureOpponentMove>>()[..],
                   &candidates_inf.iter().flat_map(|planned_dest| {
                     let (rotated_piece_color , rotated_piece_prof) = match rotated_piece {
                         Piece::Tam2 => panic!(),
-                        Piece::NonTam2Piece{color, prof, side} => (color, prof)
+                        Piece::NonTam2Piece{color, prof, side: _} => (color, prof)
                     };
                     if
                       !can_get_occupied_by(
@@ -258,9 +257,9 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                       // retry
                     }
                     let obj: PureOpponentMove = PureOpponentMove::InfAfterStep{
-                      src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                      step: toAbsoluteCoord_(step, game_state.ia_is_down),
-                      planned_direction: toAbsoluteCoord_(
+                      src: to_absolute_coord(src, game_state.ia_is_down),
+                      step: to_absolute_coord(step, game_state.ia_is_down),
+                      planned_direction: to_absolute_coord(
                           *planned_dest,
                           game_state.ia_is_down
                       ),
@@ -288,9 +287,9 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                             {
                                 let snd_dst: Coord = *neighbor;
                                 vec![PureOpponentMove::TamMoveNoStep {
-                                    second_dest: toAbsoluteCoord_(snd_dst, game_state.ia_is_down),
-                                    first_dest: toAbsoluteCoord_(fst_dst, game_state.ia_is_down),
-                                    src: toAbsoluteCoord_(src, game_state.ia_is_down),
+                                    second_dest: to_absolute_coord(snd_dst, game_state.ia_is_down),
+                                    first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
+                                    src: to_absolute_coord(src, game_state.ia_is_down),
                                 }].into_iter()
                             } else {
                                 /* if not, step from there */
@@ -298,10 +297,10 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                                 empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
                                     .iter().flat_map(|snd_dst| {
                                     return vec![PureOpponentMove::TamMoveStepsDuringLatter {
-                                        first_dest: toAbsoluteCoord_(fst_dst, game_state.ia_is_down),
-                                        second_dest: toAbsoluteCoord_(*snd_dst, game_state.ia_is_down),
-                                        src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                                        step: toAbsoluteCoord_(step, game_state.ia_is_down),
+                                        first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
+                                        second_dest: to_absolute_coord(*snd_dst, game_state.ia_is_down),
+                                        src: to_absolute_coord(src, game_state.ia_is_down),
+                                        step: to_absolute_coord(step, game_state.ia_is_down),
                                     }].into_iter();
                                 }).collect::<Vec<PureOpponentMove>>().into_iter()
                             }
@@ -320,16 +319,16 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                                     v.iter()
                                         .flat_map(move |snd_dst| {
                                             vec![PureOpponentMove::TamMoveStepsDuringFormer {
-                                                first_dest: toAbsoluteCoord_(
+                                                first_dest: to_absolute_coord(
                                                     *fst_dst,
                                                     game_state.ia_is_down,
                                                 ),
-                                                second_dest: toAbsoluteCoord_(
+                                                second_dest: to_absolute_coord(
                                                     *snd_dst,
                                                     game_state.ia_is_down,
                                                 ),
-                                                src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                                                step: toAbsoluteCoord_(step, game_state.ia_is_down),
+                                                src: to_absolute_coord(src, game_state.ia_is_down),
+                                                step: to_absolute_coord(step, game_state.ia_is_down),
                                             }]
                                             .into_iter()
                                         })
@@ -343,14 +342,14 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                 Piece::NonTam2Piece {
                     color: rotated_piece_color,
                     prof: rotated_piece_prof,
-                    side: rotated_piece_side,
+                    side: _,
                 } => {
                     if dest_piece == None {
                         // cannot step
                         let obj: PureOpponentMoveWithPotentialWaterEntry =
                             PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
-                                src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                                dest: toAbsoluteCoord_(dest, game_state.ia_is_down),
+                                src: to_absolute_coord(src, game_state.ia_is_down),
+                                dest: to_absolute_coord(dest, game_state.ia_is_down),
                                 is_water_entry_ciurl: is_ciurl_required(
                                     dest,
                                     rotated_piece_prof,
@@ -367,8 +366,8 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                         }
                     } else if let Some(Piece::NonTam2Piece {
                         side: Side::Upward,
-                        color,
-                        prof,
+                        color: _,
+                        prof: _,
                     }) = dest_piece
                     {
                         // opponent's piece; stepping and taking both attainable
@@ -391,8 +390,8 @@ fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<
                                 &mut [
                                     &[PureOpponentMove::PotentialWaterEntry(
                                         PureOpponentMoveWithPotentialWaterEntry::NonTamMoveSrcDst {
-                                            src: toAbsoluteCoord_(src, game_state.ia_is_down),
-                                            dest: toAbsoluteCoord_(dest, game_state.ia_is_down),
+                                            src: to_absolute_coord(src, game_state.ia_is_down),
+                                            dest: to_absolute_coord(dest, game_state.ia_is_down),
                                             is_water_entry_ciurl: is_ciurl_required(
                                                 dest,
                                                 rotated_piece_prof,

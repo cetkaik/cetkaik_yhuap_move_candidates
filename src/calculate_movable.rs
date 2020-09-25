@@ -227,14 +227,14 @@ pub fn calculate_movable_positions(
         [0, 8],
     ];
 
-    let (piece_prof, piece_color, piece_side) = match piece {
+    let piece_prof = match piece {
         Piece::Tam2 => {
             return MovablePositions {
                 finite: eight_neighborhood(coord),
                 infinite: vec![],
             }
         }
-        Piece::NonTam2Piece { prof, color, side } => (prof, color, side),
+        Piece::NonTam2Piece { prof, color:_, side:_ } => prof,
     };
 
     if piece_prof == Profession::Io {
