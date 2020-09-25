@@ -462,29 +462,12 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-impl From<NonTam2PieceUpward> for Piece {
-    fn from(from: NonTam2PieceUpward) -> Piece {
-        Piece::NonTam2Piece {
-            color: from.color,
-            prof: from.prof,
-            side: Side::Upward,
-        }
-    }
-}
-
-impl From<NonTam2PieceDownward> for Piece {
-    fn from(from: NonTam2PieceDownward) -> Piece {
-        Piece::NonTam2Piece {
-            color: from.color,
-            prof: from.prof,
-            side: Side::Downward,
-        }
-    }
-}
 
 fn rotate_coord(c: Coord) -> Coord {
     [(8 - c[0]), (8 - c[1])]
 }
+
+use cetkaik_core::relative::*;
 
 /// [row, col]
 pub type Coord = [usize; 2];
@@ -548,29 +531,6 @@ pub struct Config {
 #[cfg(test)]
 mod tests;
 
-fn rotate_piece_or_null(p: Option<Piece>) -> Option<Piece> {
-    let p = p?;
-    match p {
-        Piece::Tam2 => Some(p),
-        Piece::NonTam2Piece { prof, color, side } => Some(Piece::NonTam2Piece {
-            prof,
-            color,
-            side: !side,
-        }),
-    }
-}
-
-impl std::ops::Not for Side {
-    type Output = Side;
-
-    fn not(self) -> Self::Output {
-        match self {
-            Side::Upward => Side::Downward,
-            Side::Downward => Side::Upward,
-        }
-    }
-}
-
 fn rotate_board(b: Board) -> Board {
     let mut ans: Board = [
         [None, None, None, None, None, None, None, None, None],
@@ -594,38 +554,14 @@ fn rotate_board(b: Board) -> Board {
 type Board = [Row; 9];
 type Row = [Option<Piece>; 9];
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Piece {
-    Tam2,
-    NonTam2Piece {
-        color: Color,
-        prof: Profession,
-        side: Side,
-    },
-}
+
 
 use calculate_movable::TamOrUpwardPiece;
 
 pub use cetkaik_core::{Color, Profession};
 
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Side {
-    Upward,
-    Downward,
-}
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct NonTam2PieceDownward {
-    pub color: Color,
-    pub prof: Profession,
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct NonTam2PieceUpward {
-    pub color: Color,
-    pub prof: Profession,
-}
 
 #[derive(Debug)]
 pub struct PureGameState {

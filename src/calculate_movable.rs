@@ -143,20 +143,21 @@ fn apply_deltas_if_zero_or_one_intervention(
 /// # Examples
 /// ```
 /// use cerke_rust::*;
+/// use cetkaik_core::*;
 /// assert_eq!(
 ///     calculate_movable_positions_for_either_side(
 ///         [2, 0], /* if, at [2,0], */
-///         Piece::NonTam2Piece {
+///         relative::Piece::NonTam2Piece {
 ///             color: Color::Huok2,
 ///             prof: Profession::Kua2,
-///             side: Side::Downward,
+///             side: relative::Side::Downward,
 ///         }, /* a black Kua2 belonging to the opponent exists, */
 ///         [
 ///             [
-///                 Some(Piece::NonTam2Piece {
+///                 Some(relative::Piece::NonTam2Piece {
 ///                     color: Color::Huok2,
 ///                     prof: Profession::Gua2,
-///                     side: Side::Downward,
+///                     side: relative::Side::Downward,
 ///                 }), /* while the opponent's Gua2 is in [0,0] and */
 ///                 None,
 ///                 None,
@@ -173,10 +174,10 @@ fn apply_deltas_if_zero_or_one_intervention(
 ///             [None, None, None, None, None, None, None, None, None],
 ///             [None, None, None, None, None, None, None, None, None],
 ///             [
-///                 Some(Piece::NonTam2Piece {
+///                 Some(relative::Piece::NonTam2Piece {
 ///                     color: Color::Huok2,
 ///                     prof: Profession::Kauk2,
-///                     side: Side::Upward,
+///                     side: relative::Side::Upward,
 ///                 }), /* your Kauk2 in [6,0], */
 ///                 None,
 ///                 None,

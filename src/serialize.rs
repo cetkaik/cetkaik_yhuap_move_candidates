@@ -107,12 +107,13 @@ fn serialize_side(side: Side) -> &'static str {
 /// ```
 /// use cerke_rust::*;
 /// use cerke_rust::serialize::*;
+/// use cetkaik_core::*;
 ///
-/// assert_eq!(serialize_piece(Piece::Tam2), "皇");
-/// assert_eq!(serialize_piece(Piece::NonTam2Piece {
+/// assert_eq!(serialize_piece(relative::Piece::Tam2), "皇");
+/// assert_eq!(serialize_piece(relative::Piece::NonTam2Piece {
 ///     prof: Profession::Uai1,
 ///     color: Color::Kok1,
-///     side: Side::Downward
+///     side: relative::Side::Downward
 /// }), "赤将↓");
 /// ```
 pub fn serialize_piece(p: Piece) -> String {
