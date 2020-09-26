@@ -17,12 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="19368b1c-2fae-4eef-8445-9b300ed66432" name="Default Changelist" comment="Split off modules into separate files">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/serialize.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/pure_move.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests/from_hand_candidates.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/from_hand_candidates.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests/not_from_hand_candidates.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/not_from_hand_candidates.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests/test_not_from_hand_candidates_with_kut2tam2.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/test_not_from_hand_candidates_with_kut2tam2.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +155,7 @@
       <workItem from="1600980813593" duration="170000" />
       <workItem from="1600981022364" duration="3110000" />
       <workItem from="1600986772611" duration="14713000" />
-      <workItem from="1601075622010" duration="769000" />
+      <workItem from="1601075622010" duration="1389000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit: port parts of the test cases into rust">
       <created>1600984097229</created>

@@ -6,7 +6,7 @@ pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
             ans.push(PureMove::NonTamMoveFromHand {
                 color: piece.color,
                 prof: piece.prof,
-                dest: to_absolute_coord(empty_square, game_state.ia_is_down),
+                dest: to_absolute_coord(empty_square, game_state.perspective),
             })
         }
     }
@@ -15,39 +15,6 @@ pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 
 mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
-
-fn to_absolute_coord(coord: Coord, ia_is_down: bool) -> absolute::Coord {
-    let [row, col] = coord;
-
-    let columns = vec![
-        absolute::Column::K,
-        absolute::Column::L,
-        absolute::Column::N,
-        absolute::Column::T,
-        absolute::Column::Z,
-        absolute::Column::X,
-        absolute::Column::C,
-        absolute::Column::M,
-        absolute::Column::P,
-    ];
-
-    let rows = vec![
-        absolute::Row::A,
-        absolute::Row::E,
-        absolute::Row::I,
-        absolute::Row::U,
-        absolute::Row::O,
-        absolute::Row::Y,
-        absolute::Row::AI,
-        absolute::Row::AU,
-        absolute::Row::IA,
-    ];
-
-    (
-        rows[if ia_is_down { row } else { 8 - row }],
-        columns[if ia_is_down { col } else { 8 - col }],
-    )
-}
 
 #[derive(Debug, Eq, Clone, PartialEq)]
 pub struct MovablePositions {
@@ -215,9 +182,9 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                 game_state.tam_itself_is_tam_hue,
                             ) {
                                 vec![PureMove::NonTamMoveSrcStepDstFinite {
-                                    src: to_absolute_coord(src, game_state.ia_is_down),
-                                    step: to_absolute_coord(step, game_state.ia_is_down),
-                                    dest: to_absolute_coord(*final_dest, game_state.ia_is_down),
+                                    src: to_absolute_coord(src, game_state.perspective),
+                                    step: to_absolute_coord(step, game_state.perspective),
+                                    dest: to_absolute_coord(*final_dest, game_state.perspective),
                                     is_water_entry_ciurl: is_ciurl_required(
                                         *final_dest,
                                         rotated_piece_prof,
@@ -252,11 +219,11 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                 // retry
                             }
                             let obj: PureMove = PureMove::InfAfterStep {
-                                src: to_absolute_coord(src, game_state.ia_is_down),
-                                step: to_absolute_coord(step, game_state.ia_is_down),
+                                src: to_absolute_coord(src, game_state.perspective),
+                                step: to_absolute_coord(step, game_state.perspective),
                                 planned_direction: to_absolute_coord(
                                     *planned_dest,
-                                    game_state.ia_is_down,
+                                    game_state.perspective,
                                 ),
                             };
                             vec![obj].into_iter()
@@ -284,9 +251,9 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                             {
                                 let snd_dst: Coord = *neighbor;
                                 vec![PureMove::TamMoveNoStep {
-                                    second_dest: to_absolute_coord(snd_dst, game_state.ia_is_down),
-                                    first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
-                                    src: to_absolute_coord(src, game_state.ia_is_down),
+                                    second_dest: to_absolute_coord(snd_dst, game_state.perspective),
+                                    first_dest: to_absolute_coord(fst_dst, game_state.perspective),
+                                    src: to_absolute_coord(src, game_state.perspective),
                                 }].into_iter()
                             } else {
                                 /* if not, step from there */
@@ -294,10 +261,10 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                 empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
                                     .iter().flat_map(|snd_dst| {
                                     vec![PureMove::TamMoveStepsDuringLatter {
-                                        first_dest: to_absolute_coord(fst_dst, game_state.ia_is_down),
-                                        second_dest: to_absolute_coord(*snd_dst, game_state.ia_is_down),
-                                        src: to_absolute_coord(src, game_state.ia_is_down),
-                                        step: to_absolute_coord(step, game_state.ia_is_down),
+                                        first_dest: to_absolute_coord(fst_dst, game_state.perspective),
+                                        second_dest: to_absolute_coord(*snd_dst, game_state.perspective),
+                                        src: to_absolute_coord(src, game_state.perspective),
+                                        step: to_absolute_coord(step, game_state.perspective),
                                     }].into_iter()
                                 }).collect::<Vec<PureMove>>().into_iter()
                             }
@@ -318,16 +285,16 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                             vec![PureMove::TamMoveStepsDuringFormer {
                                                 first_dest: to_absolute_coord(
                                                     *fst_dst,
-                                                    game_state.ia_is_down,
+                                                    game_state.perspective,
                                                 ),
                                                 second_dest: to_absolute_coord(
                                                     *snd_dst,
-                                                    game_state.ia_is_down,
+                                                    game_state.perspective,
                                                 ),
-                                                src: to_absolute_coord(src, game_state.ia_is_down),
+                                                src: to_absolute_coord(src, game_state.perspective),
                                                 step: to_absolute_coord(
                                                     step,
-                                                    game_state.ia_is_down,
+                                                    game_state.perspective,
                                                 ),
                                             }]
                                             .into_iter()
@@ -346,8 +313,8 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                     if dest_piece == None {
                         // cannot step
                         ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
-                            src: to_absolute_coord(src, game_state.ia_is_down),
-                            dest: to_absolute_coord(dest, game_state.ia_is_down),
+                            src: to_absolute_coord(src, game_state.perspective),
+                            dest: to_absolute_coord(dest, game_state.perspective),
                             is_water_entry_ciurl: is_ciurl_required(dest, rotated_piece_prof, src),
                         }]);
                     } else if dest_piece == Some(Piece::Tam2) {
@@ -382,8 +349,8 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                             ans.append(
                                 &mut [
                                     &[PureMove::NonTamMoveSrcDst {
-                                        src: to_absolute_coord(src, game_state.ia_is_down),
-                                        dest: to_absolute_coord(dest, game_state.ia_is_down),
+                                        src: to_absolute_coord(src, game_state.perspective),
+                                        dest: to_absolute_coord(dest, game_state.perspective),
                                         is_water_entry_ciurl: is_ciurl_required(
                                             dest,
                                             rotated_piece_prof,
@@ -494,12 +461,13 @@ type Row = [Option<Piece>; 9];
 
 use calculate_movable::TamOrUpwardPiece;
 
+pub use cetkaik_core::perspective::*;
 pub use cetkaik_core::{Color, Profession};
 
 #[derive(Debug)]
 pub struct PureGameState {
     pub f: Field,
-    pub ia_is_down: bool,
+    pub perspective: Perspective,
     pub tam_itself_is_tam_hue: bool,
     pub opponent_has_just_moved_tam: bool,
 }
