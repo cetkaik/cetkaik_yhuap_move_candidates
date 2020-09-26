@@ -1,11 +1,9 @@
-use crate::pure_move::*;
-
 #[test]
 fn test_tam_corner_sample() {
     super::run_test(
         super::not_from_hand_candidates_with_kut2tam2,
         &crate::tests::test_cases::tam_corner_sample(),
-        serialize_pure_opponent_move,
+        crate::pure_move::PureMove::serialize,
         &[
             "CAI片XAI",
             "CAI片CY",
@@ -29,7 +27,7 @@ fn test_tam_itself_is_not_tam_hue_sample() {
     super::run_test(
         super::not_from_hand_candidates_with_kut2tam2,
         &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
-        serialize_pure_opponent_move,
+        crate::pure_move::PureMove::serialize,
         &[
             &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM[..],
             &vec![
@@ -53,7 +51,7 @@ fn test_initial_board_sample() {
     super::run_test(
         super::not_from_hand_candidates_with_kut2tam2,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-        serialize_pure_opponent_move,
+        crate::pure_move::PureMove::serialize,
         &[
             &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM[..],
             &vec![

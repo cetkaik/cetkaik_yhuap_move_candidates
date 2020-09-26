@@ -1,11 +1,9 @@
-use crate::pure_move::*;
-
 #[test]
 fn test_initial_board_sample() {
     super::run_test(
         crate::from_hand_candidates,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-        serialize_pure_opponent_move,
+        crate::pure_move::PureMove::serialize,
         &[],
     )
 }
@@ -15,7 +13,7 @@ fn test_simple_board_sample_4() {
     super::run_test(
         crate::from_hand_candidates,
         &crate::tests::test_cases::simple_board_sample_4(),
-        serialize_pure_opponent_move,
+        crate::pure_move::PureMove::serialize,
         &[
             "黒弓KA",
             "黒弓LA",
