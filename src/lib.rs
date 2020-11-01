@@ -436,29 +436,6 @@ pub struct Config {
 #[cfg(test)]
 mod tests;
 
-fn rotate_board(b: Board) -> Board {
-    let mut ans: Board = [
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-        [None, None, None, None, None, None, None, None, None],
-    ];
-    for i in 0..9 {
-        for j in 0..9 {
-            ans[i][j] = rotate_piece_or_null(b[8 - i][8 - j]);
-        }
-    }
-    ans
-}
-
-type Board = [Row; 9];
-type Row = [Option<Piece>; 9];
-
 use calculate_movable::TamOrUpwardPiece;
 
 pub use cetkaik_core::perspective::*;
@@ -472,9 +449,3 @@ pub struct PureGameState {
     pub opponent_has_just_moved_tam: bool,
 }
 
-#[derive(Debug)]
-pub struct Field {
-    pub current_board: Board,
-    pub hop1zuo1of_upward: Vec<NonTam2PieceUpward>,
-    pub hop1zuo1of_downward: Vec<NonTam2PieceDownward>,
-}
