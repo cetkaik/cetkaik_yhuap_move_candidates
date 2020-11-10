@@ -1,4 +1,7 @@
+#![warn(clippy::pedantic)]
+#![allow(clippy::non_ascii_literal)]
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
+#[must_use]
 pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
@@ -63,8 +66,7 @@ fn can_get_occupied_by_non_tam(
             .filter(|[a, b]| {
                 let piece = board[*a][*b];
                 match piece {
-                    None => false,
-                    Some(Piece::Tam2) => false,
+                    None | Some(Piece::Tam2) => false,
                     Some(Piece::NonTam2Piece {
                         side: piece_side,
                         prof: piece_prof,
@@ -102,6 +104,7 @@ fn can_get_occupied_by_non_tam(
 }
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
+#[must_use]
 pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for Rotated {
@@ -417,7 +420,9 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-use cetkaik_core::relative::*;
+use cetkaik_core::relative::{
+    is_water, rotate_board, rotate_coord, Board, Coord, Field, NonTam2PieceUpward, Piece, Side,
+};
 
 pub use cetkaik_core::absolute;
 
@@ -448,4 +453,3 @@ pub struct PureGameState {
     pub tam_itself_is_tam_hue: bool,
     pub opponent_has_just_moved_tam: bool,
 }
-

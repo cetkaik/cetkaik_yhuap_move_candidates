@@ -473,6 +473,8 @@ pub fn simple_board_sample_3() -> PureGameState {
     }
 }
 
+use cetkaik_core::relative::NonTam2PieceDownward;
+
 pub fn simple_board_sample_4() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDown,

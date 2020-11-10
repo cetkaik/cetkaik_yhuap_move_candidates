@@ -1,4 +1,4 @@
-use super::*;
+use super::{Color, Profession, absolute};
 use cetkaik_core::{serialize_color, serialize_prof};
 
 #[derive(Clone, Copy)]
@@ -101,6 +101,7 @@ impl PureMove {
     ///     second_dest: (absolute::Row::E, absolute::Column::L)
     /// }.serialize(), "KE皇[KI]LILE");
     /// ```
+    #[must_use]
     pub fn serialize(self) -> String {
         match self {
             PureMove::InfAfterStep {

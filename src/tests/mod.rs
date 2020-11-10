@@ -34,7 +34,7 @@ fn run_test<T, F, F2>(
         .collect::<HashSet<String>>();
     let set2 = tested_against
         .into_iter()
-        .map(|s| s.to_string())
+        .map(|s| (*s).to_string())
         .collect::<HashSet<String>>();
 
     assert_eq!(set1, set2)
@@ -47,7 +47,7 @@ mod not_from_hand_candidates;
 mod test_cases;
 
 mod empty_squares {
-    use cetkaik_core::*;
+    use cetkaik_core::relative;
     #[test]
     fn test_initial_board_sample() {
         super::run_test(

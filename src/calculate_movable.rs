@@ -1,4 +1,7 @@
-use super::*;
+use super::{
+    rotate_board, rotate_coord, Board, Color, Coord, MovablePositions, NonTam2PieceUpward, Piece,
+    Profession, Side,
+};
 
 pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
     apply_deltas(
@@ -46,8 +49,13 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
     deltas
         .iter()
         .map(|[delta_x, delta_y]| [i as i32 + delta_x, j as i32 + delta_y])
-        .filter(|[l, m]| 0 <= *l && *l <= 8 && 0 <= *m && *m <= 8)
-        .map(|[l, m]| [l as usize, m as usize])
+        .filter_map(|[l, m]| {
+            if 0 <= l && l <= 8 && 0 <= m && m <= 8 {
+                Some([l as usize, m as usize])
+            } else {
+                None
+            }
+        })
         .collect()
 }
 
