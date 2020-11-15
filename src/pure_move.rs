@@ -48,8 +48,8 @@ impl PureMove {
     /// Serializes [`PureMove`](./enum.PureMove.html) in textual form.
     /// # Examples
     /// ```
-    /// use cerke_rust::*;
-    /// use cerke_rust::pure_move::*;
+    /// use cetkaik_yhuap_move_candidates::*;
+    /// use cetkaik_yhuap_move_candidates::pure_move::*;
     /// use cetkaik_core::*;
     ///
     /// assert_eq!(PureMove::InfAfterStep {

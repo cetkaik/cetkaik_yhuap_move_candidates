@@ -150,7 +150,7 @@ fn apply_deltas_if_zero_or_one_intervention(
 /// Returns the list of all possible locations that a piece can move to / step on.
 /// # Examples
 /// ```
-/// use cerke_rust::*;
+/// use cetkaik_yhuap_move_candidates::*;
 /// use cetkaik_core::*;
 /// assert_eq!(
 ///     calculate_movable_positions_for_either_side(
