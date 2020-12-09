@@ -1,4 +1,4 @@
-use super::{Color, Profession, absolute};
+use super::{absolute, Color, Profession};
 use cetkaik_core::{serialize_color, serialize_prof};
 
 #[derive(Clone, Copy)]

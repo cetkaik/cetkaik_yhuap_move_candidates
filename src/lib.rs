@@ -1,11 +1,15 @@
 #![warn(clippy::pedantic)]
-#![allow(clippy::non_ascii_literal)]
+#![allow(
+    clippy::too_many_lines,
+    clippy::non_ascii_literal,
+    clippy::module_name_repetitions
+)]
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
 pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in empty_squares(&game_state) {
+        for empty_square in empty_squares(game_state) {
             ans.push(PureMove::NonTamMoveFromHand {
                 color: piece.color,
                 prof: piece.prof,
@@ -105,7 +109,7 @@ fn can_get_occupied_by_non_tam(
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 #[must_use]
-pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> Vec<PureMove> {
+pub fn not_from_hand_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,
@@ -336,7 +340,7 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                         // opponent's piece; stepping and taking both attainable
 
                         // except when protected by tam2 hue a uai1
-                        if !can_get_occupied_by(
+                        if can_get_occupied_by(
                             Side::Downward,
                             dest,
                             Piece::NonTam2Piece {
@@ -347,8 +351,6 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                             game_state.f.current_board,
                             game_state.tam_itself_is_tam_hue,
                         ) {
-                            ans.append(&mut candidates_when_stepping(rotated_piece));
-                        } else {
                             ans.append(
                                 &mut [
                                     &[PureMove::NonTamMoveSrcDst {
@@ -364,6 +366,8 @@ pub fn not_from_hand_candidates_(config: Config, game_state: &PureGameState) -> 
                                 ]
                                 .concat(),
                             );
+                        } else {
+                            ans.append(&mut candidates_when_stepping(rotated_piece));
                         }
                     } else {
                         ans.append(&mut candidates_when_stepping(rotated_piece));
@@ -399,7 +403,9 @@ fn get_opponent_pieces_rotated(game_state: &PureGameState) -> Vec<Rotated> {
                             rotated_coord: rotate_coord(coord),
                         });
                     }
-                    _ => {}
+                    Piece::NonTam2Piece {
+                        side: Side::Upward, ..
+                    } => {}
                 }
             }
         }

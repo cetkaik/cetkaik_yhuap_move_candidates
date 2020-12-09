@@ -2,7 +2,7 @@ use super::*;
 
 fn not_from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hand_candidates_(
-        Config {
+        &Config {
             allow_kut2tam2: false,
         },
         game_state,
@@ -11,7 +11,7 @@ fn not_from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 
 fn not_from_hand_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hand_candidates_(
-        Config {
+        &Config {
             allow_kut2tam2: true,
         },
         game_state,

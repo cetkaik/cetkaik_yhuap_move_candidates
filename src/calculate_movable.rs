@@ -45,13 +45,19 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
 }
 
 fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
+    use std::convert::TryFrom;
     let [i, j] = coord;
     deltas
         .iter()
-        .map(|[delta_x, delta_y]| [i as i32 + delta_x, j as i32 + delta_y])
+        .map(|[delta_x, delta_y]| {
+            [
+                i32::try_from(i).unwrap() + delta_x,
+                i32::try_from(j).unwrap() + delta_y,
+            ]
+        })
         .filter_map(|[l, m]| {
             if 0 <= l && l <= 8 && 0 <= m && m <= 8 {
-                Some([l as usize, m as usize])
+                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
             } else {
                 None
             }
@@ -210,6 +216,7 @@ fn apply_deltas_if_zero_or_one_intervention(
 ///     }
 /// );
 /// ```
+#[must_use]
 pub fn calculate_movable_positions_for_either_side(
     coord: Coord,
     piece: Piece,
@@ -375,16 +382,9 @@ pub fn calculate_movable_positions(
         TamOrUpwardPiece::NonTam2Piece { prof, color: _ } => prof,
     };
 
-    if piece_prof == Profession::Io {
-        return MovablePositions {
-            finite: eight_neighborhood(coord),
-            infinite: vec![],
-        };
-    }
-
     if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
-           Profession::Uai1 => // General, 将, varxle
+           Profession::Io | Profession::Uai1 => // General, 将, varxle
             MovablePositions { finite: eight_neighborhood(coord), infinite: vec![] },
            Profession::Kaun1 =>
             MovablePositions {
@@ -517,10 +517,13 @@ pub fn calculate_movable_positions(
                 board
               )
             },
-          _ =>unreachable!()
         }
     } else {
         match piece_prof {
+            Profession::Io => MovablePositions {
+                finite: eight_neighborhood(coord),
+                infinite: vec![],
+            },
             Profession::Kauk2 => MovablePositions {
                 finite: apply_deltas(coord, &[[-1, 0]]),
                 infinite: vec![],
@@ -608,8 +611,6 @@ pub fn calculate_movable_positions(
                     infinite: vec![],
                 }
             }
-
-            _ => unreachable!(),
         }
     }
 }
