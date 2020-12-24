@@ -20,6 +20,8 @@ pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     ans
 }
 
+pub use pure_move::PureMove;
+
 mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
 
@@ -438,7 +440,6 @@ struct Rotated {
 }
 
 pub mod pure_move;
-use pure_move::PureMove;
 
 pub struct Config {
     pub allow_kut2tam2: bool,
