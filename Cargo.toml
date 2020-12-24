@@ -9,4 +9,4 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cetkaik_core = "0.1.11"
+cetkaik_core = "0.2.0"

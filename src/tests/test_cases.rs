@@ -1,7 +1,7 @@
 use super::*;
 
 pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
-    perspective: Perspective::IaIsDown,
+    perspective: Perspective::IaIsDownAndPointsUpward,
     tam_itself_is_tam_hue: true,
     opponent_has_just_moved_tam: false,
     f: Field {
@@ -12,7 +12,7 @@ pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
 };
 
 pub const TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE: PureGameState = PureGameState {
-    perspective: Perspective::IaIsDown,
+    perspective: Perspective::IaIsDownAndPointsUpward,
     tam_itself_is_tam_hue: false,
     opponent_has_just_moved_tam: false,
     f: Field {
@@ -436,7 +436,7 @@ pub fn tam_corner() -> Board {
 
 pub fn simple_board_sample_1() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -449,7 +449,7 @@ pub fn simple_board_sample_1() -> PureGameState {
 
 pub fn simple_board_sample_2() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsUp,
+        perspective: Perspective::IaIsUpAndPointsDownward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -462,7 +462,7 @@ pub fn simple_board_sample_2() -> PureGameState {
 
 pub fn simple_board_sample_3() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -477,7 +477,7 @@ use cetkaik_core::relative::NonTam2PieceDownward;
 
 pub fn simple_board_sample_4() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -496,7 +496,7 @@ pub fn simple_board_sample_4() -> PureGameState {
 
 pub fn complicated_board_sample_1() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -509,7 +509,7 @@ pub fn complicated_board_sample_1() -> PureGameState {
 
 pub fn complicated_board_sample_2() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
@@ -522,7 +522,7 @@ pub fn complicated_board_sample_2() -> PureGameState {
 
 pub fn tam_corner_sample() -> PureGameState {
     PureGameState {
-        perspective: Perspective::IaIsDown,
+        perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
         opponent_has_just_moved_tam: false,
         f: Field {
