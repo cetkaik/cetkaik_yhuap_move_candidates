@@ -1,7 +1,7 @@
 use super::{absolute, Color, Profession};
 use cetkaik_core::{serialize_color, serialize_prof};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum PureMove {
     NonTamMoveSrcDst {
         src: absolute::Coord,
