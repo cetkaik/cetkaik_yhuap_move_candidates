@@ -62,7 +62,7 @@ pub const SIMPLE_BOARD: Board = [
     [None, None, None, None, None, None, None, None, None],
 ];
 
-pub fn complicated_board() -> Board {
+pub const fn complicated_board() -> Board {
     [
         [
             None,
@@ -358,7 +358,7 @@ pub fn complicated_board() -> Board {
     ]
 }
 
-pub fn tam_corner() -> Board {
+pub const fn tam_corner() -> Board {
     [
         [None, None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None, None],
@@ -434,7 +434,7 @@ pub fn tam_corner() -> Board {
     ]
 }
 
-pub fn simple_board_sample_1() -> PureGameState {
+pub const fn simple_board_sample_1() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
@@ -447,7 +447,7 @@ pub fn simple_board_sample_1() -> PureGameState {
     }
 }
 
-pub fn simple_board_sample_2() -> PureGameState {
+pub const fn simple_board_sample_2() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsUpAndPointsDownward,
         tam_itself_is_tam_hue: true,
@@ -494,7 +494,7 @@ pub fn simple_board_sample_4() -> PureGameState {
     }
 }
 
-pub fn complicated_board_sample_1() -> PureGameState {
+pub const fn complicated_board_sample_1() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
@@ -520,7 +520,7 @@ pub fn complicated_board_sample_2() -> PureGameState {
     }
 }
 
-pub fn tam_corner_sample() -> PureGameState {
+pub const fn tam_corner_sample() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,

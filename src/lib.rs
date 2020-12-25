@@ -1,8 +1,9 @@
-#![warn(clippy::pedantic)]
+#![warn(clippy::pedantic, clippy::nursery)]
 #![allow(
     clippy::too_many_lines,
     clippy::non_ascii_literal,
-    clippy::module_name_repetitions
+    clippy::module_name_repetitions,
+    clippy::use_self
 )]
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
@@ -116,7 +117,7 @@ pub fn not_from_hand_candidates_(config: &Config, game_state: &PureGameState) ->
     for Rotated {
         rotated_piece,
         rotated_coord,
-    } in get_opponent_pieces_rotated(&game_state)
+    } in get_opponent_pieces_rotated(game_state)
     {
         let MovablePositions {
             finite: guide_list_yellow,
@@ -319,60 +320,68 @@ pub fn not_from_hand_candidates_(config: &Config, game_state: &PureGameState) ->
                     color: rotated_piece_color,
                     prof: rotated_piece_prof,
                 } => {
-                    if dest_piece == None {
-                        // cannot step
-                        ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
-                            src: to_absolute_coord(src, game_state.perspective),
-                            dest: to_absolute_coord(dest, game_state.perspective),
-                            is_water_entry_ciurl: is_ciurl_required(dest, rotated_piece_prof, src),
-                        }]);
-                    } else if dest_piece == Some(Piece::Tam2) {
-                        // if allowed by config, allow stepping on Tam2;
-                        if config.allow_kut2tam2 {
-                            ans.append(&mut candidates_when_stepping(rotated_piece));
-                        } else {
-                            ans.append(&mut vec![]);
+                    match dest_piece {
+                        None => {
+                            // cannot step
+                            ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
+                                src: to_absolute_coord(src, game_state.perspective),
+                                dest: to_absolute_coord(dest, game_state.perspective),
+                                is_water_entry_ciurl: is_ciurl_required(
+                                    dest,
+                                    rotated_piece_prof,
+                                    src,
+                                ),
+                            }]);
                         }
-                    } else if let Some(Piece::NonTam2Piece {
-                        side: Side::Upward,
-                        color: _,
-                        prof: _,
-                    }) = dest_piece
-                    {
-                        // opponent's piece; stepping and taking both attainable
+                        Some(Piece::Tam2) => {
+                            // if allowed by config, allow stepping on Tam2;
+                            if config.allow_kut2tam2 {
+                                ans.append(&mut candidates_when_stepping(rotated_piece));
+                            } else {
+                                ans.append(&mut vec![]);
+                            }
+                        }
+                        Some(Piece::NonTam2Piece {
+                            side: Side::Upward,
+                            color: _,
+                            prof: _,
+                        }) => {
+                            // opponent's piece; stepping and taking both attainable
 
-                        // except when protected by tam2 hue a uai1
-                        if can_get_occupied_by(
-                            Side::Downward,
-                            dest,
-                            Piece::NonTam2Piece {
-                                color: rotated_piece_color,
-                                prof: rotated_piece_prof,
-                                side: Side::Downward,
-                            },
-                            game_state.f.current_board,
-                            game_state.tam_itself_is_tam_hue,
-                        ) {
-                            ans.append(
-                                &mut [
-                                    &[PureMove::NonTamMoveSrcDst {
-                                        src: to_absolute_coord(src, game_state.perspective),
-                                        dest: to_absolute_coord(dest, game_state.perspective),
-                                        is_water_entry_ciurl: is_ciurl_required(
-                                            dest,
-                                            rotated_piece_prof,
-                                            src,
-                                        ),
-                                    }][..],
-                                    &candidates_when_stepping(rotated_piece)[..],
-                                ]
-                                .concat(),
-                            );
-                        } else {
+                            // except when protected by tam2 hue a uai1
+                            if can_get_occupied_by(
+                                Side::Downward,
+                                dest,
+                                Piece::NonTam2Piece {
+                                    color: rotated_piece_color,
+                                    prof: rotated_piece_prof,
+                                    side: Side::Downward,
+                                },
+                                game_state.f.current_board,
+                                game_state.tam_itself_is_tam_hue,
+                            ) {
+                                ans.append(
+                                    &mut [
+                                        &[PureMove::NonTamMoveSrcDst {
+                                            src: to_absolute_coord(src, game_state.perspective),
+                                            dest: to_absolute_coord(dest, game_state.perspective),
+                                            is_water_entry_ciurl: is_ciurl_required(
+                                                dest,
+                                                rotated_piece_prof,
+                                                src,
+                                            ),
+                                        }][..],
+                                        &candidates_when_stepping(rotated_piece)[..],
+                                    ]
+                                    .concat(),
+                                );
+                            } else {
+                                ans.append(&mut candidates_when_stepping(rotated_piece));
+                            }
+                        }
+                        Some(_) => {
                             ans.append(&mut candidates_when_stepping(rotated_piece));
                         }
-                    } else {
-                        ans.append(&mut candidates_when_stepping(rotated_piece));
                     }
                 }
             }
