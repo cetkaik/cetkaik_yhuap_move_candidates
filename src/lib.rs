@@ -7,11 +7,11 @@
 )]
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
-pub fn from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
+pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
         for empty_square in empty_squares(game_state) {
-            ans.push(PureMove::NonTamMoveFromHand {
+            ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,
                 dest: to_absolute_coord(empty_square, game_state.perspective),
@@ -112,7 +112,7 @@ fn can_get_occupied_by_non_tam(
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 #[must_use]
-pub fn not_from_hand_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
+pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for Rotated {
         rotated_piece,

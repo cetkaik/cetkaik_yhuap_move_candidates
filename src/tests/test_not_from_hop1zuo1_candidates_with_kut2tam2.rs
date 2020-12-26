@@ -1,7 +1,7 @@
 #[test]
 fn test_tam_corner_sample() {
     super::run_test(
-        super::not_from_hand_candidates_with_kut2tam2,
+        super::not_from_hop1zuo1_candidates_with_kut2tam2,
         &crate::tests::test_cases::tam_corner_sample(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -25,7 +25,7 @@ fn test_tam_corner_sample() {
 #[test]
 fn test_tam_itself_is_not_tam_hue_sample() {
     super::run_test(
-        super::not_from_hand_candidates_with_kut2tam2,
+        super::not_from_hop1zuo1_candidates_with_kut2tam2,
         &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &[
@@ -49,7 +49,7 @@ fn test_tam_itself_is_not_tam_hue_sample() {
 #[test]
 fn test_initial_board_sample() {
     super::run_test(
-        super::not_from_hand_candidates_with_kut2tam2,
+        super::not_from_hop1zuo1_candidates_with_kut2tam2,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &[

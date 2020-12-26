@@ -20,7 +20,7 @@ pub enum PureMove {
         step: absolute::Coord,
         planned_direction: absolute::Coord,
     },
-    NonTamMoveFromHand {
+    NonTamMoveFromHopZuo {
         color: Color,
         prof: Profession,
         dest: absolute::Coord,
@@ -58,7 +58,7 @@ impl PureMove {
     ///     planned_direction: (absolute::Row::E, absolute::Column::N)
     /// }.serialize(), "ZA片TE心NE");
     ///
-    /// assert_eq!(PureMove::NonTamMoveFromHand {
+    /// assert_eq!(PureMove::NonTamMoveFromHopZuo {
     ///     color: Color::Huok2,
     ///     prof: Profession::Gua2,
     ///     dest: (absolute::Row::IA, absolute::Column::L)
@@ -114,7 +114,7 @@ impl PureMove {
                 absolute::serialize_coord(step),
                 absolute::serialize_coord(planned_direction)
             ),
-            PureMove::NonTamMoveFromHand { color, prof, dest } => format!(
+            PureMove::NonTamMoveFromHopZuo { color, prof, dest } => format!(
                 "{}{}{}",
                 serialize_color(color),
                 serialize_prof(prof),

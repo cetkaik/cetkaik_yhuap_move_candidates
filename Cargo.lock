@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "cetkaik_core",
 ]

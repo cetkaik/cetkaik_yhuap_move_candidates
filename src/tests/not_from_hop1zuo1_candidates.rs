@@ -1,7 +1,7 @@
 #[test]
 fn test_simple_board_sample_3() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_3(),
         crate::pure_move::PureMove::serialize,
         &["PI片PU"],
@@ -11,7 +11,7 @@ fn test_simple_board_sample_3() {
 #[test]
 fn test_simple_board_sample_1_ia_is_down_true() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_1(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -38,7 +38,7 @@ fn test_simple_board_sample_1_ia_is_down_true() {
 #[test]
 fn test_simple_board_sample_2_ia_is_down_false() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_2(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -65,7 +65,7 @@ fn test_simple_board_sample_2_ia_is_down_false() {
 #[test]
 fn test_initial_board_sample() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
@@ -75,7 +75,7 @@ fn test_initial_board_sample() {
 #[test]
 fn test_complicated_board_sample_1() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::complicated_board_sample_1(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -394,7 +394,7 @@ fn test_complicated_board_sample_1() {
 #[test]
 fn test_complicated_board_sample_2() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::complicated_board_sample_2(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -743,7 +743,7 @@ fn test_complicated_board_sample_2() {
 #[test]
 fn test_tam_corner_sample() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::tam_corner_sample(),
         crate::pure_move::PureMove::serialize,
         &[
@@ -764,7 +764,7 @@ fn test_tam_corner_sample() {
 #[test]
 fn test_tam_itself_is_not_tam_hue_sample() {
     super::run_test(
-        super::not_from_hand_candidates,
+        super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,

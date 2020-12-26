@@ -1,7 +1,7 @@
 use super::*;
 
-fn not_from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hand_candidates_(
+fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
+    not_from_hop1zuo1_candidates_(
         &Config {
             allow_kut2tam2: false,
         },
@@ -9,8 +9,8 @@ fn not_from_hand_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     )
 }
 
-fn not_from_hand_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hand_candidates_(
+fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
+    not_from_hop1zuo1_candidates_(
         &Config {
             allow_kut2tam2: true,
         },
@@ -40,9 +40,9 @@ fn run_test<T, F, F2>(
     assert_eq!(set1, set2)
 }
 
-mod test_not_from_hand_candidates_with_kut2tam2;
+mod test_not_from_hop1zuo1_candidates_with_kut2tam2;
 
-mod not_from_hand_candidates;
+mod not_from_hop1zuo1_candidates;
 
 mod test_cases;
 
@@ -110,4 +110,4 @@ mod get_opponent_pieces_rotated {
     }
 }
 
-mod from_hand_candidates;
+mod from_hop1zuo1_candidates;
