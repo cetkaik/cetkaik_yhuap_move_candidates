@@ -56,7 +56,7 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
             ]
         })
         .filter_map(|[l, m]| {
-            if 0 <= l && l <= 8 && 0 <= m && m <= 8 {
+            if (0..=8).contains(&l) && (0..=8).contains(&m) {
                 Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
             } else {
                 None

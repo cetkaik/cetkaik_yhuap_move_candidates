@@ -66,6 +66,8 @@ mod empty_squares {
 
 mod get_opponent_pieces_rotated {
     use cetkaik_core::relative;
+
+    #[allow(clippy::needless_pass_by_value)]
     fn serialize_rotated(r: crate::Rotated) -> String {
         format!(
             "{} {}",
