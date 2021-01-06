@@ -2,16 +2,16 @@
 # It is not intended for manual editing.
 [[package]]
 name = "cetkaik_core"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfef2a8f5fca3fd9f176ab8fac4805ad3b83495400e9cf7b8d31a8f0c277b17e"
+checksum = "f34f97f8b7e84f0bf817bd7c59d0c797f796d2b104684867b70190ece8972e85"
 dependencies = [
  "maplit",
 ]
 
 [[package]]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "cetkaik_core",
 ]
