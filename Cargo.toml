@@ -10,4 +10,4 @@ repository = "https://github.com/sozysozbot/cetkaik_yhuap_move_candidates"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cetkaik_core = "0.3.0"
+cetkaik_core = "0.3.1"
