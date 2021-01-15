@@ -52,10 +52,7 @@ fn can_get_occupied_by(
 fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
     calculate_movable::eight_neighborhood(c)
         .iter()
-        .filter(|a| {
-            let [i, j] = a;
-            board[*i][*j] == None
-        })
+        .filter(|[i, j]| board[*i][*j].is_none())
         .copied()
         .collect()
 }
