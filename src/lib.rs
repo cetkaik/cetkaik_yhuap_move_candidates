@@ -113,6 +113,106 @@ fn can_get_occupied_by_non_tam(
     }
 }
 
+fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
+    is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1
+}
+
+fn generate_candidates_when_stepping(
+    src: Coord,
+    tam_itself_is_tam_hue: bool,
+    step: Coord,
+    rotated_coord: Coord,
+    rotated_piece: TamOrUpwardPiece,
+    current_board: &Board,
+    perspective: Perspective,
+) -> Vec<PureMove> {
+    /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
+    let mut subtracted_rotated_board = rotate_board(current_board.clone());
+    subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
+
+    let MovablePositions {
+        finite: guide_list_yellow,
+        infinite: guide_list_green,
+    } = calculate_movable::calculate_movable_positions(
+        rotate_coord(step),
+        rotated_piece,
+        subtracted_rotated_board,
+        tam_itself_is_tam_hue,
+    );
+
+    let candidates: Vec<Coord> = guide_list_yellow
+        .iter()
+        .map(|c| rotate_coord(*c))
+        .collect::<Vec<_>>();
+    let candidates_inf: Vec<Coord> = guide_list_green.iter().map(|c| rotate_coord(*c)).collect();
+    [
+        &candidates
+            .iter()
+            .flat_map(|final_dest| {
+                let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
+                    TamOrUpwardPiece::Tam2 => panic!(),
+                    TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
+                };
+                if can_get_occupied_by(
+                    Side::Downward,
+                    *final_dest,
+                    Piece::NonTam2Piece {
+                        color: rotated_piece_color,
+                        prof: rotated_piece_prof,
+                        side: Side::Downward,
+                    },
+                    rotate_board(subtracted_rotated_board),
+                    tam_itself_is_tam_hue,
+                ) {
+                    vec![PureMove::NonTamMoveSrcStepDstFinite {
+                        src: to_absolute_coord(src, perspective),
+                        step: to_absolute_coord(step, perspective),
+                        dest: to_absolute_coord(*final_dest, perspective),
+                        is_water_entry_ciurl: is_ciurl_required(
+                            *final_dest,
+                            rotated_piece_prof,
+                            src,
+                        ),
+                    }]
+                    .into_iter()
+                } else {
+                    vec![].into_iter()
+                }
+            })
+            .collect::<Vec<PureMove>>()[..],
+        &candidates_inf
+            .iter()
+            .flat_map(|planned_dest| {
+                let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
+                    TamOrUpwardPiece::Tam2 => panic!(),
+                    TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
+                };
+                if !can_get_occupied_by(
+                    Side::Downward,
+                    *planned_dest,
+                    Piece::NonTam2Piece {
+                        color: rotated_piece_color,
+                        prof: rotated_piece_prof,
+                        side: Side::Downward,
+                    },
+                    rotate_board(subtracted_rotated_board),
+                    tam_itself_is_tam_hue,
+                ) {
+                    return vec![].into_iter();
+                    // retry
+                }
+                let obj: PureMove = PureMove::InfAfterStep {
+                    src: to_absolute_coord(src, perspective),
+                    step: to_absolute_coord(step, perspective),
+                    planned_direction: to_absolute_coord(*planned_dest, perspective),
+                };
+                vec![obj].into_iter()
+            })
+            .collect::<Vec<PureMove>>()[..],
+    ]
+    .concat()
+}
+
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 #[must_use]
 pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
@@ -153,97 +253,15 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
             let dest_piece = game_state.f.current_board[dest[0]][dest[1]];
 
             let candidates_when_stepping = |rotated_piece| -> Vec<PureMove> {
-                let step = dest; // less confusing
-
-                /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-                let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
-                subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
-
-                let MovablePositions {
-                    finite: guide_list_yellow,
-                    infinite: guide_list_green,
-                } = calculate_movable::calculate_movable_positions(
-                    rotate_coord(step),
-                    rotated_piece,
-                    subtracted_rotated_board,
+                generate_candidates_when_stepping(
+                    src,
                     game_state.tam_itself_is_tam_hue,
-                );
-
-                let candidates: Vec<Coord> = guide_list_yellow
-                    .iter()
-                    .map(|c| rotate_coord(*c))
-                    .collect::<Vec<_>>();
-                let candidates_inf: Vec<Coord> =
-                    guide_list_green.iter().map(|c| rotate_coord(*c)).collect();
-                [
-                    &candidates
-                        .iter()
-                        .flat_map(|final_dest| {
-                            let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
-                                TamOrUpwardPiece::Tam2 => panic!(),
-                                TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
-                            };
-                            if can_get_occupied_by(
-                                Side::Downward,
-                                *final_dest,
-                                Piece::NonTam2Piece {
-                                    color: rotated_piece_color,
-                                    prof: rotated_piece_prof,
-                                    side: Side::Downward,
-                                },
-                                rotate_board(subtracted_rotated_board),
-                                game_state.tam_itself_is_tam_hue,
-                            ) {
-                                vec![PureMove::NonTamMoveSrcStepDstFinite {
-                                    src: to_absolute_coord(src, game_state.perspective),
-                                    step: to_absolute_coord(step, game_state.perspective),
-                                    dest: to_absolute_coord(*final_dest, game_state.perspective),
-                                    is_water_entry_ciurl: is_ciurl_required(
-                                        *final_dest,
-                                        rotated_piece_prof,
-                                        src,
-                                    ),
-                                }]
-                                .into_iter()
-                            } else {
-                                vec![].into_iter()
-                            }
-                        })
-                        .collect::<Vec<PureMove>>()[..],
-                    &candidates_inf
-                        .iter()
-                        .flat_map(|planned_dest| {
-                            let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
-                                TamOrUpwardPiece::Tam2 => panic!(),
-                                TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
-                            };
-                            if !can_get_occupied_by(
-                                Side::Downward,
-                                *planned_dest,
-                                Piece::NonTam2Piece {
-                                    color: rotated_piece_color,
-                                    prof: rotated_piece_prof,
-                                    side: Side::Downward,
-                                },
-                                rotate_board(subtracted_rotated_board),
-                                game_state.tam_itself_is_tam_hue,
-                            ) {
-                                return vec![].into_iter();
-                                // retry
-                            }
-                            let obj: PureMove = PureMove::InfAfterStep {
-                                src: to_absolute_coord(src, game_state.perspective),
-                                step: to_absolute_coord(step, game_state.perspective),
-                                planned_direction: to_absolute_coord(
-                                    *planned_dest,
-                                    game_state.perspective,
-                                ),
-                            };
-                            vec![obj].into_iter()
-                        })
-                        .collect::<Vec<PureMove>>()[..],
-                ]
-                .concat()
+                    dest,
+                    rotated_coord,
+                    rotated_piece,
+                    &game_state.f.current_board,
+                    game_state.perspective,
+                )
             };
 
             match rotated_piece {
