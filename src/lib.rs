@@ -5,6 +5,12 @@
     clippy::module_name_repetitions,
     clippy::use_self
 )]
+#![cfg_attr(not(test), no_std)]
+
+#[macro_use]
+extern crate alloc;
+use alloc::vec::Vec;
+
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
 pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {

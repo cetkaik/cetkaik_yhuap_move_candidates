@@ -1,3 +1,5 @@
+use alloc::vec::Vec;
+
 use super::{
     rotate_board, rotate_coord, Board, Color, Coord, MovablePositions, NonTam2PieceUpward, Piece,
     Profession, Side,
@@ -45,7 +47,7 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
 }
 
 fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
-    use std::convert::TryFrom;
+    use core::convert::TryFrom;
     let [i, j] = coord;
     deltas
         .iter()
