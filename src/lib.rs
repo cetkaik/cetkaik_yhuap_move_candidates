@@ -252,21 +252,6 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
             }
             let dest_piece = game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
 
-            let candidates_when_stepping = || {
-                match rotated_piece {
-                    TamOrUpwardPiece::Tam2 => panic!(),
-                    TamOrUpwardPiece::NonTam2Piece { color, prof } => {
-                        generate_candidates_when_stepping(
-                            game_state,
-                            src,
-                            tentative_dest, // tentative_dest becomes the position on which the stepping occurs
-                            rotated_coord,
-                            NonTam2PieceUpward { color, prof },
-                        )
-                    }
-                }
-            };
-
             match rotated_piece {
                 TamOrUpwardPiece::Tam2 => {
                     /* avoid self-occlusion */
@@ -344,6 +329,18 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                     color: rotated_piece_color,
                     prof: rotated_piece_prof,
                 } => {
+                    let candidates_when_stepping = || {
+                        generate_candidates_when_stepping(
+                            game_state,
+                            src,
+                            tentative_dest, // tentative_dest becomes the position on which the stepping occurs
+                            rotated_coord,
+                            NonTam2PieceUpward {
+                                color: rotated_piece_color,
+                                prof: rotated_piece_prof,
+                            },
+                        )
+                    };
                     match dest_piece {
                         None => {
                             // cannot step

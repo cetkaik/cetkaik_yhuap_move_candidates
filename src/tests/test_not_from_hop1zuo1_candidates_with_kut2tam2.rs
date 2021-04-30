@@ -54,7 +54,7 @@ fn test_initial_board_sample() {
         crate::pure_move::PureMove::serialize,
         &[
             &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM[..],
-            &vec![
+            &[
                 "ZI片ZOXO",
                 "ZI片ZOTO",
                 "ZI片ZOCO",

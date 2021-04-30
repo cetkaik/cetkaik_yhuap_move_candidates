@@ -33,7 +33,7 @@ fn run_test<T, F, F2>(
         .map(serializer)
         .collect::<HashSet<String>>();
     let set2 = tested_against
-        .into_iter()
+        .iter()
         .map(|s| (*s).to_string())
         .collect::<HashSet<String>>();
 
