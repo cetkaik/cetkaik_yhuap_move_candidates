@@ -246,17 +246,17 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
 
         let src: Coord = rotate_coord(rotated_coord);
 
-        for dest in candidates {
+        for tentative_dest in candidates {
             fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
                 is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1
             }
-            let dest_piece = game_state.f.current_board[dest[0]][dest[1]];
+            let dest_piece = game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
 
-            let candidates_when_stepping = |rotated_piece| -> Vec<PureMove> {
+            let candidates_when_stepping = || {
                 generate_candidates_when_stepping(
                     game_state,
                     src,
-                    dest,
+                    tentative_dest, // tentative_dest becomes the position on which the stepping occurs
                     rotated_coord,
                     rotated_piece,
                 )
@@ -270,7 +270,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                     // FIXME: tam2 ty sak2 not handled
                     if dest_piece == None {
                         /* empty square; first move is completed without stepping */
-                        let fst_dst: Coord = dest;
+                        let fst_dst: Coord = tentative_dest;
                         ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
@@ -300,7 +300,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         }).collect::<Vec<PureMove>>());
                     } else {
                         /* not an empty square: must complete the first move */
-                        let step = dest;
+                        let step = tentative_dest;
                         ans.append(
                             &mut empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
                                 .iter()
@@ -344,9 +344,9 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             // cannot step
                             ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
                                 src: to_absolute_coord(src, game_state.perspective),
-                                dest: to_absolute_coord(dest, game_state.perspective),
+                                dest: to_absolute_coord(tentative_dest, game_state.perspective),
                                 is_water_entry_ciurl: is_ciurl_required(
-                                    dest,
+                                    tentative_dest,
                                     rotated_piece_prof,
                                     src,
                                 ),
@@ -355,7 +355,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         Some(Piece::Tam2) => {
                             // if allowed by config, allow stepping on Tam2;
                             if config.allow_kut2tam2 {
-                                ans.append(&mut candidates_when_stepping(rotated_piece));
+                                ans.append(&mut candidates_when_stepping());
                             } else {
                                 ans.append(&mut vec![]);
                             }
@@ -370,7 +370,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             // except when protected by tam2 hue a uai1
                             if can_get_occupied_by(
                                 Side::Downward,
-                                dest,
+                                tentative_dest,
                                 Piece::NonTam2Piece {
                                     color: rotated_piece_color,
                                     prof: rotated_piece_prof,
@@ -383,23 +383,23 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                     &mut [
                                         &[PureMove::NonTamMoveSrcDst {
                                             src: to_absolute_coord(src, game_state.perspective),
-                                            dest: to_absolute_coord(dest, game_state.perspective),
+                                            dest: to_absolute_coord(tentative_dest, game_state.perspective),
                                             is_water_entry_ciurl: is_ciurl_required(
-                                                dest,
+                                                tentative_dest,
                                                 rotated_piece_prof,
                                                 src,
                                             ),
                                         }][..],
-                                        &candidates_when_stepping(rotated_piece)[..],
+                                        &candidates_when_stepping()[..],
                                     ]
                                     .concat(),
                                 );
                             } else {
-                                ans.append(&mut candidates_when_stepping(rotated_piece));
+                                ans.append(&mut candidates_when_stepping());
                             }
                         }
                         Some(_) => {
-                            ans.append(&mut candidates_when_stepping(rotated_piece));
+                            ans.append(&mut candidates_when_stepping());
                         }
                     }
                 }
