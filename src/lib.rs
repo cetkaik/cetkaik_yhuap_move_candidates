@@ -113,8 +113,8 @@ fn can_get_occupied_by_non_tam(
     }
 }
 
-fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
-    is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1
+const fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
+    is_water(dest) && !is_water(src) && !matches!(moving_piece_prof, Profession::Nuak1)
 }
 
 fn generate_candidates_when_stepping(
@@ -130,21 +130,15 @@ fn generate_candidates_when_stepping(
     let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
     subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
 
-    let MovablePositions {
-        finite: guide_list_yellow,
-        infinite: guide_list_green,
-    } = calculate_movable::calculate_movable_positions(
+    let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions(
         rotate_coord(step),
         rotated_piece.into(),
         subtracted_rotated_board,
         tam_itself_is_tam_hue,
     );
 
-    let candidates: Vec<Coord> = guide_list_yellow
-        .iter()
-        .map(|c| rotate_coord(*c))
-        .collect::<Vec<_>>();
-    let candidates_inf: Vec<Coord> = guide_list_green.iter().map(|c| rotate_coord(*c)).collect();
+    let candidates: Vec<Coord> = finite.iter().map(|c| rotate_coord(*c)).collect::<Vec<_>>();
+    let candidates_inf: Vec<Coord> = infinite.iter().map(|c| rotate_coord(*c)).collect();
     [
         &candidates
             .iter()
@@ -222,10 +216,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
         rotated_coord,
     } in get_opponent_pieces_and_tam_rotated(game_state)
     {
-        let MovablePositions {
-            finite: guide_list_yellow,
-            infinite: guide_list_green,
-        } = calculate_movable::calculate_movable_positions(
+        let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions(
             rotated_coord,
             rotated_piece,
             rotate_board(game_state.f.current_board),
@@ -233,23 +224,14 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
         );
 
         let candidates: Vec<Coord> = [
-            &guide_list_yellow
-                .into_iter()
-                .map(rotate_coord)
-                .collect::<Vec<_>>()[..],
-            &guide_list_green
-                .into_iter()
-                .map(rotate_coord)
-                .collect::<Vec<_>>()[..],
+            &finite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
+            &infinite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
         ]
         .concat();
 
         let src: Coord = rotate_coord(rotated_coord);
 
         for tentative_dest in candidates {
-            fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
-                is_water(dest) && !is_water(src) && moving_piece_prof != Profession::Nuak1
-            }
             let dest_piece = game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
 
             match rotated_piece {
