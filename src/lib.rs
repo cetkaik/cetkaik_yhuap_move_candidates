@@ -118,16 +118,16 @@ fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> 
 }
 
 fn generate_candidates_when_stepping(
+    game_state: &PureGameState,
     src: Coord,
-    tam_itself_is_tam_hue: bool,
     step: Coord,
     rotated_coord: Coord,
     rotated_piece: TamOrUpwardPiece,
-    current_board: &Board,
-    perspective: Perspective,
 ) -> Vec<PureMove> {
+    let perspective = game_state.perspective;
+    let tam_itself_is_tam_hue: bool = game_state.tam_itself_is_tam_hue;
     /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-    let mut subtracted_rotated_board = rotate_board(current_board.clone());
+    let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
     subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
 
     let MovablePositions {
@@ -254,13 +254,11 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
 
             let candidates_when_stepping = |rotated_piece| -> Vec<PureMove> {
                 generate_candidates_when_stepping(
+                    game_state,
                     src,
-                    game_state.tam_itself_is_tam_hue,
                     dest,
                     rotated_coord,
                     rotated_piece,
-                    &game_state.f.current_board,
-                    game_state.perspective,
                 )
             };
 
