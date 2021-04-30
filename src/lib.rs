@@ -120,7 +120,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     for Rotated {
         rotated_piece,
         rotated_coord,
-    } in get_opponent_pieces_rotated(game_state)
+    } in get_opponent_pieces_and_tam_rotated(game_state)
     {
         let MovablePositions {
             finite: guide_list_yellow,
@@ -394,7 +394,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     ans
 }
 
-fn get_opponent_pieces_rotated(game_state: &PureGameState) -> Vec<Rotated> {
+fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotated> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
