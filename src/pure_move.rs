@@ -53,27 +53,27 @@ impl PureMove {
     /// use cetkaik_core::*;
     ///
     /// assert_eq!(PureMove::InfAfterStep {
-    ///     src: (absolute::Row::A, absolute::Column::Z),
-    ///     step: (absolute::Row::E, absolute::Column::T),
-    ///     planned_direction: (absolute::Row::E, absolute::Column::N)
+    ///     src: absolute::Coord(absolute::Row::A, absolute::Column::Z),
+    ///     step: absolute::Coord(absolute::Row::E, absolute::Column::T),
+    ///     planned_direction: absolute::Coord(absolute::Row::E, absolute::Column::N)
     /// }.serialize(), "ZA片TE心NE");
     ///
     /// assert_eq!(PureMove::NonTamMoveFromHopZuo {
     ///     color: Color::Huok2,
     ///     prof: Profession::Gua2,
-    ///     dest: (absolute::Row::IA, absolute::Column::L)
+    ///     dest: absolute::Coord(absolute::Row::IA, absolute::Column::L)
     /// }.serialize(), "黒弓LIA");
     ///
     /// assert_eq!(PureMove::NonTamMoveSrcDst {
-    ///     src: (absolute::Row::A, absolute::Column::Z),
-    ///     dest: (absolute::Row::E, absolute::Column::N),
+    ///     src: absolute::Coord(absolute::Row::A, absolute::Column::Z),
+    ///     dest: absolute::Coord(absolute::Row::E, absolute::Column::N),
     ///     is_water_entry_ciurl: true
     /// }.serialize(), "ZA片NE水");
     ///
     /// assert_eq!(PureMove::NonTamMoveSrcStepDstFinite {
-    ///     src: (absolute::Row::A, absolute::Column::Z),
-    ///     step: (absolute::Row::E, absolute::Column::T),
-    ///     dest: (absolute::Row::E, absolute::Column::N),
+    ///     src: absolute::Coord(absolute::Row::A, absolute::Column::Z),
+    ///     step: absolute::Coord(absolute::Row::E, absolute::Column::T),
+    ///     dest: absolute::Coord(absolute::Row::E, absolute::Column::N),
     ///     is_water_entry_ciurl: false
     /// }.serialize(), "ZA片TENE");
     ///
@@ -82,23 +82,23 @@ impl PureMove {
     /// // it is not to be written in the standard notation.
     /// // Hence this additional information is denoted by [].
     /// assert_eq!(PureMove::TamMoveStepsDuringFormer {
-    ///     src: (absolute::Row::E, absolute::Column::K),
-    ///     step: (absolute::Row::I, absolute::Column::L),
-    ///     first_dest: (absolute::Row::I, absolute::Column::K),
-    ///     second_dest: (absolute::Row::E, absolute::Column::L)
+    ///     src: absolute::Coord(absolute::Row::E, absolute::Column::K),
+    ///     step: absolute::Coord(absolute::Row::I, absolute::Column::L),
+    ///     first_dest: absolute::Coord(absolute::Row::I, absolute::Column::K),
+    ///     second_dest: absolute::Coord(absolute::Row::E, absolute::Column::L)
     /// }.serialize(), "KE皇LI[KI]LE");
     ///
     /// assert_eq!(PureMove::TamMoveNoStep {
-    ///     src: (absolute::Row::E, absolute::Column::K),
-    ///     first_dest: (absolute::Row::I, absolute::Column::K),
-    ///     second_dest: (absolute::Row::E, absolute::Column::K)
+    ///     src: absolute::Coord(absolute::Row::E, absolute::Column::K),
+    ///     first_dest: absolute::Coord(absolute::Row::I, absolute::Column::K),
+    ///     second_dest: absolute::Coord(absolute::Row::E, absolute::Column::K)
     /// }.serialize(), "KE皇[KI]KE");
     ///
     /// assert_eq!(PureMove::TamMoveStepsDuringLatter {
-    ///     src: (absolute::Row::E, absolute::Column::K),
-    ///     first_dest: (absolute::Row::I, absolute::Column::K),
-    ///     step: (absolute::Row::I, absolute::Column::L),
-    ///     second_dest: (absolute::Row::E, absolute::Column::L)
+    ///     src: absolute::Coord(absolute::Row::E, absolute::Column::K),
+    ///     first_dest: absolute::Coord(absolute::Row::I, absolute::Column::K),
+    ///     step: absolute::Coord(absolute::Row::I, absolute::Column::L),
+    ///     second_dest: absolute::Coord(absolute::Row::E, absolute::Column::L)
     /// }.serialize(), "KE皇[KI]LILE");
     /// ```
     #[must_use]
