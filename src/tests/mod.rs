@@ -78,7 +78,7 @@ mod get_opponent_pieces_rotated {
     #[test]
     fn test_initial_board_sample() {
         super::run_test(
-            crate::get_opponent_pieces_rotated,
+            crate::get_opponent_pieces_and_tam_rotated,
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             serialize_rotated,
             &[

@@ -1,5 +1,6 @@
 use super::{absolute, Color, Profession};
 use cetkaik_core::{serialize_color, serialize_prof};
+use alloc::string::String;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum PureMove {

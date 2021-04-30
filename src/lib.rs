@@ -5,6 +5,12 @@
     clippy::module_name_repetitions,
     clippy::use_self
 )]
+#![cfg_attr(not(test), no_std)]
+
+#[macro_use]
+extern crate alloc;
+use alloc::vec::Vec;
+
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
 pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
@@ -52,10 +58,7 @@ fn can_get_occupied_by(
 fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
     calculate_movable::eight_neighborhood(c)
         .iter()
-        .filter(|a| {
-            let [i, j] = a;
-            board[*i][*j] == None
-        })
+        .filter(|[i, j]| board[*i][*j].is_none())
         .copied()
         .collect()
 }
@@ -117,7 +120,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     for Rotated {
         rotated_piece,
         rotated_coord,
-    } in get_opponent_pieces_rotated(game_state)
+    } in get_opponent_pieces_and_tam_rotated(game_state)
     {
         let MovablePositions {
             finite: guide_list_yellow,
@@ -391,7 +394,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     ans
 }
 
-fn get_opponent_pieces_rotated(game_state: &PureGameState) -> Vec<Rotated> {
+fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotated> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
