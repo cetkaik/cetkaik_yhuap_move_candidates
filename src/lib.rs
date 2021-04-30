@@ -122,7 +122,7 @@ fn generate_candidates_when_stepping(
     src: Coord,
     step: Coord,
     rotated_coord: Coord,
-    rotated_piece: TamOrUpwardPiece,
+    rotated_piece: NonTam2PieceUpward,
 ) -> Vec<PureMove> {
     let perspective = game_state.perspective;
     let tam_itself_is_tam_hue: bool = game_state.tam_itself_is_tam_hue;
@@ -135,7 +135,7 @@ fn generate_candidates_when_stepping(
         infinite: guide_list_green,
     } = calculate_movable::calculate_movable_positions(
         rotate_coord(step),
-        rotated_piece,
+        rotated_piece.into(),
         subtracted_rotated_board,
         tam_itself_is_tam_hue,
     );
@@ -149,10 +149,10 @@ fn generate_candidates_when_stepping(
         &candidates
             .iter()
             .flat_map(|final_dest| {
-                let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
-                    TamOrUpwardPiece::Tam2 => panic!(),
-                    TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
-                };
+                let NonTam2PieceUpward {
+                    color: rotated_piece_color,
+                    prof: rotated_piece_prof,
+                } = rotated_piece;
                 if can_get_occupied_by(
                     Side::Downward,
                     *final_dest,
@@ -183,10 +183,10 @@ fn generate_candidates_when_stepping(
         &candidates_inf
             .iter()
             .flat_map(|planned_dest| {
-                let (rotated_piece_color, rotated_piece_prof) = match rotated_piece {
-                    TamOrUpwardPiece::Tam2 => panic!(),
-                    TamOrUpwardPiece::NonTam2Piece { color, prof } => (color, prof),
-                };
+                let NonTam2PieceUpward {
+                    color: rotated_piece_color,
+                    prof: rotated_piece_prof,
+                } = rotated_piece;
                 if !can_get_occupied_by(
                     Side::Downward,
                     *planned_dest,
@@ -253,13 +253,18 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
             let dest_piece = game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
 
             let candidates_when_stepping = || {
-                generate_candidates_when_stepping(
-                    game_state,
-                    src,
-                    tentative_dest, // tentative_dest becomes the position on which the stepping occurs
-                    rotated_coord,
-                    rotated_piece,
-                )
+                match rotated_piece {
+                    TamOrUpwardPiece::Tam2 => panic!(),
+                    TamOrUpwardPiece::NonTam2Piece { color, prof } => {
+                        generate_candidates_when_stepping(
+                            game_state,
+                            src,
+                            tentative_dest, // tentative_dest becomes the position on which the stepping occurs
+                            rotated_coord,
+                            NonTam2PieceUpward { color, prof },
+                        )
+                    }
+                }
             };
 
             match rotated_piece {
@@ -383,7 +388,10 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                     &mut [
                                         &[PureMove::NonTamMoveSrcDst {
                                             src: to_absolute_coord(src, game_state.perspective),
-                                            dest: to_absolute_coord(tentative_dest, game_state.perspective),
+                                            dest: to_absolute_coord(
+                                                tentative_dest,
+                                                game_state.perspective,
+                                            ),
                                             is_water_entry_ciurl: is_ciurl_required(
                                                 tentative_dest,
                                                 rotated_piece_prof,
