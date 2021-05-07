@@ -2,9 +2,9 @@
 # It is not intended for manual editing.
 [[package]]
 name = "cetkaik_core"
-version = "0.3.5"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4aa1f35acd96abcf9b01deaa21f9dfe58bdb38d3365f2bd8780b4690487d8988"
+checksum = "36edfa9ba6d74b124f2ba09d5431af2495fd43fd4f84c9edf511ea8f88453fb6"
 dependencies = [
  "maplit",
  "serde",
