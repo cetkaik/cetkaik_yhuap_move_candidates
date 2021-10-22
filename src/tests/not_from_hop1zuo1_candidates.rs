@@ -5,7 +5,7 @@ fn test_simple_board_sample_3() {
         &crate::tests::test_cases::simple_board_sample_3(),
         crate::pure_move::PureMove::serialize,
         &["PI片PU"],
-    )
+    );
 }
 
 #[test]
@@ -32,7 +32,7 @@ fn test_simple_board_sample_1_ia_is_down_true() {
             "KA片KAI心KE",
             "KA片KAI心KA", /* step and then plan u-turn */
         ],
-    )
+    );
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn test_simple_board_sample_2_ia_is_down_false() {
             "PIA片PI心PAU",
             "PIA片PI心PIA", /* step and then plan u-turn */
         ],
-    )
+    );
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn test_initial_board_sample() {
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
-    )
+    );
 }
 
 #[test]
@@ -388,7 +388,7 @@ fn test_complicated_board_sample_1() {
             "PAU皇MAI[PAU]MIA",
             "PAU皇MAI[PAU]PIA",
         ],
-    )
+    );
 }
 
 #[test]
@@ -737,7 +737,7 @@ fn test_complicated_board_sample_2() {
             "XY片ZO心XU",
             "XY片ZO心NI",
         ],
-    )
+    );
 }
 
 #[test]
@@ -758,7 +758,7 @@ fn test_tam_corner_sample() {
             "PAU片PAIPAU",
             "MIA片MAUMIA",
         ],
-    )
+    );
 }
 
 #[test]
@@ -768,5 +768,5 @@ fn test_tam_itself_is_not_tam_hue_sample() {
         &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
-    )
+    );
 }

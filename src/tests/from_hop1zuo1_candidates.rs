@@ -5,7 +5,7 @@ fn test_initial_board_sample() {
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &[],
-    )
+    );
 }
 
 #[test]
@@ -95,5 +95,5 @@ fn test_simple_board_sample_4() {
             "黒弓CIA",
             "黒弓MIA",
         ],
-    )
+    );
 }

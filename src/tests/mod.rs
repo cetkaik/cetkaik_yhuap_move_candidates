@@ -37,7 +37,7 @@ fn run_test<T, F, F2>(
         .map(|s| (*s).to_string())
         .collect::<HashSet<String>>();
 
-    assert_eq!(set1, set2)
+    assert_eq!(set1, set2);
 }
 
 mod test_not_from_hop1zuo1_candidates_with_kut2tam2;
@@ -60,7 +60,7 @@ mod empty_squares {
                 "[4,7]", "[4,8]", "[5,0]", "[5,1]", "[5,2]", "[5,3]", "[5,4]", "[5,5]", "[5,6]",
                 "[5,7]", "[5,8]", "[7,2]", "[7,4]", "[7,6]",
             ],
-        )
+        );
     }
 }
 
@@ -108,7 +108,7 @@ mod get_opponent_pieces_rotated {
                 "[6,0] 黒兵↑",
                 "[4,4] 皇",
             ],
-        )
+        );
     }
 }
 

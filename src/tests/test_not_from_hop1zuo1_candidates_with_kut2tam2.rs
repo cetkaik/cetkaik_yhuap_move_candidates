@@ -19,7 +19,7 @@ fn test_tam_corner_sample() {
             "PAU片PIAPAU",
             "MIA片PIAMIA",
         ],
-    )
+    );
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn test_tam_itself_is_not_tam_hue_sample() {
             ][..],
         ]
         .concat(),
-    )
+    );
 }
 
 #[test]
@@ -67,5 +67,5 @@ fn test_initial_board_sample() {
             ],
         ]
         .concat(),
-    )
+    );
 }

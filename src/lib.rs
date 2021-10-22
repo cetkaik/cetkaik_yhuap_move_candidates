@@ -21,7 +21,7 @@ pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
                 color: piece.color,
                 prof: piece.prof,
                 dest: to_absolute_coord(empty_square, game_state.perspective),
-            })
+            });
         }
     }
     ans
@@ -245,12 +245,12 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         let fst_dst: Coord = tentative_dest;
                         ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
+                            let snd_dst: Coord = *neighbor;
                             if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
                                 None /* the neighbor is utterly occupied */ ||
                                 *neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
-                                let snd_dst: Coord = *neighbor;
                                 vec![PureMove::TamMoveNoStep {
                                     second_dest: to_absolute_coord(snd_dst, game_state.perspective),
                                     first_dest: to_absolute_coord(fst_dst, game_state.perspective),
@@ -414,7 +414,7 @@ fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotate
                         prof,
                         color,
                     } => {
-                        let rot_piece = NonTam2PieceUpward { prof, color };
+                        let rot_piece = NonTam2PieceUpward { color, prof };
                         ans.push(Rotated {
                             rotated_piece: rot_piece.into(),
                             rotated_coord: rotate_coord(coord),

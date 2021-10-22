@@ -47,7 +47,6 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
 }
 
 fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
-    use core::convert::TryFrom;
     let [i, j] = coord;
     deltas
         .iter()
@@ -136,7 +135,7 @@ fn apply_deltas_if_no_intervention(coord: Coord, deltas: &[[i32; 2]], board: Boa
     for delta in deltas {
         ans.append(&mut apply_single_delta_if_no_intervention(
             coord, *delta, board,
-        ))
+        ));
     }
     ans
 }
@@ -150,7 +149,7 @@ fn apply_deltas_if_zero_or_one_intervention(
     for delta in deltas {
         ans.append(&mut apply_single_delta_if_zero_or_one_intervention(
             coord, *delta, board,
-        ))
+        ));
     }
     ans
 }
