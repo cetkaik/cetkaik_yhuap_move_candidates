@@ -67,10 +67,14 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
 }
 
 fn get_blocker_deltas(delta: [i32; 2]) -> Vec<[i32; 2]> {
-    /* blocking occurs only when there exists [dx_block, dy_block] such that
-    - dx is a positive multiple of dx_block
-    - dy is a positive multiple of dy_block
-    - abs(dx_block, dy_block) < abs(dx, dy)
+    if let [0, 0] = delta {
+        return vec![];
+    }
+    /*
+    We list the coordinates [dx_block, dy_block] that can block an attempt for a piece to move to [dx, dy].
+    Let [qx, qy] = [dx, dy] / gcd(dx, dy), and then the criteria required for [dx_block, dy_block] to block the move are
+    - [dx_block, dy_block] = mult * [qx, qy]
+    - abs^2(dx_block, dy_block) < abs^2(dx, dy)
     */
     let [dx, dy] = delta;
     let d_length = dx * dx + dy * dy;
