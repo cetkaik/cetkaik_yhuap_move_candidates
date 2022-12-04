@@ -66,33 +66,25 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
         .collect()
 }
 
-fn get_blocker_deltas(delta: [i32; 2]) -> Vec<[i32; 2]> {
-    /* blocking occurs only when there exists [dx_block, dy_block] such that
-    - the dot product with [dx, dy] is positive
-    - the cross product with [dx, dy] is zero
-    - abs(dx_block, dy_block) < abs(dx, dy)
-    */
-    let [dx, dy] = delta;
-
-    let mut ans: Vec<[i32; 2]> = vec![];
-
-    for dx_block in -8..=8 {
-        for dy_block in -8..=8 {
-            if dx * dy_block - dy * dx_block != 0 {
-                continue;
-            } // cross product must be zero
-            if dx * dx_block + dy * dy_block <= 0 {
-                continue;
-            } // cross product must be positive
-            if dx_block * dx_block + dy_block * dy_block >= dx * dx + dy * dy {
-                continue;
+fn apply_deltas_to_iter(
+    coord: Coord,
+    deltas: impl Iterator<Item = [i32; 2]>,
+) -> impl Iterator<Item = Coord> {
+    let [i, j] = coord;
+    deltas
+        .map(move |[delta_x, delta_y]| {
+            [
+                i32::try_from(i).unwrap() + delta_x,
+                i32::try_from(j).unwrap() + delta_y,
+            ]
+        })
+        .filter_map(|[l, m]| {
+            if (0..=8).contains(&l) && (0..=8).contains(&m) {
+                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
+            } else {
+                None
             }
-            // must be strictly small in absolute value
-
-            ans.push([dx_block, dy_block]);
-        }
-    }
-    ans
+        })
 }
 
 fn apply_single_delta_if_no_intervention(
@@ -100,10 +92,13 @@ fn apply_single_delta_if_no_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &get_blocker_deltas(delta));
+    let mut blocker = apply_deltas_to_iter(
+        coord,
+        crate::get_blocker_deltas::ultrafast(delta),
+    );
 
     // if nothing is blocking the way
-    if blocker.iter().all(|[i, j]| board[*i][*j] == None) {
+    if blocker.all(|[i, j]| board[i][j] == None) {
         apply_deltas(coord, &[delta])
     } else {
         vec![]
@@ -115,11 +110,13 @@ fn apply_single_delta_if_zero_or_one_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &get_blocker_deltas(delta));
+    let blocker = apply_deltas_to_iter(
+        coord,
+        crate::get_blocker_deltas::ultrafast(delta),
+    );
 
     // if no piece or a single piece is blocking the way
     if blocker
-        .iter()
         .filter(|[i, j]| board[*i][*j] != None)
         .count()
         <= 1
@@ -472,7 +469,7 @@ pub fn calculate_movable_positions(
             ];
             let mut inf: Vec<Coord> = vec![];
             for delta in &DELTAS {
-              let blocker_deltas: Vec<[i32; 2]> = get_blocker_deltas(*delta).into_iter().filter(
+              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
                 |d|
                   /*
                    * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because

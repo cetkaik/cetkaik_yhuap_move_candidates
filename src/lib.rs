@@ -475,3 +475,10 @@ pub struct PureGameState {
     pub tam_itself_is_tam_hue: bool,
     pub opponent_has_just_moved_tam: bool,
 }
+
+/// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,
+/// this function was a bottleneck that accounted for roughly fifty percent of all the runtime
+/// in an attempt to implement an AI for this game.
+/// Hence, this module contains multiple implementations of this functions and test that they are equal.
+#[allow(clippy::similar_names)]
+pub mod get_blocker_deltas;
