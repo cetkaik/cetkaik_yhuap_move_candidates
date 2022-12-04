@@ -480,4 +480,5 @@ pub struct PureGameState {
 /// this function was a bottleneck that accounted for roughly fifty percent of all the runtime
 /// in an attempt to implement an AI for this game.
 /// Hence, this module contains multiple implementations of this functions and test that they are equal.
+#[allow(clippy::similar_names)]
 pub mod get_blocker_deltas;

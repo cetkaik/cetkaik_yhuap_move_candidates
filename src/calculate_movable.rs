@@ -71,7 +71,10 @@ fn apply_single_delta_if_no_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &crate::get_blocker_deltas::fast(delta));
+    let blocker: Vec<Coord> = apply_deltas(
+        coord,
+        &crate::get_blocker_deltas::ultrafast(delta).collect::<Vec<_>>(),
+    );
 
     // if nothing is blocking the way
     if blocker.iter().all(|[i, j]| board[*i][*j] == None) {
@@ -86,7 +89,7 @@ fn apply_single_delta_if_zero_or_one_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &crate::get_blocker_deltas::fast(delta));
+    let blocker: Vec<Coord> = apply_deltas(coord, &crate::get_blocker_deltas::ultrafast(delta).collect::<Vec<_>>());
 
     // if no piece or a single piece is blocking the way
     if blocker
@@ -443,7 +446,7 @@ pub fn calculate_movable_positions(
             ];
             let mut inf: Vec<Coord> = vec![];
             for delta in &DELTAS {
-              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::fast(*delta).into_iter().filter(
+              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
                 |d|
                   /*
                    * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because

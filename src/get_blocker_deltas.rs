@@ -1,4 +1,5 @@
 use alloc::vec::Vec;
+use num::signum;
 
 /// Lists the coordinates `[dx_block, dy_block]` that can block an attempt for a piece to move to `[dx, dy]`
 /// ```
@@ -111,6 +112,66 @@ pub fn fast(delta: [i32; 2]) -> Vec<[i32; 2]> {
     }
 
     ans
+}
+
+pub struct Blocker {
+    d_length: i32,
+    qx: i32,
+    qy: i32,
+    mult: i32,
+}
+
+impl Iterator for Blocker {
+    type Item = [i32; 2];
+
+    #[inline]
+    fn next(&mut self) -> Option<[i32; 2]> {
+        let dx_block = self.mult * self.qx;
+        let dy_block = self.mult * self.qy;
+        let d_block_length = dx_block * dx_block + dy_block * dy_block;
+        if d_block_length >= self.d_length {
+            return None;
+        }
+        self.mult += 1;
+
+        Some([dx_block, dy_block])
+    }
+}
+
+/// Lists the coordinates `[dx_block, dy_block]` that can block an attempt for a piece to move to `[dx, dy]`
+/// It is assumed that
+/// - the direction is either horizontal, vertical, or 45 degrees diagonal
+/// - the input vector is not zero
+/// ```
+/// use cetkaik_yhuap_move_candidates::get_blocker_deltas::ultrafast;
+/// use std::collections::HashSet;
+///
+/// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
+/// where
+///     T: Eq + core::hash::Hash + std::fmt::Debug,
+/// {
+///     let a: HashSet<_> = a.iter().collect();
+///     let b: HashSet<_> = b.iter().collect();
+///
+///     assert_eq!(a, b);
+/// }
+/// assert_eq_ignoring_order(&ultrafast([6,6]).collect::<Vec<_>>(), &vec![[1,1], [2,2], [3,3], [4,4], [5,5]]);
+/// assert_eq_ignoring_order(&ultrafast([-6,6]).collect::<Vec<_>>(), &vec![[-1,1], [-2,2], [-3,3], [-4,4], [-5,5]]);
+/// assert_eq_ignoring_order(&ultrafast([-5,0]).collect::<Vec<_>>(), &vec![[-1,0], [-2,0], [-3,0], [-4,0]]);
+/// assert_eq_ignoring_order(&ultrafast([0,5]).collect::<Vec<_>>(), &vec![[0,1], [0,2], [0,3], [0,4]]);
+/// ```
+pub fn ultrafast(delta: [i32; 2]) -> impl Iterator<Item = [i32; 2]> {
+    let [dx, dy] = delta;
+    let d_length = dx * dx + dy * dy;
+    let qx = signum(dx);
+    let qy = signum(dy);
+
+    Blocker {
+        d_length,
+        qx,
+        qy,
+        mult: 1,
+    }
 }
 
 #[test]
