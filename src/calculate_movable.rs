@@ -66,43 +66,12 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
         .collect()
 }
 
-fn get_blocker_deltas(delta: [i32; 2]) -> Vec<[i32; 2]> {
-    if let [0, 0] = delta {
-        return vec![];
-    }
-    /*
-    We list the coordinates [dx_block, dy_block] that can block an attempt for a piece to move to [dx, dy].
-    Let [qx, qy] = [dx, dy] / gcd(dx, dy), and then the criteria required for [dx_block, dy_block] to block the move are
-    - [dx_block, dy_block] = mult * [qx, qy]
-    - abs^2(dx_block, dy_block) < abs^2(dx, dy)
-    */
-    let [dx, dy] = delta;
-    let d_length = dx * dx + dy * dy;
-    let g = num::integer::gcd(dx, dy);
-    let qx = dx / g;
-    let qy = dy / g;
-
-    let mut ans: Vec<[i32; 2]> = vec![];
-
-    for mult in 1.. {
-        let dx_block = mult * qx;
-        let dy_block = mult * qy;
-        let d_block_length = dx_block * dx_block + dy_block * dy_block;
-        if core::cmp::max(dx_block.abs(), dy_block.abs()) > 8 || d_block_length >= d_length {
-            break;
-        }
-        ans.push([dx_block, dy_block]);
-    }
-
-    ans
-}
-
 fn apply_single_delta_if_no_intervention(
     coord: Coord,
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &get_blocker_deltas(delta));
+    let blocker: Vec<Coord> = apply_deltas(coord, &crate::get_blocker_deltas::fast(delta));
 
     // if nothing is blocking the way
     if blocker.iter().all(|[i, j]| board[*i][*j] == None) {
@@ -117,7 +86,7 @@ fn apply_single_delta_if_zero_or_one_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker: Vec<Coord> = apply_deltas(coord, &get_blocker_deltas(delta));
+    let blocker: Vec<Coord> = apply_deltas(coord, &crate::get_blocker_deltas::fast(delta));
 
     // if no piece or a single piece is blocking the way
     if blocker
@@ -474,7 +443,7 @@ pub fn calculate_movable_positions(
             ];
             let mut inf: Vec<Coord> = vec![];
             for delta in &DELTAS {
-              let blocker_deltas: Vec<[i32; 2]> = get_blocker_deltas(*delta).into_iter().filter(
+              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::fast(*delta).into_iter().filter(
                 |d|
                   /*
                    * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because
