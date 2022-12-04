@@ -12,3 +12,4 @@ exclude = [ "renovate.json" ]
 
 [dependencies]
 cetkaik_core = "0.3.8"
+num = { version = "0.4.0", feature = ["alloc"] }

@@ -68,30 +68,28 @@ fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
 
 fn get_blocker_deltas(delta: [i32; 2]) -> Vec<[i32; 2]> {
     /* blocking occurs only when there exists [dx_block, dy_block] such that
-    - the dot product with [dx, dy] is positive
-    - the cross product with [dx, dy] is zero
+    - dx is a positive multiple of dx_block
+    - dy is a positive multiple of dy_block
     - abs(dx_block, dy_block) < abs(dx, dy)
     */
     let [dx, dy] = delta;
+    let d_length = dx * dx + dy * dy;
+    let g = num::integer::gcd(dx, dy);
+    let qx = dx / g;
+    let qy = dy / g;
 
     let mut ans: Vec<[i32; 2]> = vec![];
 
-    for dx_block in -8..=8 {
-        for dy_block in -8..=8 {
-            if dx * dy_block - dy * dx_block != 0 {
-                continue;
-            } // cross product must be zero
-            if dx * dx_block + dy * dy_block <= 0 {
-                continue;
-            } // cross product must be positive
-            if dx_block * dx_block + dy_block * dy_block >= dx * dx + dy * dy {
-                continue;
-            }
-            // must be strictly small in absolute value
-
-            ans.push([dx_block, dy_block]);
+    for mult in 1.. {
+        let dx_block = mult * qx;
+        let dy_block = mult * qy;
+        let d_block_length = dx_block * dx_block + dy_block * dy_block;
+        if core::cmp::max(dx_block.abs(), dy_block.abs()) > 8 || d_block_length >= d_length {
+            break;
         }
+        ans.push([dx_block, dy_block]);
     }
+
     ans
 }
 
