@@ -61,11 +61,5 @@ pub fn apply_deltas_if_zero_or_one_intervention(
     deltas: &[[i32; 2]],
     board: Board,
 ) -> Vec<Coord> {
-    let mut ans = vec![];
-    for delta in deltas {
-        ans.extend(&mut iter::apply_single_delta_if_zero_or_one_intervention(
-            coord, *delta, board,
-        ));
-    }
-    ans
+    iter::apply_deltas_if_zero_or_one_intervention(coord, deltas, board).collect()
 }

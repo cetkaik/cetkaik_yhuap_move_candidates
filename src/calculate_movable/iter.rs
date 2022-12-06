@@ -84,3 +84,14 @@ pub fn apply_single_delta_if_zero_or_one_intervention(
         .into_iter(),
     )
 }
+
+pub fn apply_deltas_if_zero_or_one_intervention(
+    coord: Coord,
+    deltas: &[[i32; 2]],
+    board: Board,
+) -> impl Iterator<Item = Coord> + '_ {
+    deltas
+        .iter()
+        .copied()
+        .flat_map(move |delta| apply_single_delta_if_zero_or_one_intervention(coord, delta, board))
+}
