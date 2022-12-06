@@ -237,22 +237,12 @@ pub fn calculate_movable_positions_for_either_side(
     tam_itself_is_tam_hue: bool,
 ) -> MovablePositions {
     match piece {
-        Piece::Tam2 => calculate_movable_positions_for_upward(
-            coord,
-            TamOrUpwardPiece::Tam2,
-            board,
-            tam_itself_is_tam_hue,
-        ),
+        Piece::Tam2 => calculate_movable_positions_for_tam(coord),
         Piece::NonTam2Piece {
             prof,
-            color,
+            color: _,
             side: Side::Upward,
-        } => calculate_movable_positions_for_upward(
-            coord,
-            TamOrUpwardPiece::NonTam2Piece { prof, color },
-            board,
-            tam_itself_is_tam_hue,
-        ),
+        } => calculate_movable_positions_for_upward(coord, prof, board, tam_itself_is_tam_hue),
         Piece::NonTam2Piece {
             prof,
             color: _,
@@ -620,7 +610,7 @@ pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
 
 pub fn calculate_movable_positions_for_upward(
     coord: Coord,
-    piece: TamOrUpwardPiece,
+    prof: Profession,
     board: Board,
     tam_itself_is_tam_hue: bool,
 ) -> MovablePositions {
@@ -705,12 +695,7 @@ pub fn calculate_movable_positions_for_upward(
         [0, 8],
     ];
 
-    let piece_prof = match piece {
-        TamOrUpwardPiece::Tam2 => {
-            return calculate_movable_positions_for_tam(coord);
-        }
-        TamOrUpwardPiece::NonTam2Piece { prof, color: _ } => prof,
-    };
+    let piece_prof = prof;
 
     if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
