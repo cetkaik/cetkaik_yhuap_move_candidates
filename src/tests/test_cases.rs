@@ -473,7 +473,7 @@ pub fn simple_board_sample_3() -> PureGameState {
     }
 }
 
-use cetkaik_core::relative::NonTam2PieceDownward;
+use cetkaik_core::relative::{NonTam2PieceDownward, rotate_board};
 
 pub fn simple_board_sample_4() -> PureGameState {
     PureGameState {
