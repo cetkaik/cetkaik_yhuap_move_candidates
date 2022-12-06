@@ -208,44 +208,24 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
-            let coord = [rand_i, rand_j];
+            let src = [rand_i, rand_j];
             let piece = game_state.f.current_board[rand_i][rand_j];
             if let Some(p) = piece {
                 match p {
                     Piece::Tam2 => {
-                        let rotated_coord = rotate_coord(coord);
-                        {
-                            let MovablePositions { finite, infinite } =
-                                calculate_movable::calculate_movable_positions_for_upward(
-                                    rotated_coord,
-                                    TamOrUpwardPiece::Tam2,
-                                    rotate_board(game_state.f.current_board),
-                                    game_state.tam_itself_is_tam_hue,
-                                );
+                        let candidates: Vec<Coord> = calculate_movable::eight_neighborhood(src);
+                        for tentative_dest in candidates {
+                            let dest_piece =
+                                game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
 
-                            let candidates: Vec<Coord> = [
-                                &finite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
-                                &infinite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
-                            ]
-                            .concat();
-
-                            let src: Coord = rotate_coord(rotated_coord);
-
-                            for tentative_dest in candidates {
-                                let dest_piece = game_state.f.current_board[tentative_dest[0]]
-                                    [tentative_dest[1]];
-
-                                {
-                                    /* avoid self-occlusion */
-                                    let mut subtracted_rotated_board =
-                                        rotate_board(game_state.f.current_board);
-                                    subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] =
-                                        None;
-                                    // FIXME: tam2 ty sak2 not handled
-                                    if dest_piece == None {
-                                        /* empty square; first move is completed without stepping */
-                                        let fst_dst: Coord = tentative_dest;
-                                        ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
+                            /* avoid self-occlusion */
+                            let mut subtracted_board = game_state.f.current_board;
+                            subtracted_board[src[0]][src[1]] = None;
+                            // FIXME: tam2 ty sak2 not handled
+                            if dest_piece == None {
+                                /* empty square; first move is completed without stepping */
+                                let fst_dst: Coord = tentative_dest;
+                                ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: Coord = *neighbor;
                             if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
@@ -261,7 +241,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             } else {
                                 /* if not, step from there */
                                 let step: Coord = *neighbor;
-                                empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
+                                empty_neighbors_of(subtracted_board, step)
                                     .flat_map(|snd_dst| {
                                     vec![PureMove::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.perspective),
@@ -272,47 +252,39 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 }).collect::<Vec<PureMove>>().into_iter()
                             }
                         }).collect::<Vec<PureMove>>());
-                                    } else {
-                                        /* not an empty square: must complete the first move */
-                                        let step = tentative_dest;
-                                        ans.append(
-                                            &mut empty_neighbors_of(
-                                                rotate_board(subtracted_rotated_board),
-                                                step,
-                                            )
-                                            .flat_map(|fst_dst| {
-                                                let v = empty_neighbors_of(
-                                                    rotate_board(subtracted_rotated_board),
-                                                    fst_dst,
-                                                );
-                                                v.flat_map(move |snd_dst| {
-                                                    vec![PureMove::TamMoveStepsDuringFormer {
-                                                        first_dest: to_absolute_coord(
-                                                            fst_dst,
-                                                            game_state.perspective,
-                                                        ),
-                                                        second_dest: to_absolute_coord(
-                                                            snd_dst,
-                                                            game_state.perspective,
-                                                        ),
-                                                        src: to_absolute_coord(
-                                                            src,
-                                                            game_state.perspective,
-                                                        ),
-                                                        step: to_absolute_coord(
-                                                            step,
-                                                            game_state.perspective,
-                                                        ),
-                                                    }]
-                                                    .into_iter()
-                                                })
-                                                .collect::<Vec<PureMove>>()
+                            } else {
+                                /* not an empty square: must complete the first move */
+                                let step = tentative_dest;
+                                ans.append(
+                                    &mut empty_neighbors_of(subtracted_board, step)
+                                        .flat_map(|fst_dst| {
+                                            let v = empty_neighbors_of(subtracted_board, fst_dst);
+                                            v.flat_map(move |snd_dst| {
+                                                vec![PureMove::TamMoveStepsDuringFormer {
+                                                    first_dest: to_absolute_coord(
+                                                        fst_dst,
+                                                        game_state.perspective,
+                                                    ),
+                                                    second_dest: to_absolute_coord(
+                                                        snd_dst,
+                                                        game_state.perspective,
+                                                    ),
+                                                    src: to_absolute_coord(
+                                                        src,
+                                                        game_state.perspective,
+                                                    ),
+                                                    step: to_absolute_coord(
+                                                        step,
+                                                        game_state.perspective,
+                                                    ),
+                                                }]
                                                 .into_iter()
                                             })
-                                            .collect::<Vec<PureMove>>(),
-                                        );
-                                    }
-                                }
+                                            .collect::<Vec<PureMove>>()
+                                            .into_iter()
+                                        })
+                                        .collect::<Vec<PureMove>>(),
+                                );
                             }
                         }
                     }
@@ -321,20 +293,16 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         prof,
                         color,
                     } => {
-                        let rotated_coord = rotate_coord(coord);
-
+                        let rotated_coord = rotate_coord(src);
                         let MovablePositions { finite, infinite } =
                             calculate_movable::calculate_movable_positions_for_downward(
-                                coord,
+                                src,
                                 prof,
                                 game_state.f.current_board,
                                 game_state.tam_itself_is_tam_hue,
                             );
 
                         let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
-
-                        let src: Coord = coord;
-
                         for tentative_dest in candidates {
                             let dest_piece =
                                 game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
@@ -433,7 +401,6 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
     ans
 }
 
-
 fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     let mut ans = vec![];
     for rand_i in 0..9 {
@@ -453,8 +420,6 @@ use cetkaik_core::relative::{
 
 pub use cetkaik_core::absolute;
 
-
-
 pub mod pure_move;
 
 pub struct Config {
@@ -463,8 +428,6 @@ pub struct Config {
 
 #[cfg(test)]
 mod tests;
-
-use calculate_movable::TamOrUpwardPiece;
 
 pub use cetkaik_core::perspective::*;
 pub use cetkaik_core::{Color, Profession};

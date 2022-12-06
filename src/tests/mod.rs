@@ -71,7 +71,7 @@ mod get_opponent_pieces_rotated {
     }
     use cetkaik_core::relative::{self, Coord, NonTam2PieceUpward};
 
-    use crate::{rotate_coord, Piece, PureGameState, Side, TamOrUpwardPiece, Vec};
+    use crate::{rotate_coord, Piece, PureGameState, Side, Vec, calculate_movable::TamOrUpwardPiece};
 
     #[allow(clippy::needless_pass_by_value)]
     fn serialize_rotated(r: Rotated) -> String {

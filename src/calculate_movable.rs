@@ -171,8 +171,8 @@ fn apply_deltas_if_zero_or_one_intervention(
 ///
 ///     assert_eq!(a, b)
 /// }
-/// 
-/// let MovablePositions { finite, infinite } = 
+///
+/// let MovablePositions { finite, infinite } =
 ///     calculate_movable_positions_for_either_side(
 ///         [2, 0], /* if, at [2,0], */
 ///         relative::Piece::NonTam2Piece {
@@ -221,10 +221,10 @@ fn apply_deltas_if_zero_or_one_intervention(
 ///         ],
 ///         false
 ///     );
-/// 
+///
 /// /* then the opponent's Gua2 can either move one step to the side, */
 /// assert_eq_ignoring_order(&finite, &vec![[2, 1]]);
-/// 
+///
 /// /* or it can run to anywhere from [0,0] to [6,0].
 ///  * Note that you need two calls to this function in order to handle stepping. */
 /// assert_eq_ignoring_order(&infinite, &vec![[3, 0], [4, 0], [5, 0], [6, 0], [1, 0], [0, 0]]);
@@ -611,6 +611,13 @@ pub fn calculate_movable_positions_for_downward(
     }
 }
 
+pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
+    MovablePositions {
+        finite: eight_neighborhood(coord),
+        infinite: vec![],
+    }
+}
+
 pub fn calculate_movable_positions_for_upward(
     coord: Coord,
     piece: TamOrUpwardPiece,
@@ -700,10 +707,7 @@ pub fn calculate_movable_positions_for_upward(
 
     let piece_prof = match piece {
         TamOrUpwardPiece::Tam2 => {
-            return MovablePositions {
-                finite: eight_neighborhood(coord),
-                infinite: vec![],
-            }
+            return calculate_movable_positions_for_tam(coord);
         }
         TamOrUpwardPiece::NonTam2Piece { prof, color: _ } => prof,
     };
