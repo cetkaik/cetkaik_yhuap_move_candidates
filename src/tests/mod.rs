@@ -65,20 +65,60 @@ mod empty_squares {
 }
 
 mod get_opponent_pieces_rotated {
-    use cetkaik_core::relative;
+    struct Rotated {
+        rotated_piece: TamOrUpwardPiece,
+        rotated_coord: Coord,
+    }
+    use cetkaik_core::relative::{self, Coord, NonTam2PieceUpward, rotate_coord};
+
+    use crate::{Piece, PureGameState, Side, Vec, calculate_movable::TamOrUpwardPiece};
 
     #[allow(clippy::needless_pass_by_value)]
-    fn serialize_rotated(r: crate::Rotated) -> String {
+    fn serialize_rotated(r: Rotated) -> String {
         format!(
             "{} {}",
             relative::serialize_coord(r.rotated_coord),
             relative::serialize_piece(r.rotated_piece.into())
         )
     }
+
+    fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotated> {
+        let mut ans = vec![];
+        for rand_i in 0..9 {
+            for rand_j in 0..9 {
+                let coord = [rand_i, rand_j];
+                let piece = game_state.f.current_board[rand_i][rand_j];
+                if let Some(p) = piece {
+                    match p {
+                        Piece::Tam2 => ans.push(Rotated {
+                            rotated_piece: TamOrUpwardPiece::Tam2,
+                            rotated_coord: rotate_coord(coord),
+                        }),
+                        Piece::NonTam2Piece {
+                            side: Side::Downward,
+                            prof,
+                            color,
+                        } => {
+                            let rot_piece = NonTam2PieceUpward { color, prof };
+                            ans.push(Rotated {
+                                rotated_piece: rot_piece.into(),
+                                rotated_coord: rotate_coord(coord),
+                            });
+                        }
+                        Piece::NonTam2Piece {
+                            side: Side::Upward, ..
+                        } => {}
+                    }
+                }
+            }
+        }
+        ans
+    }
+
     #[test]
     fn test_initial_board_sample() {
         super::run_test(
-            crate::get_opponent_pieces_and_tam_rotated,
+            get_opponent_pieces_and_tam_rotated,
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             serialize_rotated,
             &[
