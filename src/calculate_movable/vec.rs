@@ -1,4 +1,3 @@
-
 use super::{iter, Board, Coord, Vec};
 pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
     apply_deltas(
@@ -55,4 +54,18 @@ pub fn apply_deltas_if_no_intervention(
     board: Board,
 ) -> Vec<Coord> {
     iter::apply_deltas_if_no_intervention(coord, deltas, board).collect()
+}
+
+pub fn apply_deltas_if_zero_or_one_intervention(
+    coord: Coord,
+    deltas: &[[i32; 2]],
+    board: Board,
+) -> Vec<Coord> {
+    let mut ans = vec![];
+    for delta in deltas {
+        ans.extend(&mut iter::apply_single_delta_if_zero_or_one_intervention(
+            coord, *delta, board,
+        ));
+    }
+    ans
 }

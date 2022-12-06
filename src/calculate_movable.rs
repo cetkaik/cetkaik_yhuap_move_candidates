@@ -28,35 +28,6 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
     iter::eight_neighborhood(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
 }
 
-fn apply_single_delta_if_zero_or_one_intervention(
-    coord: Coord,
-    delta: [i32; 2],
-    board: Board,
-) -> Vec<Coord> {
-    let blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
-
-    // if no piece or a single piece is blocking the way
-    if blocker.filter(|[i, j]| board[*i][*j].is_some()).count() <= 1 {
-        vec::apply_deltas(coord, &[delta])
-    } else {
-        vec![]
-    }
-}
-
-fn apply_deltas_if_zero_or_one_intervention(
-    coord: Coord,
-    deltas: &[[i32; 2]],
-    board: Board,
-) -> Vec<Coord> {
-    let mut ans = vec![];
-    for delta in deltas {
-        ans.append(&mut apply_single_delta_if_zero_or_one_intervention(
-            coord, *delta, board,
-        ));
-    }
-    ans
-}
-
 /// Returns the list of all possible locations that a piece can move to / step on.
 /// # Examples
 /// ```
@@ -390,7 +361,7 @@ pub fn calculate_movable_positions_for_nontam(
            Profession::Tuk2 => // Shaman, 巫, terlsk
               MovablePositions {
                finite: vec![],
-               infinite: apply_deltas_if_zero_or_one_intervention(
+               infinite: vec::apply_deltas_if_zero_or_one_intervention(
                  coord,
                  &[
                    &UP[..],
