@@ -55,12 +55,8 @@ fn can_get_occupied_by(
     }
 }
 
-fn empty_neighbors_of(board: Board, c: Coord) -> Vec<Coord> {
-    calculate_movable::eight_neighborhood(c)
-        .iter()
-        .filter(|[i, j]| board[*i][*j].is_none())
-        .copied()
-        .collect()
+fn empty_neighbors_of(board: Board, c: Coord) -> impl Iterator<Item = Coord> {
+    calculate_movable::eight_neighborhood_iter(c).filter(move |[i, j]| board[*i][*j].is_none())
 }
 
 fn can_get_occupied_by_non_tam(
@@ -260,10 +256,10 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 /* if not, step from there */
                                 let step: Coord = *neighbor;
                                 empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
-                                    .iter().flat_map(|snd_dst| {
+                                    .flat_map(|snd_dst| {
                                     vec![PureMove::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.perspective),
-                                        second_dest: to_absolute_coord(*snd_dst, game_state.perspective),
+                                        second_dest: to_absolute_coord(snd_dst, game_state.perspective),
                                         src: to_absolute_coord(src, game_state.perspective),
                                         step: to_absolute_coord(step, game_state.perspective),
                                     }].into_iter()
@@ -275,33 +271,28 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         let step = tentative_dest;
                         ans.append(
                             &mut empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
-                                .iter()
                                 .flat_map(|fst_dst| {
                                     let v = empty_neighbors_of(
                                         rotate_board(subtracted_rotated_board),
-                                        *fst_dst,
+                                        fst_dst,
                                     );
-                                    v.iter()
-                                        .flat_map(move |snd_dst| {
-                                            vec![PureMove::TamMoveStepsDuringFormer {
-                                                first_dest: to_absolute_coord(
-                                                    *fst_dst,
-                                                    game_state.perspective,
-                                                ),
-                                                second_dest: to_absolute_coord(
-                                                    *snd_dst,
-                                                    game_state.perspective,
-                                                ),
-                                                src: to_absolute_coord(src, game_state.perspective),
-                                                step: to_absolute_coord(
-                                                    step,
-                                                    game_state.perspective,
-                                                ),
-                                            }]
-                                            .into_iter()
-                                        })
-                                        .collect::<Vec<PureMove>>()
+                                    v.flat_map(move |snd_dst| {
+                                        vec![PureMove::TamMoveStepsDuringFormer {
+                                            first_dest: to_absolute_coord(
+                                                fst_dst,
+                                                game_state.perspective,
+                                            ),
+                                            second_dest: to_absolute_coord(
+                                                snd_dst,
+                                                game_state.perspective,
+                                            ),
+                                            src: to_absolute_coord(src, game_state.perspective),
+                                            step: to_absolute_coord(step, game_state.perspective),
+                                        }]
                                         .into_iter()
+                                    })
+                                    .collect::<Vec<PureMove>>()
+                                    .into_iter()
                                 })
                                 .collect::<Vec<PureMove>>(),
                         );

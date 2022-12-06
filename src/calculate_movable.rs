@@ -21,6 +21,23 @@ pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
     )
 }
 
+
+pub fn eight_neighborhood_iter(coord: Coord) -> impl Iterator<Item = Coord> {
+    apply_deltas_to_iter(
+        coord,
+        [
+            [-1, -1],
+            [-1, 0],
+            [-1, 1],
+            [0, -1],
+            [0, 1],
+            [1, -1],
+            [1, 0],
+            [1, 1],
+        ].into_iter(),
+    )
+}
+
 pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
     // unconditionally TamHue
     if coord == [2, 2]
