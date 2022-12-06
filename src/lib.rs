@@ -56,7 +56,8 @@ fn can_get_occupied_by(
 }
 
 fn empty_neighbors_of(board: Board, c: Coord) -> impl Iterator<Item = Coord> {
-    calculate_movable::eight_neighborhood_iter(c).filter(move |[i, j]| board[*i][*j].is_none())
+    calculate_movable::iter::eight_neighborhood(c)
+        .filter(move |[i, j]| board[*i][*j].is_none())
 }
 
 fn can_get_occupied_by_non_tam(
@@ -67,7 +68,7 @@ fn can_get_occupied_by_non_tam(
 ) -> bool {
     /* Intentionally does not verify whether the piece itself is of opponent */
     let is_protected_by_opponent_tam_hue_auai = |side: Side, coord: Coord| {
-        calculate_movable::eight_neighborhood(coord)
+        calculate_movable::vec::eight_neighborhood(coord)
             .into_iter()
             .filter(|[a, b]| {
                 let piece = board[*a][*b];
@@ -124,7 +125,8 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
             if let Some(p) = piece {
                 match p {
                     Piece::Tam2 => {
-                        let candidates: Vec<Coord> = calculate_movable::eight_neighborhood(src);
+                        let candidates: Vec<Coord> =
+                            calculate_movable::vec::eight_neighborhood(src);
                         for tentative_dest in candidates {
                             let dest_piece =
                                 game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
@@ -136,11 +138,11 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             if dest_piece.is_none() {
                                 /* empty square; first move is completed without stepping */
                                 let fst_dst: Coord = tentative_dest;
-                                ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
+                                ans.append(&mut calculate_movable::iter::eight_neighborhood(fst_dst).flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
-                            let snd_dst: Coord = *neighbor;
+                            let snd_dst: Coord = neighbor;
                             if game_state.f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
-                                *neighbor == src
+                                neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
                                 vec![PureMove::TamMoveNoStep {
@@ -150,7 +152,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 }].into_iter()
                             } else {
                                 /* if not, step from there */
-                                let step: Coord = *neighbor;
+                                let step: Coord = neighbor;
                                 empty_neighbors_of(subtracted_board, step)
                                     .flat_map(|snd_dst| {
                                     vec![PureMove::TamMoveStepsDuringLatter {
@@ -209,7 +211,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 prof,
                                 game_state.f.current_board,
                                 game_state.tam_itself_is_tam_hue,
-                                Side::Downward
+                                Side::Downward,
                             );
 
                         let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
@@ -232,7 +234,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                         prof,
                                         subtracted_board,
                                         tam_itself_is_tam_hue,
-                                        Side::Downward
+                                        Side::Downward,
                                     );
 
                                 let candidates = finite.into_iter();

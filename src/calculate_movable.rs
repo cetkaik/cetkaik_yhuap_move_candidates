@@ -2,37 +2,134 @@ use alloc::vec::Vec;
 
 use super::{Board, Color, Coord, MovablePositions, NonTam2PieceUpward, Piece, Profession, Side};
 
-pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
-    apply_deltas(
-        coord,
-        &[
-            [-1, -1],
-            [-1, 0],
-            [-1, 1],
-            [0, -1],
-            [0, 1],
-            [1, -1],
-            [1, 0],
-            [1, 1],
-        ],
-    )
+pub mod vec {
+    use super::{iter, Board, Coord, Vec};
+    pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
+        apply_deltas(
+            coord,
+            &[
+                [-1, -1],
+                [-1, 0],
+                [-1, 1],
+                [0, -1],
+                [0, 1],
+                [1, -1],
+                [1, 0],
+                [1, 1],
+            ],
+        )
+    }
+    pub fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
+        let [i, j] = coord;
+        deltas
+            .iter()
+            .map(|[delta_x, delta_y]| {
+                [
+                    i32::try_from(i).unwrap() + delta_x,
+                    i32::try_from(j).unwrap() + delta_y,
+                ]
+            })
+            .filter_map(|[l, m]| {
+                if (0..=8).contains(&l) && (0..=8).contains(&m) {
+                    Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+    pub fn apply_single_delta_if_no_intervention(
+        coord: Coord,
+        delta: [i32; 2],
+        board: Board,
+    ) -> Vec<Coord> {
+        let mut blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+
+        // if nothing is blocking the way
+        if blocker.all(|[i, j]| board[i][j].is_none()) {
+            apply_deltas(coord, &[delta])
+        } else {
+            vec![]
+        }
+    }
+
+    pub fn apply_deltas_if_no_intervention(
+        coord: Coord,
+        deltas: &[[i32; 2]],
+        board: Board,
+    ) -> Vec<Coord> {
+        iter::apply_deltas_if_no_intervention(coord, deltas, board).collect()
+    }
 }
 
-pub fn eight_neighborhood_iter(coord: Coord) -> impl Iterator<Item = Coord> {
-    apply_deltas_to_iter(
-        coord,
-        [
-            [-1, -1],
-            [-1, 0],
-            [-1, 1],
-            [0, -1],
-            [0, 1],
-            [1, -1],
-            [1, 0],
-            [1, 1],
-        ]
-        .into_iter(),
-    )
+pub mod iter {
+    use super::{Board, Coord};
+    pub fn eight_neighborhood(coord: Coord) -> impl Iterator<Item = Coord> {
+        apply_deltas(
+            coord,
+            [
+                [-1, -1],
+                [-1, 0],
+                [-1, 1],
+                [0, -1],
+                [0, 1],
+                [1, -1],
+                [1, 0],
+                [1, 1],
+            ]
+            .into_iter(),
+        )
+    }
+    pub fn apply_deltas(
+        coord: Coord,
+        deltas: impl Iterator<Item = [i32; 2]>,
+    ) -> impl Iterator<Item = Coord> {
+        let [i, j] = coord;
+        deltas
+            .map(move |[delta_x, delta_y]| {
+                [
+                    i32::try_from(i).unwrap() + delta_x,
+                    i32::try_from(j).unwrap() + delta_y,
+                ]
+            })
+            .filter_map(|[l, m]| {
+                if (0..=8).contains(&l) && (0..=8).contains(&m) {
+                    Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
+                } else {
+                    None
+                }
+            })
+    }
+
+    pub fn apply_single_delta_if_no_intervention(
+        coord: Coord,
+        delta: [i32; 2],
+        board: Board,
+    ) -> impl Iterator<Item = Coord> {
+        let mut blocker = apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+
+        // if nothing is blocking the way
+        apply_deltas(
+            coord,
+            if blocker.all(|[i, j]| board[i][j].is_none()) {
+                Some(delta)
+            } else {
+                None
+            }
+            .into_iter(),
+        )
+    }
+
+    pub fn apply_deltas_if_no_intervention(
+        coord: Coord,
+        deltas: &[[i32; 2]],
+        board: Board,
+    ) -> impl Iterator<Item = Coord> + '_ {
+        deltas
+            .iter()
+            .copied()
+            .flat_map(move |delta| apply_single_delta_if_no_intervention(coord, delta, board))
+    }
 }
 
 pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
@@ -55,84 +152,7 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
     }
 
     // is Tam2 available at any neighborhood?
-    eight_neighborhood(coord)
-        .iter()
-        .any(|[i, j]| board[*i][*j] == Some(Piece::Tam2))
-}
-
-fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
-    let [i, j] = coord;
-    deltas
-        .iter()
-        .map(|[delta_x, delta_y]| {
-            [
-                i32::try_from(i).unwrap() + delta_x,
-                i32::try_from(j).unwrap() + delta_y,
-            ]
-        })
-        .filter_map(|[l, m]| {
-            if (0..=8).contains(&l) && (0..=8).contains(&m) {
-                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
-            } else {
-                None
-            }
-        })
-        .collect()
-}
-
-fn apply_deltas_to_iter(
-    coord: Coord,
-    deltas: impl Iterator<Item = [i32; 2]>,
-) -> impl Iterator<Item = Coord> {
-    let [i, j] = coord;
-    deltas
-        .map(move |[delta_x, delta_y]| {
-            [
-                i32::try_from(i).unwrap() + delta_x,
-                i32::try_from(j).unwrap() + delta_y,
-            ]
-        })
-        .filter_map(|[l, m]| {
-            if (0..=8).contains(&l) && (0..=8).contains(&m) {
-                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
-            } else {
-                None
-            }
-        })
-}
-
-fn apply_single_delta_if_no_intervention(
-    coord: Coord,
-    delta: [i32; 2],
-    board: Board,
-) -> Vec<Coord> {
-    let mut blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
-
-    // if nothing is blocking the way
-    if blocker.all(|[i, j]| board[i][j].is_none()) {
-        apply_deltas(coord, &[delta])
-    } else {
-        vec![]
-    }
-}
-
-fn apply_single_delta_if_no_intervention_iter(
-    coord: Coord,
-    delta: [i32; 2],
-    board: Board,
-) -> impl Iterator<Item = Coord> {
-    let mut blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
-
-    // if nothing is blocking the way
-    apply_deltas_to_iter(
-        coord,
-        if blocker.all(|[i, j]| board[i][j].is_none()) {
-            Some(delta)
-        } else {
-            None
-        }
-        .into_iter(),
-    )
+    iter::eight_neighborhood(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
 }
 
 fn apply_single_delta_if_zero_or_one_intervention(
@@ -140,29 +160,14 @@ fn apply_single_delta_if_zero_or_one_intervention(
     delta: [i32; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
+    let blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if no piece or a single piece is blocking the way
     if blocker.filter(|[i, j]| board[*i][*j].is_some()).count() <= 1 {
-        apply_deltas(coord, &[delta])
+        vec::apply_deltas(coord, &[delta])
     } else {
         vec![]
     }
-}
-
-fn apply_deltas_if_no_intervention_iter(
-    coord: Coord,
-    deltas: &[[i32; 2]],
-    board: Board,
-) -> impl Iterator<Item = Coord> + '_ {
-    deltas
-        .iter()
-        .copied()
-        .flat_map(move |delta| apply_single_delta_if_no_intervention_iter(coord, delta, board))
-}
-
-fn apply_deltas_if_no_intervention(coord: Coord, deltas: &[[i32; 2]], board: Board) -> Vec<Coord> {
-    apply_deltas_if_no_intervention_iter(coord, deltas, board).collect()
 }
 
 fn apply_deltas_if_zero_or_one_intervention(
@@ -302,7 +307,7 @@ impl From<TamOrUpwardPiece> for Piece {
 
 pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
     MovablePositions {
-        finite: eight_neighborhood(coord),
+        finite: vec::eight_neighborhood(coord),
         infinite: vec![],
     }
 }
@@ -395,10 +400,10 @@ pub fn calculate_movable_positions_for_nontam(
     if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
            Profession::Io | Profession::Uai1 => // General, 将, varxle
-            MovablePositions { finite: eight_neighborhood(coord), infinite: vec![] },
+            MovablePositions { finite: vec::eight_neighborhood(coord), infinite: vec![] },
             Profession::Kaun1 =>
             MovablePositions {
-              finite: apply_deltas(coord, &[
+              finite: vec::apply_deltas(coord, &[
                 [-2, -2],
                 [-2, 2],
                 [2, 2],
@@ -409,24 +414,24 @@ pub fn calculate_movable_positions_for_nontam(
             Profession::Kauk2 => // Pawn, 兵, elmer
             MovablePositions  {
               finite: [
-                &apply_deltas(coord, &[
+                &vec::apply_deltas(coord, &[
                   [-1, 0],
                   [0, -1],
                   [0, 1],
                   [1, 0]
                 ])[..],
-                &apply_single_delta_if_no_intervention(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
+                &vec::apply_single_delta_if_no_intervention(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
               ].concat(),
               infinite: vec![]
             },
             Profession::Nuak1 => // Vessel, 船, felkana
             MovablePositions  {
               finite: [
-                &apply_deltas(coord, &[
+                &vec::apply_deltas(coord, &[
                   [0, -1],
                   [0, 1]
                 ])[..],
-                &apply_deltas_if_no_intervention(
+                &vec::apply_deltas_if_no_intervention(
                   coord,
                   &[
                     [0, -2],
@@ -435,13 +440,13 @@ pub fn calculate_movable_positions_for_nontam(
                   board
                 )[..]
               ].concat(),
-              infinite: apply_deltas_if_no_intervention(coord, &[&UP[..], &DOWN[..]].concat(), board)
+              infinite: vec::apply_deltas_if_no_intervention(coord, &[&UP[..], &DOWN[..]].concat(), board)
             },
             Profession::Gua2 | // Rook, 弓, gustuer
             Profession::Dau2 => // Tiger, 虎, stistyst
                MovablePositions {
                 finite: vec![],
-                infinite: apply_deltas_if_no_intervention(
+                infinite: vec::apply_deltas_if_no_intervention(
                     coord,
                     &DIAGONAL,
                     board
@@ -481,18 +486,18 @@ pub fn calculate_movable_positions_for_nontam(
                 ];
                 let mut inf: Vec<Coord> = vec![];
                 for delta in &HORSE_DELTAS {
-                  let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
+                  let blocker_deltas = crate::get_blocker_deltas::ultrafast(*delta).filter(
                     |d|
                       /*
                        * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because
                        * pieces here will not prevent Tam2HueAMaun1 from moving.
                        */
                       !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
-                  ).collect();
-                  let blocker: Vec<Coord> = apply_deltas(coord, &blocker_deltas);
+                  );
+                  let mut blocker = iter::apply_deltas(coord, blocker_deltas);
                   // if nothing is blocking the way
-                  if blocker.iter().all(|[i, j]| board[*i][*j].is_none()) {
-                    inf.append(&mut apply_deltas(coord, &[*delta]));
+                  if blocker.all(|[i, j]| board[i][j].is_none()) {
+                    inf.append(&mut vec::apply_deltas(coord, &[*delta]));
                   }
                 }
                 MovablePositions  {
@@ -503,7 +508,7 @@ pub fn calculate_movable_positions_for_nontam(
               Profession::Kua2 => // Clerk, 筆, kua
               MovablePositions  {
                finite: vec![],
-               infinite: apply_deltas_if_no_intervention(
+               infinite: vec::apply_deltas_if_no_intervention(
                  coord,
                  &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                  board
@@ -527,11 +532,11 @@ pub fn calculate_movable_positions_for_nontam(
     } else {
         match piece_prof {
             Profession::Io => MovablePositions {
-                finite: eight_neighborhood(coord),
+                finite: vec::eight_neighborhood(coord),
                 infinite: vec![],
             },
             Profession::Kauk2 => MovablePositions {
-                finite: apply_deltas(
+                finite: vec::apply_deltas(
                     coord,
                     &[if side == Side::Upward {
                         [-1, 0]
@@ -542,7 +547,7 @@ pub fn calculate_movable_positions_for_nontam(
                 infinite: vec![],
             }, // Pawn, 兵, elmer
             Profession::Kaun1 => MovablePositions {
-                finite: apply_deltas(coord, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
+                finite: vec::apply_deltas(coord, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
                 infinite: vec![],
             }, // 車, vadyrd
 
@@ -550,7 +555,7 @@ pub fn calculate_movable_positions_for_nontam(
             // Tiger, 虎, stistyst
             {
                 MovablePositions {
-                    finite: apply_deltas(coord, &[[-1, -1], [-1, 1], [1, -1], [1, 1]]),
+                    finite: vec::apply_deltas(coord, &[[-1, -1], [-1, 1], [1, -1], [1, 1]]),
                     infinite: vec![],
                 }
             }
@@ -559,7 +564,7 @@ pub fn calculate_movable_positions_for_nontam(
             // Horse, 馬, dodor
             {
                 MovablePositions {
-                    finite: apply_deltas(coord, &[[-2, -2], [-2, 2], [2, 2], [2, -2]]),
+                    finite: vec::apply_deltas(coord, &[[-2, -2], [-2, 2], [2, 2], [2, -2]]),
                     infinite: vec![],
                 }
             }
@@ -568,7 +573,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention(
                         coord,
                         if side == Side::Upward { &UP } else { &DOWN },
                         board,
@@ -580,7 +585,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention(
                         coord,
                         &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                         board,
@@ -591,8 +596,8 @@ pub fn calculate_movable_positions_for_nontam(
             // Clerk, 筆, kua
             {
                 MovablePositions {
-                    finite: apply_deltas(coord, &[[0, -1], [0, 1]]),
-                    infinite: apply_deltas_if_no_intervention(
+                    finite: vec::apply_deltas(coord, &[[0, -1], [0, 1]]),
+                    infinite: vec::apply_deltas_if_no_intervention(
                         coord,
                         &[&UP[..], &DOWN[..]].concat(),
                         board,
@@ -604,8 +609,8 @@ pub fn calculate_movable_positions_for_nontam(
             // Shaman, 巫, terlsk
             {
                 MovablePositions {
-                    finite: apply_deltas(coord, &[[-1, 0], [1, 0]]),
-                    infinite: apply_deltas_if_no_intervention(coord, &LEFT_RIGHT, board),
+                    finite: vec::apply_deltas(coord, &[[-1, 0], [1, 0]]),
+                    infinite: vec::apply_deltas_if_no_intervention(coord, &LEFT_RIGHT, board),
                 }
             }
 
@@ -613,7 +618,7 @@ pub fn calculate_movable_positions_for_nontam(
             // General, 将, varxle
             {
                 MovablePositions {
-                    finite: apply_deltas(
+                    finite: vec::apply_deltas(
                         coord,
                         &[
                             [-1, -1],
