@@ -204,11 +204,12 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         color,
                     } => {
                         let MovablePositions { finite, infinite } =
-                            calculate_movable::calculate_movable_positions_for_downward(
+                            calculate_movable::calculate_movable_positions_for_nontam(
                                 src,
                                 prof,
                                 game_state.f.current_board,
                                 game_state.tam_itself_is_tam_hue,
+                                Side::Downward
                             );
 
                         let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
@@ -226,11 +227,12 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
 
                                 let MovablePositions { finite, infinite } =
-                                    calculate_movable::calculate_movable_positions_for_downward(
+                                    calculate_movable::calculate_movable_positions_for_nontam(
                                         step,
                                         prof,
                                         subtracted_board,
                                         tam_itself_is_tam_hue,
+                                        Side::Downward
                                     );
 
                                 let candidates = finite.into_iter();

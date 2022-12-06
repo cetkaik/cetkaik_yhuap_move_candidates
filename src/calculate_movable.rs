@@ -241,13 +241,8 @@ pub fn calculate_movable_positions_for_either_side(
         Piece::NonTam2Piece {
             prof,
             color: _,
-            side: Side::Upward,
-        } => calculate_movable_positions_for_upward(coord, prof, board, tam_itself_is_tam_hue),
-        Piece::NonTam2Piece {
-            prof,
-            color: _,
-            side: Side::Downward,
-        } => calculate_movable_positions_for_downward(coord, prof, board, tam_itself_is_tam_hue),
+            side,
+        } => calculate_movable_positions_for_nontam(coord, prof, board, tam_itself_is_tam_hue, side),
     }
 }
 
@@ -279,328 +274,6 @@ impl From<TamOrUpwardPiece> for Piece {
     }
 }
 
-pub fn calculate_movable_positions_for_downward(
-    coord_: Coord,
-    prof: Profession,
-    board_: Board,
-    tam_itself_is_tam_hue: bool,
-) -> MovablePositions {
-    const UP_LEFT: [[i32; 2]; 8] = [
-        [-8, -8],
-        [-7, -7],
-        [-6, -6],
-        [-5, -5],
-        [-4, -4],
-        [-3, -3],
-        [-2, -2],
-        [-1, -1],
-    ];
-    const UP_RIGHT: [[i32; 2]; 8] = [
-        [-8, 8],
-        [-7, 7],
-        [-6, 6],
-        [-5, 5],
-        [-4, 4],
-        [-3, 3],
-        [-2, 2],
-        [-1, 1],
-    ];
-    const DOWN_LEFT: [[i32; 2]; 8] = [
-        [8, -8],
-        [7, -7],
-        [6, -6],
-        [5, -5],
-        [4, -4],
-        [3, -3],
-        [2, -2],
-        [1, -1],
-    ];
-    const DOWN_RIGHT: [[i32; 2]; 8] = [
-        [8, 8],
-        [7, 7],
-        [6, 6],
-        [5, 5],
-        [4, 4],
-        [3, 3],
-        [2, 2],
-        [1, 1],
-    ];
-    const UP: [[i32; 2]; 8] = [
-        [-1, 0],
-        [-2, 0],
-        [-3, 0],
-        [-4, 0],
-        [-5, 0],
-        [-6, 0],
-        [-7, 0],
-        [-8, 0],
-    ];
-    const DOWN: [[i32; 2]; 8] = [
-        [1, 0],
-        [2, 0],
-        [3, 0],
-        [4, 0],
-        [5, 0],
-        [6, 0],
-        [7, 0],
-        [8, 0],
-    ];
-    const LEFT: [[i32; 2]; 8] = [
-        [0, -1],
-        [0, -2],
-        [0, -3],
-        [0, -4],
-        [0, -5],
-        [0, -6],
-        [0, -7],
-        [0, -8],
-    ];
-    const RIGHT: [[i32; 2]; 8] = [
-        [0, 1],
-        [0, 2],
-        [0, 3],
-        [0, 4],
-        [0, 5],
-        [0, 6],
-        [0, 7],
-        [0, 8],
-    ];
-
-    let piece_prof = prof;
-
-    if is_tam_hue(coord_, board_, tam_itself_is_tam_hue) {
-        match piece_prof {
-           Profession::Io | Profession::Uai1 => // General, 将, varxle
-            MovablePositions { finite: eight_neighborhood(coord_), infinite: vec![] },
-           Profession::Kaun1 =>
-            MovablePositions {
-              finite: apply_deltas(coord_, &[
-                [-2, -2],
-                [-2, 2],
-                [2, 2],
-                [2, -2]
-              ]),
-              infinite: vec![]
-            }, // 車, vadyrd
-          Profession::Kauk2 => // Pawn, 兵, elmer
-            MovablePositions  {
-              finite: [
-                &apply_deltas(coord_, &[
-                  [1, 0],
-                  [0, 1],
-                  [0, -1],
-                  [-1, 0]
-                ])[..],
-                &apply_single_delta_if_no_intervention(coord_, [2, 0], board_)[..]
-              ].concat(),
-              infinite: vec![]
-            },
-          Profession::Nuak1 => // Vessel, 船, felkana
-            MovablePositions  {
-              finite: [
-                &apply_deltas(coord_, &[
-                  [0, 1],
-                  [0, -1]
-                ])[..],
-                &apply_deltas_if_no_intervention(
-                  coord_,
-                  &[
-                    [0, 2],
-                    [0, -2]
-                  ],
-                  board_
-                )[..]
-              ].concat(),
-              infinite: apply_deltas_if_no_intervention(coord_, &[&UP[..], &DOWN[..]].concat(), board_)
-            },
-          Profession::Gua2 | // Rook, 弓, gustuer
-          Profession::Dau2 => // Tiger, 虎, stistyst
-             MovablePositions {
-              finite: vec![],
-              infinite: apply_deltas_if_no_intervention(
-                  coord_,
-                  &[&UP_LEFT[..], &UP_RIGHT[..], &DOWN_LEFT[..], &DOWN_RIGHT[..]].concat(),
-                  board_
-              )
-            },
-          Profession::Maun1 => {
-            // Horse, 馬, dodor
-            const DELTAS: [[i32; 2] ; 28] = [
-              [-8, -8],
-              [-7, -7],
-              [-6, -6],
-              [-5, -5],
-              [-4, -4],
-              [-3, -3],
-              [-2, -2],
-              [-8, 8],
-              [-7, 7],
-              [-6, 6],
-              [-5, 5],
-              [-4, 4],
-              [-3, 3],
-              [-2, 2],
-              [8, -8],
-              [7, -7],
-              [6, -6],
-              [5, -5],
-              [4, -4],
-              [3, -3],
-              [2, -2],
-              [8, 8],
-              [7, 7],
-              [6, 6],
-              [5, 5],
-              [4, 4],
-              [3, 3],
-              [2, 2]
-            ];
-            let mut inf: Vec<Coord> = vec![];
-            for delta in &DELTAS {
-              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
-                |d|
-                  /*
-                   * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because
-                   * pieces here will not prevent Tam2HueAMaun1 from moving.
-                   */
-                  !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
-              ).collect();
-              let blocker: Vec<Coord> = apply_deltas(coord_, &blocker_deltas);
-              // if nothing is blocking the way
-              if blocker.iter().all(|[i, j]| board_[*i][*j].is_none()) {
-                inf.append(&mut apply_deltas(coord_, &[*delta]));
-              }
-            }
-            MovablePositions  {
-              finite: vec![],
-              infinite: inf
-            }
-          }
-          Profession::Kua2 => // Clerk, 筆, kua
-             MovablePositions  {
-              finite: vec![],
-              infinite: apply_deltas_if_no_intervention(
-                coord_,
-                &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
-                board_
-              )
-            },
-          Profession::Tuk2 => // Shaman, 巫, terlsk
-             MovablePositions {
-              finite: vec![],
-              infinite: apply_deltas_if_zero_or_one_intervention(
-                coord_,
-                &[
-                  &UP[..],
-                  &DOWN[..],
-                  &LEFT[..],
-                  &RIGHT[..],
-                  &UP_LEFT[..],
-                  &UP_RIGHT[..],
-                  &DOWN_LEFT[..],
-                  &DOWN_RIGHT[..]
-                ].concat(),
-                board_
-              )
-            },
-        }
-    } else {
-        match piece_prof {
-            Profession::Io => MovablePositions {
-                finite: eight_neighborhood(coord_),
-                infinite: vec![],
-            },
-            Profession::Kauk2 => MovablePositions {
-                finite: apply_deltas(coord_, &[[1, 0]]),
-                infinite: vec![],
-            }, // Pawn, 兵, elmer
-
-            Profession::Kaun1 => MovablePositions {
-                finite: apply_deltas(coord_, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
-                infinite: vec![],
-            }, // 車, vadyrd
-
-            Profession::Dau2 =>
-            // Tiger, 虎, stistyst
-            {
-                MovablePositions {
-                    finite: apply_deltas(coord_, &[[-1, -1], [-1, 1], [1, -1], [1, 1]]),
-                    infinite: vec![],
-                }
-            }
-
-            Profession::Maun1 =>
-            // Horse, 馬, dodor
-            {
-                MovablePositions {
-                    finite: apply_deltas(coord_, &[[-2, -2], [-2, 2], [2, 2], [2, -2]]),
-                    infinite: vec![],
-                }
-            }
-
-            Profession::Nuak1 =>
-            // Vessel, 船, felkana
-            {
-                MovablePositions {
-                    finite: vec![],
-                    infinite: apply_deltas_if_no_intervention(coord_, &DOWN, board_),
-                }
-            }
-
-            Profession::Gua2 =>
-            // Rook, 弓, gustuer
-            {
-                MovablePositions {
-                    finite: vec![],
-                    infinite: apply_deltas_if_no_intervention(
-                        coord_,
-                        &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
-                        board_,
-                    ),
-                }
-            }
-
-            Profession::Kua2 =>
-            // Clerk, 筆, kua
-            {
-                MovablePositions {
-                    finite: apply_deltas(coord_, &[[0, -1], [0, 1]]),
-                    infinite: apply_deltas_if_no_intervention(
-                        coord_,
-                        &[&UP[..], &DOWN[..]].concat(),
-                        board_,
-                    ),
-                }
-            }
-
-            Profession::Tuk2 =>
-            // Shaman, 巫, terlsk
-            {
-                MovablePositions {
-                    finite: apply_deltas(coord_, &[[-1, 0], [1, 0]]),
-                    infinite: apply_deltas_if_no_intervention(
-                        coord_,
-                        &[&LEFT[..], &RIGHT[..]].concat(),
-                        board_,
-                    ),
-                }
-            }
-
-            Profession::Uai1 =>
-            // General, 将, varxle
-            {
-                MovablePositions {
-                    finite: apply_deltas(
-                        coord_,
-                        &[[1, 1], [1, 0], [1, -1], [0, 1], [0, -1], [-1, 1], [-1, -1]],
-                    ),
-                    infinite: vec![],
-                }
-            }
-        }
-    }
-}
-
 pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
     MovablePositions {
         finite: eight_neighborhood(coord),
@@ -608,11 +281,12 @@ pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
     }
 }
 
-pub fn calculate_movable_positions_for_upward(
+pub fn calculate_movable_positions_for_nontam(
     coord: Coord,
     prof: Profession,
     board: Board,
     tam_itself_is_tam_hue: bool,
+    side: Side,
 ) -> MovablePositions {
     const UP_LEFT: [[i32; 2]; 8] = [
         [-8, -8],
@@ -696,12 +370,11 @@ pub fn calculate_movable_positions_for_upward(
     ];
 
     let piece_prof = prof;
-
     if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
            Profession::Io | Profession::Uai1 => // General, 将, varxle
             MovablePositions { finite: eight_neighborhood(coord), infinite: vec![] },
-           Profession::Kaun1 =>
+            Profession::Kaun1 =>
             MovablePositions {
               finite: apply_deltas(coord, &[
                 [-2, -2],
@@ -711,7 +384,7 @@ pub fn calculate_movable_positions_for_upward(
               ]),
               infinite: vec![]
             }, // 車, vadyrd
-          Profession::Kauk2 => // Pawn, 兵, elmer
+            Profession::Kauk2 => // Pawn, 兵, elmer
             MovablePositions  {
               finite: [
                 &apply_deltas(coord, &[
@@ -720,11 +393,11 @@ pub fn calculate_movable_positions_for_upward(
                   [0, 1],
                   [1, 0]
                 ])[..],
-                &apply_single_delta_if_no_intervention(coord, [-2, 0], board)[..]
+                &apply_single_delta_if_no_intervention(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
               ].concat(),
               infinite: vec![]
             },
-          Profession::Nuak1 => // Vessel, 船, felkana
+            Profession::Nuak1 => // Vessel, 船, felkana
             MovablePositions  {
               finite: [
                 &apply_deltas(coord, &[
@@ -742,97 +415,97 @@ pub fn calculate_movable_positions_for_upward(
               ].concat(),
               infinite: apply_deltas_if_no_intervention(coord, &[&UP[..], &DOWN[..]].concat(), board)
             },
-          Profession::Gua2 | // Rook, 弓, gustuer
-          Profession::Dau2 => // Tiger, 虎, stistyst
-             MovablePositions  {
-              finite: vec![],
-              infinite: apply_deltas_if_no_intervention(
-                  coord,
-                  &[&UP_LEFT[..], &UP_RIGHT[..], &DOWN_LEFT[..], &DOWN_RIGHT[..]].concat(),
-                  board
-              )
-            },
-          Profession::Maun1 => {
-            // Horse, 馬, dodor
-            const DELTAS: [[i32; 2] ; 28] = [
-              [-8, -8],
-              [-7, -7],
-              [-6, -6],
-              [-5, -5],
-              [-4, -4],
-              [-3, -3],
-              [-2, -2],
-              [-8, 8],
-              [-7, 7],
-              [-6, 6],
-              [-5, 5],
-              [-4, 4],
-              [-3, 3],
-              [-2, 2],
-              [8, -8],
-              [7, -7],
-              [6, -6],
-              [5, -5],
-              [4, -4],
-              [3, -3],
-              [2, -2],
-              [8, 8],
-              [7, 7],
-              [6, 6],
-              [5, 5],
-              [4, 4],
-              [3, 3],
-              [2, 2]
-            ];
-            let mut inf: Vec<Coord> = vec![];
-            for delta in &DELTAS {
-              let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
-                |d|
-                  /*
-                   * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because
-                   * pieces here will not prevent Tam2HueAMaun1 from moving.
-                   */
-                  !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
-              ).collect();
-              let blocker: Vec<Coord> = apply_deltas(coord, &blocker_deltas);
-              // if nothing is blocking the way
-              if blocker.iter().all(|[i, j]| board[*i][*j].is_none()) {
-                inf.append(&mut apply_deltas(coord, &[*delta]));
+            Profession::Gua2 | // Rook, 弓, gustuer
+            Profession::Dau2 => // Tiger, 虎, stistyst
+               MovablePositions {
+                finite: vec![],
+                infinite: apply_deltas_if_no_intervention(
+                    coord,
+                    &[&UP_LEFT[..], &UP_RIGHT[..], &DOWN_LEFT[..], &DOWN_RIGHT[..]].concat(),
+                    board
+                )
+              },
+              Profession::Maun1 => {
+                // Horse, 馬, dodor
+                const DELTAS: [[i32; 2] ; 28] = [
+                  [-8, -8],
+                  [-7, -7],
+                  [-6, -6],
+                  [-5, -5],
+                  [-4, -4],
+                  [-3, -3],
+                  [-2, -2],
+                  [-8, 8],
+                  [-7, 7],
+                  [-6, 6],
+                  [-5, 5],
+                  [-4, 4],
+                  [-3, 3],
+                  [-2, 2],
+                  [8, -8],
+                  [7, -7],
+                  [6, -6],
+                  [5, -5],
+                  [4, -4],
+                  [3, -3],
+                  [2, -2],
+                  [8, 8],
+                  [7, 7],
+                  [6, 6],
+                  [5, 5],
+                  [4, 4],
+                  [3, 3],
+                  [2, 2]
+                ];
+                let mut inf: Vec<Coord> = vec![];
+                for delta in &DELTAS {
+                  let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
+                    |d|
+                      /*
+                       * remove [-1, 1], [-1, -1], [1, -1] and [1, 1], because
+                       * pieces here will not prevent Tam2HueAMaun1 from moving.
+                       */
+                      !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
+                  ).collect();
+                  let blocker: Vec<Coord> = apply_deltas(coord, &blocker_deltas);
+                  // if nothing is blocking the way
+                  if blocker.iter().all(|[i, j]| board[*i][*j].is_none()) {
+                    inf.append(&mut apply_deltas(coord, &[*delta]));
+                  }
+                }
+                MovablePositions  {
+                  finite: vec![],
+                  infinite: inf
+                }
               }
-            }
-            MovablePositions  {
-              finite: vec![],
-              infinite: inf
-            }
-          }
-          Profession::Kua2 => // Clerk, 筆, kua
-             MovablePositions  {
-              finite: vec![],
-              infinite: apply_deltas_if_no_intervention(
-                coord,
-                &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
-                board
-              )
-            },
-          Profession::Tuk2 => // Shaman, 巫, terlsk
-             MovablePositions {
-              finite: vec![],
-              infinite: apply_deltas_if_zero_or_one_intervention(
-                coord,
-                &[
-                  &UP[..],
-                  &DOWN[..],
-                  &LEFT[..],
-                  &RIGHT[..],
-                  &UP_LEFT[..],
-                  &UP_RIGHT[..],
-                  &DOWN_LEFT[..],
-                  &DOWN_RIGHT[..]
-                ].concat(),
-                board
-              )
-            },
-        }
+              Profession::Kua2 => // Clerk, 筆, kua
+              MovablePositions  {
+               finite: vec![],
+               infinite: apply_deltas_if_no_intervention(
+                 coord,
+                 &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
+                 board
+               )
+             },
+           Profession::Tuk2 => // Shaman, 巫, terlsk
+              MovablePositions {
+               finite: vec![],
+               infinite: apply_deltas_if_zero_or_one_intervention(
+                 coord,
+                 &[
+                   &UP[..],
+                   &DOWN[..],
+                   &LEFT[..],
+                   &RIGHT[..],
+                   &UP_LEFT[..],
+                   &UP_RIGHT[..],
+                   &DOWN_LEFT[..],
+                   &DOWN_RIGHT[..]
+                 ].concat(),
+                 board
+               )
+             },
+         }
     } else {
         match piece_prof {
             Profession::Io => MovablePositions {
@@ -840,10 +513,16 @@ pub fn calculate_movable_positions_for_upward(
                 infinite: vec![],
             },
             Profession::Kauk2 => MovablePositions {
-                finite: apply_deltas(coord, &[[-1, 0]]),
+                finite: apply_deltas(
+                    coord,
+                    &[if side == Side::Upward {
+                        [-1, 0]
+                    } else {
+                        [1, 0]
+                    }],
+                ),
                 infinite: vec![],
             }, // Pawn, 兵, elmer
-
             Profession::Kaun1 => MovablePositions {
                 finite: apply_deltas(coord, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
                 infinite: vec![],
@@ -866,16 +545,18 @@ pub fn calculate_movable_positions_for_upward(
                     infinite: vec![],
                 }
             }
-
             Profession::Nuak1 =>
             // Vessel, 船, felkana
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: apply_deltas_if_no_intervention(coord, &UP, board),
+                    infinite: apply_deltas_if_no_intervention(
+                        coord,
+                        if side == Side::Upward { &UP } else { &DOWN },
+                        board,
+                    ),
                 }
             }
-
             Profession::Gua2 =>
             // Rook, 弓, gustuer
             {
@@ -888,7 +569,6 @@ pub fn calculate_movable_positions_for_upward(
                     ),
                 }
             }
-
             Profession::Kua2 =>
             // Clerk, 筆, kua
             {
@@ -921,7 +601,19 @@ pub fn calculate_movable_positions_for_upward(
                 MovablePositions {
                     finite: apply_deltas(
                         coord,
-                        &[[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 1]],
+                        &[
+                            [-1, -1],
+                            if side == Side::Upward {
+                                [-1, 0]
+                            } else {
+                                [1, 0]
+                            },
+                            [-1, 1],
+                            [0, -1],
+                            [0, 1],
+                            [1, -1],
+                            [1, 1],
+                        ],
                     ),
                     infinite: vec![],
                 }
