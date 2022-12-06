@@ -242,7 +242,9 @@ pub fn calculate_movable_positions_for_either_side(
             prof,
             color: _,
             side,
-        } => calculate_movable_positions_for_nontam(coord, prof, board, tam_itself_is_tam_hue, side),
+        } => {
+            calculate_movable_positions_for_nontam(coord, prof, board, tam_itself_is_tam_hue, side)
+        }
     }
 }
 
@@ -288,7 +290,8 @@ pub fn calculate_movable_positions_for_nontam(
     tam_itself_is_tam_hue: bool,
     side: Side,
 ) -> MovablePositions {
-    const UP_LEFT: [[i32; 2]; 8] = [
+    const DIAGONAL: [[i32; 2]; 32] = [
+        // UP_LEFT:
         [-8, -8],
         [-7, -7],
         [-6, -6],
@@ -297,8 +300,7 @@ pub fn calculate_movable_positions_for_nontam(
         [-3, -3],
         [-2, -2],
         [-1, -1],
-    ];
-    const UP_RIGHT: [[i32; 2]; 8] = [
+        // UP_RIGHT:
         [-8, 8],
         [-7, 7],
         [-6, 6],
@@ -307,8 +309,7 @@ pub fn calculate_movable_positions_for_nontam(
         [-3, 3],
         [-2, 2],
         [-1, 1],
-    ];
-    const DOWN_LEFT: [[i32; 2]; 8] = [
+        // DOWN_LEFT:
         [8, -8],
         [7, -7],
         [6, -6],
@@ -317,8 +318,7 @@ pub fn calculate_movable_positions_for_nontam(
         [3, -3],
         [2, -2],
         [1, -1],
-    ];
-    const DOWN_RIGHT: [[i32; 2]; 8] = [
+        // DOWN_RIGHT:
         [8, 8],
         [7, 7],
         [6, 6],
@@ -348,7 +348,7 @@ pub fn calculate_movable_positions_for_nontam(
         [7, 0],
         [8, 0],
     ];
-    const LEFT: [[i32; 2]; 8] = [
+    const LEFT_RIGHT: [[i32; 2]; 16] = [
         [0, -1],
         [0, -2],
         [0, -3],
@@ -357,8 +357,6 @@ pub fn calculate_movable_positions_for_nontam(
         [0, -6],
         [0, -7],
         [0, -8],
-    ];
-    const RIGHT: [[i32; 2]; 8] = [
         [0, 1],
         [0, 2],
         [0, 3],
@@ -421,13 +419,13 @@ pub fn calculate_movable_positions_for_nontam(
                 finite: vec![],
                 infinite: apply_deltas_if_no_intervention(
                     coord,
-                    &[&UP_LEFT[..], &UP_RIGHT[..], &DOWN_LEFT[..], &DOWN_RIGHT[..]].concat(),
+                    &DIAGONAL,
                     board
                 )
               },
               Profession::Maun1 => {
                 // Horse, 馬, dodor
-                const DELTAS: [[i32; 2] ; 28] = [
+                const HORSE_DELTAS: [[i32; 2] ; 28] = [
                   [-8, -8],
                   [-7, -7],
                   [-6, -6],
@@ -458,7 +456,7 @@ pub fn calculate_movable_positions_for_nontam(
                   [2, 2]
                 ];
                 let mut inf: Vec<Coord> = vec![];
-                for delta in &DELTAS {
+                for delta in &HORSE_DELTAS {
                   let blocker_deltas: Vec<[i32; 2]> = crate::get_blocker_deltas::ultrafast(*delta).filter(
                     |d|
                       /*
@@ -483,7 +481,7 @@ pub fn calculate_movable_positions_for_nontam(
                finite: vec![],
                infinite: apply_deltas_if_no_intervention(
                  coord,
-                 &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
+                 &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                  board
                )
              },
@@ -495,12 +493,8 @@ pub fn calculate_movable_positions_for_nontam(
                  &[
                    &UP[..],
                    &DOWN[..],
-                   &LEFT[..],
-                   &RIGHT[..],
-                   &UP_LEFT[..],
-                   &UP_RIGHT[..],
-                   &DOWN_LEFT[..],
-                   &DOWN_RIGHT[..]
+                   &LEFT_RIGHT[..],
+                   &DIAGONAL[..]
                  ].concat(),
                  board
                )
@@ -564,7 +558,7 @@ pub fn calculate_movable_positions_for_nontam(
                     finite: vec![],
                     infinite: apply_deltas_if_no_intervention(
                         coord,
-                        &[&UP[..], &DOWN[..], &LEFT[..], &RIGHT[..]].concat(),
+                        &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                         board,
                     ),
                 }
@@ -587,11 +581,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: apply_deltas(coord, &[[-1, 0], [1, 0]]),
-                    infinite: apply_deltas_if_no_intervention(
-                        coord,
-                        &[&LEFT[..], &RIGHT[..]].concat(),
-                        board,
-                    ),
+                    infinite: apply_deltas_if_no_intervention(coord, &LEFT_RIGHT, board),
                 }
             }
 
