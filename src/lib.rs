@@ -126,12 +126,13 @@ fn generate_candidates_when_stepping(
     let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
     subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
 
-    let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions_for_upward(
-        rotate_coord(step),
-        rotated_piece.into(),
-        subtracted_rotated_board,
-        tam_itself_is_tam_hue,
-    );
+    let MovablePositions { finite, infinite } =
+        calculate_movable::calculate_movable_positions_for_upward(
+            rotate_coord(step),
+            rotated_piece.into(),
+            subtracted_rotated_board,
+            tam_itself_is_tam_hue,
+        );
 
     let candidates = finite.iter().map(|c| rotate_coord(*c));
     let candidates_inf = infinite.iter().map(|c| rotate_coord(*c));
@@ -210,12 +211,13 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
         rotated_coord,
     } in get_opponent_pieces_and_tam_rotated(game_state)
     {
-        let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions_for_upward(
-            rotated_coord,
-            rotated_piece,
-            rotate_board(game_state.f.current_board),
-            game_state.tam_itself_is_tam_hue,
-        );
+        let MovablePositions { finite, infinite } =
+            calculate_movable::calculate_movable_positions_for_upward(
+                rotated_coord,
+                rotated_piece,
+                rotate_board(game_state.f.current_board),
+                game_state.tam_itself_is_tam_hue,
+            );
 
         let candidates: Vec<Coord> = [
             &finite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
