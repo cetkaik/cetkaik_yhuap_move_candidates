@@ -109,7 +109,7 @@ fn apply_single_delta_if_no_intervention(
     let mut blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    if blocker.all(|[i, j]| board[i][j] == None) {
+    if blocker.all(|[i, j]| board[i][j].is_none()) {
         apply_deltas(coord, &[delta])
     } else {
         vec![]
@@ -124,7 +124,7 @@ fn apply_single_delta_if_zero_or_one_intervention(
     let blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if no piece or a single piece is blocking the way
-    if blocker.filter(|[i, j]| board[*i][*j] != None).count() <= 1 {
+    if blocker.filter(|[i, j]| board[*i][*j].is_some()).count() <= 1 {
         apply_deltas(coord, &[delta])
     } else {
         vec![]
@@ -477,7 +477,7 @@ pub fn calculate_movable_positions_for_downward(
               ).collect();
               let blocker: Vec<Coord> = apply_deltas(coord_, &blocker_deltas);
               // if nothing is blocking the way
-              if blocker.iter().all(|[i, j]| board_[*i][*j] == None) {
+              if blocker.iter().all(|[i, j]| board_[*i][*j].is_none()) {
                 inf.append(&mut apply_deltas(coord_, &[*delta]));
               }
             }
@@ -811,7 +811,7 @@ pub fn calculate_movable_positions_for_upward(
               ).collect();
               let blocker: Vec<Coord> = apply_deltas(coord, &blocker_deltas);
               // if nothing is blocking the way
-              if blocker.iter().all(|[i, j]| board[*i][*j] == None) {
+              if blocker.iter().all(|[i, j]| board[*i][*j].is_none()) {
                 inf.append(&mut apply_deltas(coord, &[*delta]));
               }
             }

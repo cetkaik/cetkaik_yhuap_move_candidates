@@ -49,7 +49,7 @@ fn can_get_occupied_by(
         let [i, j] = dest;
         let dest_piece = board[i][j];
         /* It is allowed to enter an empty square */
-        dest_piece == None
+        dest_piece.is_none()
     } else {
         can_get_occupied_by_non_tam(side, dest, board, tam_itself_is_tam_hue)
     }
@@ -133,14 +133,13 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             let mut subtracted_board = game_state.f.current_board;
                             subtracted_board[src[0]][src[1]] = None;
                             // FIXME: tam2 ty sak2 not handled
-                            if dest_piece == None {
+                            if dest_piece.is_none() {
                                 /* empty square; first move is completed without stepping */
                                 let fst_dst: Coord = tentative_dest;
                                 ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: Coord = *neighbor;
-                            if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
-                                None /* the neighbor is utterly occupied */ ||
+                            if game_state.f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
                                 *neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
@@ -387,7 +386,7 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     for rand_i in 0..9 {
         for rand_j in 0..9 {
             let coord: Coord = [rand_i, rand_j];
-            if game_state.f.current_board[rand_i][rand_j] == None {
+            if game_state.f.current_board[rand_i][rand_j].is_none() {
                 ans.push(coord);
             }
         }
