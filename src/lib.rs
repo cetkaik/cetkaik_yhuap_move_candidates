@@ -398,7 +398,7 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-use cetkaik_core::relative::{is_water, Board, Coord, Field, NonTam2PieceUpward, Piece, Side};
+use cetkaik_core::relative::{is_water, Board, Coord, Field, Piece, Side};
 
 pub use cetkaik_core::absolute;
 
