@@ -116,6 +116,25 @@ fn apply_single_delta_if_no_intervention(
     }
 }
 
+fn apply_single_delta_if_no_intervention_iter(
+    coord: Coord,
+    delta: [i32; 2],
+    board: Board,
+) -> impl Iterator<Item = Coord> {
+    let mut blocker = apply_deltas_to_iter(coord, crate::get_blocker_deltas::ultrafast(delta));
+
+    // if nothing is blocking the way
+    apply_deltas_to_iter(
+        coord,
+        if blocker.all(|[i, j]| board[i][j].is_none()) {
+            Some(delta)
+        } else {
+            None
+        }
+        .into_iter(),
+    )
+}
+
 fn apply_single_delta_if_zero_or_one_intervention(
     coord: Coord,
     delta: [i32; 2],
@@ -131,14 +150,19 @@ fn apply_single_delta_if_zero_or_one_intervention(
     }
 }
 
+fn apply_deltas_if_no_intervention_iter(
+    coord: Coord,
+    deltas: &[[i32; 2]],
+    board: Board,
+) -> impl Iterator<Item = Coord> + '_ {
+    deltas
+        .iter()
+        .copied()
+        .flat_map(move |delta| apply_single_delta_if_no_intervention_iter(coord, delta, board))
+}
+
 fn apply_deltas_if_no_intervention(coord: Coord, deltas: &[[i32; 2]], board: Board) -> Vec<Coord> {
-    let mut ans = vec![];
-    for delta in deltas {
-        ans.append(&mut apply_single_delta_if_no_intervention(
-            coord, *delta, board,
-        ));
-    }
-    ans
+    apply_deltas_if_no_intervention_iter(coord, deltas, board).collect()
 }
 
 fn apply_deltas_if_zero_or_one_intervention(
