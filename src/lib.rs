@@ -219,7 +219,6 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
 
                             let candidates_when_stepping = || {
                                 let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
-                                let rotated_piece = NonTam2PieceUpward { color, prof };
 
                                 let perspective = game_state.perspective;
                                 let tam_itself_is_tam_hue: bool = game_state.tam_itself_is_tam_hue;
@@ -240,16 +239,12 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 [
                                     &candidates
                                         .flat_map(|final_dest| {
-                                            let NonTam2PieceUpward {
-                                                color: rotated_piece_color,
-                                                prof: rotated_piece_prof,
-                                            } = rotated_piece;
                                             if can_get_occupied_by(
                                                 Side::Downward,
                                                 final_dest,
                                                 Piece::NonTam2Piece {
-                                                    color: rotated_piece_color,
-                                                    prof: rotated_piece_prof,
+                                                    color,
+                                                    prof,
                                                     side: Side::Downward,
                                                 },
                                                 subtracted_board,
@@ -263,9 +258,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                                         perspective,
                                                     ),
                                                     is_water_entry_ciurl: is_ciurl_required(
-                                                        final_dest,
-                                                        rotated_piece_prof,
-                                                        src,
+                                                        final_dest, prof, src,
                                                     ),
                                                 }]
                                                 .into_iter()
@@ -276,16 +269,12 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                         .collect::<Vec<PureMove>>()[..],
                                     &candidates_inf
                                         .flat_map(|planned_dest| {
-                                            let NonTam2PieceUpward {
-                                                color: rotated_piece_color,
-                                                prof: rotated_piece_prof,
-                                            } = rotated_piece;
                                             if !can_get_occupied_by(
                                                 Side::Downward,
                                                 planned_dest,
                                                 Piece::NonTam2Piece {
-                                                    color: rotated_piece_color,
-                                                    prof: rotated_piece_prof,
+                                                    color,
+                                                    prof,
                                                     side: Side::Downward,
                                                 },
                                                 subtracted_board,
@@ -406,9 +395,7 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-use cetkaik_core::relative::{
-    is_water, Board, Coord, Field, NonTam2PieceUpward, Piece, Side,
-};
+use cetkaik_core::relative::{is_water, Board, Coord, Field, NonTam2PieceUpward, Piece, Side};
 
 pub use cetkaik_core::absolute;
 
