@@ -206,40 +206,46 @@ fn generate_candidates_when_stepping(
 #[must_use]
 pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
-    for Rotated {
-        rotated_piece,
-        rotated_coord,
-    } in get_opponent_pieces_and_tam_rotated(game_state)
-    {
-        let MovablePositions { finite, infinite } =
-            calculate_movable::calculate_movable_positions_for_upward(
-                rotated_coord,
-                rotated_piece,
-                rotate_board(game_state.f.current_board),
-                game_state.tam_itself_is_tam_hue,
-            );
+    for rand_i in 0..9 {
+        for rand_j in 0..9 {
+            let coord = [rand_i, rand_j];
+            let piece = game_state.f.current_board[rand_i][rand_j];
+            if let Some(p) = piece {
+                match p {
+                    Piece::Tam2 => {
+                        let rotated_coord = rotate_coord(coord);
+                        {
+                            let MovablePositions { finite, infinite } =
+                                calculate_movable::calculate_movable_positions_for_upward(
+                                    rotated_coord,
+                                    TamOrUpwardPiece::Tam2,
+                                    rotate_board(game_state.f.current_board),
+                                    game_state.tam_itself_is_tam_hue,
+                                );
 
-        let candidates: Vec<Coord> = [
-            &finite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
-            &infinite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
-        ]
-        .concat();
+                            let candidates: Vec<Coord> = [
+                                &finite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
+                                &infinite.into_iter().map(rotate_coord).collect::<Vec<_>>()[..],
+                            ]
+                            .concat();
 
-        let src: Coord = rotate_coord(rotated_coord);
+                            let src: Coord = rotate_coord(rotated_coord);
 
-        for tentative_dest in candidates {
-            let dest_piece = game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
+                            for tentative_dest in candidates {
+                                let dest_piece = game_state.f.current_board[tentative_dest[0]]
+                                    [tentative_dest[1]];
 
-            match rotated_piece {
-                TamOrUpwardPiece::Tam2 => {
-                    /* avoid self-occlusion */
-                    let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
-                    subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None;
-                    // FIXME: tam2 ty sak2 not handled
-                    if dest_piece == None {
-                        /* empty square; first move is completed without stepping */
-                        let fst_dst: Coord = tentative_dest;
-                        ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
+                                {
+                                    /* avoid self-occlusion */
+                                    let mut subtracted_rotated_board =
+                                        rotate_board(game_state.f.current_board);
+                                    subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] =
+                                        None;
+                                    // FIXME: tam2 ty sak2 not handled
+                                    if dest_piece == None {
+                                        /* empty square; first move is completed without stepping */
+                                        let fst_dst: Coord = tentative_dest;
+                                        ans.append(&mut calculate_movable::eight_neighborhood(fst_dst).iter().flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: Coord = *neighbor;
                             if game_state.f.current_board[neighbor[0]][neighbor[1]] ==
@@ -266,150 +272,155 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 }).collect::<Vec<PureMove>>().into_iter()
                             }
                         }).collect::<Vec<PureMove>>());
-                    } else {
-                        /* not an empty square: must complete the first move */
-                        let step = tentative_dest;
-                        ans.append(
-                            &mut empty_neighbors_of(rotate_board(subtracted_rotated_board), step)
-                                .flat_map(|fst_dst| {
-                                    let v = empty_neighbors_of(
-                                        rotate_board(subtracted_rotated_board),
-                                        fst_dst,
-                                    );
-                                    v.flat_map(move |snd_dst| {
-                                        vec![PureMove::TamMoveStepsDuringFormer {
-                                            first_dest: to_absolute_coord(
-                                                fst_dst,
-                                                game_state.perspective,
-                                            ),
-                                            second_dest: to_absolute_coord(
-                                                snd_dst,
-                                                game_state.perspective,
-                                            ),
-                                            src: to_absolute_coord(src, game_state.perspective),
-                                            step: to_absolute_coord(step, game_state.perspective),
-                                        }]
-                                        .into_iter()
-                                    })
-                                    .collect::<Vec<PureMove>>()
-                                    .into_iter()
-                                })
-                                .collect::<Vec<PureMove>>(),
-                        );
-                    }
-                }
-                TamOrUpwardPiece::NonTam2Piece {
-                    color: rotated_piece_color,
-                    prof: rotated_piece_prof,
-                } => {
-                    let candidates_when_stepping = || {
-                        generate_candidates_when_stepping(
-                            game_state,
-                            src,
-                            tentative_dest, // tentative_dest becomes the position on which the stepping occurs
-                            rotated_coord,
-                            NonTam2PieceUpward {
-                                color: rotated_piece_color,
-                                prof: rotated_piece_prof,
-                            },
-                        )
-                    };
-                    match dest_piece {
-                        None => {
-                            // cannot step
-                            ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
-                                src: to_absolute_coord(src, game_state.perspective),
-                                dest: to_absolute_coord(tentative_dest, game_state.perspective),
-                                is_water_entry_ciurl: is_ciurl_required(
-                                    tentative_dest,
-                                    rotated_piece_prof,
-                                    src,
-                                ),
-                            }]);
-                        }
-                        Some(Piece::Tam2) => {
-                            // if allowed by config, allow stepping on Tam2;
-                            if config.allow_kut2tam2 {
-                                ans.append(&mut candidates_when_stepping());
-                            } else {
-                                ans.append(&mut vec![]);
+                                    } else {
+                                        /* not an empty square: must complete the first move */
+                                        let step = tentative_dest;
+                                        ans.append(
+                                            &mut empty_neighbors_of(
+                                                rotate_board(subtracted_rotated_board),
+                                                step,
+                                            )
+                                            .flat_map(|fst_dst| {
+                                                let v = empty_neighbors_of(
+                                                    rotate_board(subtracted_rotated_board),
+                                                    fst_dst,
+                                                );
+                                                v.flat_map(move |snd_dst| {
+                                                    vec![PureMove::TamMoveStepsDuringFormer {
+                                                        first_dest: to_absolute_coord(
+                                                            fst_dst,
+                                                            game_state.perspective,
+                                                        ),
+                                                        second_dest: to_absolute_coord(
+                                                            snd_dst,
+                                                            game_state.perspective,
+                                                        ),
+                                                        src: to_absolute_coord(
+                                                            src,
+                                                            game_state.perspective,
+                                                        ),
+                                                        step: to_absolute_coord(
+                                                            step,
+                                                            game_state.perspective,
+                                                        ),
+                                                    }]
+                                                    .into_iter()
+                                                })
+                                                .collect::<Vec<PureMove>>()
+                                                .into_iter()
+                                            })
+                                            .collect::<Vec<PureMove>>(),
+                                        );
+                                    }
+                                }
                             }
                         }
-                        Some(Piece::NonTam2Piece {
-                            side: Side::Upward,
-                            color: _,
-                            prof: _,
-                        }) => {
-                            // opponent's piece; stepping and taking both attainable
-
-                            // except when protected by tam2 hue a uai1
-                            if can_get_occupied_by(
-                                Side::Downward,
-                                tentative_dest,
-                                Piece::NonTam2Piece {
-                                    color: rotated_piece_color,
-                                    prof: rotated_piece_prof,
-                                    side: Side::Downward,
-                                },
-                                game_state.f.current_board,
-                                game_state.tam_itself_is_tam_hue,
-                            ) {
-                                ans.append(
-                                    &mut [
-                                        &[PureMove::NonTamMoveSrcDst {
-                                            src: to_absolute_coord(src, game_state.perspective),
-                                            dest: to_absolute_coord(
-                                                tentative_dest,
-                                                game_state.perspective,
-                                            ),
-                                            is_water_entry_ciurl: is_ciurl_required(
-                                                tentative_dest,
-                                                rotated_piece_prof,
-                                                src,
-                                            ),
-                                        }][..],
-                                        &candidates_when_stepping()[..],
-                                    ]
-                                    .concat(),
-                                );
-                            } else {
-                                ans.append(&mut candidates_when_stepping());
-                            }
-                        }
-                        Some(_) => {
-                            ans.append(&mut candidates_when_stepping());
-                        }
                     }
-                }
-            }
-        }
-    }
-
-    ans
-}
-
-fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotated> {
-    let mut ans = vec![];
-    for rand_i in 0..9 {
-        for rand_j in 0..9 {
-            let coord = [rand_i, rand_j];
-            let piece = game_state.f.current_board[rand_i][rand_j];
-            if let Some(p) = piece {
-                match p {
-                    Piece::Tam2 => ans.push(Rotated {
-                        rotated_piece: TamOrUpwardPiece::Tam2,
-                        rotated_coord: rotate_coord(coord),
-                    }),
                     Piece::NonTam2Piece {
                         side: Side::Downward,
                         prof,
                         color,
                     } => {
-                        let rot_piece = NonTam2PieceUpward { color, prof };
-                        ans.push(Rotated {
-                            rotated_piece: rot_piece.into(),
-                            rotated_coord: rotate_coord(coord),
-                        });
+                        let rotated_coord = rotate_coord(coord);
+
+                        let MovablePositions { finite, infinite } =
+                            calculate_movable::calculate_movable_positions_for_downward(
+                                coord,
+                                prof,
+                                game_state.f.current_board,
+                                game_state.tam_itself_is_tam_hue,
+                            );
+
+                        let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
+
+                        let src: Coord = coord;
+
+                        for tentative_dest in candidates {
+                            let dest_piece =
+                                game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
+
+                            let candidates_when_stepping = || {
+                                generate_candidates_when_stepping(
+                                    game_state,
+                                    src,
+                                    tentative_dest, // tentative_dest becomes the position on which the stepping occurs
+                                    rotated_coord,
+                                    NonTam2PieceUpward { color, prof },
+                                )
+                            };
+                            match dest_piece {
+                                None => {
+                                    // cannot step
+                                    ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
+                                        src: to_absolute_coord(src, game_state.perspective),
+                                        dest: to_absolute_coord(
+                                            tentative_dest,
+                                            game_state.perspective,
+                                        ),
+                                        is_water_entry_ciurl: is_ciurl_required(
+                                            tentative_dest,
+                                            prof,
+                                            src,
+                                        ),
+                                    }]);
+                                }
+                                Some(Piece::Tam2) => {
+                                    // if allowed by config, allow stepping on Tam2;
+                                    if config.allow_kut2tam2 {
+                                        ans.append(&mut candidates_when_stepping());
+                                    } else {
+                                        ans.append(&mut vec![]);
+                                    }
+                                }
+                                Some(Piece::NonTam2Piece {
+                                    side: Side::Upward,
+                                    color: _,
+                                    prof: _,
+                                }) => {
+                                    // opponent's piece; stepping and taking both attainable
+
+                                    // except when protected by tam2 hue a uai1
+                                    if can_get_occupied_by(
+                                        Side::Downward,
+                                        tentative_dest,
+                                        Piece::NonTam2Piece {
+                                            color,
+                                            prof,
+                                            side: Side::Downward,
+                                        },
+                                        game_state.f.current_board,
+                                        game_state.tam_itself_is_tam_hue,
+                                    ) {
+                                        ans.append(
+                                            &mut [
+                                                &[PureMove::NonTamMoveSrcDst {
+                                                    src: to_absolute_coord(
+                                                        src,
+                                                        game_state.perspective,
+                                                    ),
+                                                    dest: to_absolute_coord(
+                                                        tentative_dest,
+                                                        game_state.perspective,
+                                                    ),
+                                                    is_water_entry_ciurl: is_ciurl_required(
+                                                        tentative_dest,
+                                                        prof,
+                                                        src,
+                                                    ),
+                                                }][..],
+                                                &candidates_when_stepping()[..],
+                                            ]
+                                            .concat(),
+                                        );
+                                    } else {
+                                        ans.append(&mut candidates_when_stepping());
+                                    }
+                                }
+                                Some(_) => {
+                                    ans.append(&mut candidates_when_stepping());
+                                }
+                            }
+                        }
                     }
                     Piece::NonTam2Piece {
                         side: Side::Upward, ..
@@ -418,8 +429,10 @@ fn get_opponent_pieces_and_tam_rotated(game_state: &PureGameState) -> Vec<Rotate
             }
         }
     }
+
     ans
 }
+
 
 fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     let mut ans = vec![];
@@ -440,10 +453,7 @@ use cetkaik_core::relative::{
 
 pub use cetkaik_core::absolute;
 
-struct Rotated {
-    rotated_piece: TamOrUpwardPiece,
-    rotated_coord: Coord,
-}
+
 
 pub mod pure_move;
 
