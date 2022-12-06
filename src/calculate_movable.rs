@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 
-use super::{Board, Color, Coord, MovablePositions, NonTam2PieceUpward, Piece, Profession, Side};
+use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 
 pub mod iter;
 pub mod vec;
@@ -117,34 +117,6 @@ pub fn calculate_movable_positions_for_either_side(
             side,
         } => {
             calculate_movable_positions_for_nontam(coord, prof, board, tam_itself_is_tam_hue, side)
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum TamOrUpwardPiece {
-    Tam2,
-    NonTam2Piece { color: Color, prof: Profession },
-}
-
-impl From<NonTam2PieceUpward> for TamOrUpwardPiece {
-    fn from(piece: NonTam2PieceUpward) -> TamOrUpwardPiece {
-        TamOrUpwardPiece::NonTam2Piece {
-            color: piece.color,
-            prof: piece.prof,
-        }
-    }
-}
-
-impl From<TamOrUpwardPiece> for Piece {
-    fn from(p: TamOrUpwardPiece) -> Piece {
-        match p {
-            TamOrUpwardPiece::Tam2 => Piece::Tam2,
-            TamOrUpwardPiece::NonTam2Piece { color, prof } => Piece::NonTam2Piece {
-                color,
-                prof,
-                side: Side::Upward,
-            },
         }
     }
 }

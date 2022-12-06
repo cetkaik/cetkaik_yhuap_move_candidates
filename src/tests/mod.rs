@@ -65,13 +65,44 @@ mod empty_squares {
 }
 
 mod get_opponent_pieces_rotated {
+    use crate::Color;
+    use crate::Profession;
+
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    pub enum TamOrUpwardPiece {
+        Tam2,
+        NonTam2Piece { color: Color, prof: Profession },
+    }
+
+    impl From<NonTam2PieceUpward> for TamOrUpwardPiece {
+        fn from(piece: NonTam2PieceUpward) -> TamOrUpwardPiece {
+            TamOrUpwardPiece::NonTam2Piece {
+                color: piece.color,
+                prof: piece.prof,
+            }
+        }
+    }
+
+    impl From<TamOrUpwardPiece> for Piece {
+        fn from(p: TamOrUpwardPiece) -> Piece {
+            match p {
+                TamOrUpwardPiece::Tam2 => Piece::Tam2,
+                TamOrUpwardPiece::NonTam2Piece { color, prof } => Piece::NonTam2Piece {
+                    color,
+                    prof,
+                    side: Side::Upward,
+                },
+            }
+        }
+    }
+
     struct Rotated {
         rotated_piece: TamOrUpwardPiece,
         rotated_coord: Coord,
     }
-    use cetkaik_core::relative::{self, Coord, NonTam2PieceUpward, rotate_coord};
+    use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
-    use crate::{Piece, PureGameState, Side, Vec, calculate_movable::TamOrUpwardPiece};
+    use crate::{Piece, PureGameState, Side, Vec};
 
     #[allow(clippy::needless_pass_by_value)]
     fn serialize_rotated(r: Rotated) -> String {
