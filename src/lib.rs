@@ -126,18 +126,17 @@ fn generate_candidates_when_stepping(
     let mut subtracted_rotated_board = rotate_board(game_state.f.current_board);
     subtracted_rotated_board[rotated_coord[0]][rotated_coord[1]] = None; /* must remove the piece to prevent self-occlusion */
 
-    let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions(
+    let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions_for_upward(
         rotate_coord(step),
         rotated_piece.into(),
         subtracted_rotated_board,
         tam_itself_is_tam_hue,
     );
 
-    let candidates: Vec<Coord> = finite.iter().map(|c| rotate_coord(*c)).collect::<Vec<_>>();
-    let candidates_inf: Vec<Coord> = infinite.iter().map(|c| rotate_coord(*c)).collect();
+    let candidates = finite.iter().map(|c| rotate_coord(*c));
+    let candidates_inf = infinite.iter().map(|c| rotate_coord(*c));
     [
         &candidates
-            .iter()
             .flat_map(|final_dest| {
                 let NonTam2PieceUpward {
                     color: rotated_piece_color,
@@ -145,7 +144,7 @@ fn generate_candidates_when_stepping(
                 } = rotated_piece;
                 if can_get_occupied_by(
                     Side::Downward,
-                    *final_dest,
+                    final_dest,
                     Piece::NonTam2Piece {
                         color: rotated_piece_color,
                         prof: rotated_piece_prof,
@@ -157,9 +156,9 @@ fn generate_candidates_when_stepping(
                     vec![PureMove::NonTamMoveSrcStepDstFinite {
                         src: to_absolute_coord(src, perspective),
                         step: to_absolute_coord(step, perspective),
-                        dest: to_absolute_coord(*final_dest, perspective),
+                        dest: to_absolute_coord(final_dest, perspective),
                         is_water_entry_ciurl: is_ciurl_required(
-                            *final_dest,
+                            final_dest,
                             rotated_piece_prof,
                             src,
                         ),
@@ -171,7 +170,6 @@ fn generate_candidates_when_stepping(
             })
             .collect::<Vec<PureMove>>()[..],
         &candidates_inf
-            .iter()
             .flat_map(|planned_dest| {
                 let NonTam2PieceUpward {
                     color: rotated_piece_color,
@@ -179,7 +177,7 @@ fn generate_candidates_when_stepping(
                 } = rotated_piece;
                 if !can_get_occupied_by(
                     Side::Downward,
-                    *planned_dest,
+                    planned_dest,
                     Piece::NonTam2Piece {
                         color: rotated_piece_color,
                         prof: rotated_piece_prof,
@@ -194,7 +192,7 @@ fn generate_candidates_when_stepping(
                 let obj: PureMove = PureMove::InfAfterStep {
                     src: to_absolute_coord(src, perspective),
                     step: to_absolute_coord(step, perspective),
-                    planned_direction: to_absolute_coord(*planned_dest, perspective),
+                    planned_direction: to_absolute_coord(planned_dest, perspective),
                 };
                 vec![obj].into_iter()
             })
@@ -212,7 +210,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
         rotated_coord,
     } in get_opponent_pieces_and_tam_rotated(game_state)
     {
-        let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions(
+        let MovablePositions { finite, infinite } = calculate_movable::calculate_movable_positions_for_upward(
             rotated_coord,
             rotated_piece,
             rotate_board(game_state.f.current_board),
