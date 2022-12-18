@@ -14,14 +14,14 @@ pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
         ],
     )
 }
-pub fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
+pub fn apply_deltas(coord: Coord, deltas: &[[isize; 2]]) -> Vec<Coord> {
     let [i, j] = coord;
     deltas
         .iter()
         .map(|[delta_x, delta_y]| {
             [
-                i32::try_from(i).unwrap() + delta_x,
-                i32::try_from(j).unwrap() + delta_y,
+                isize::try_from(i).unwrap() + delta_x,
+                isize::try_from(j).unwrap() + delta_y,
             ]
         })
         .filter_map(|[l, m]| {
@@ -35,7 +35,7 @@ pub fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
 }
 pub fn apply_single_delta_if_no_intervention(
     coord: Coord,
-    delta: [i32; 2],
+    delta: [isize; 2],
     board: Board,
 ) -> Vec<Coord> {
     let mut blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
@@ -50,7 +50,7 @@ pub fn apply_single_delta_if_no_intervention(
 
 pub fn apply_deltas_if_no_intervention(
     coord: Coord,
-    deltas: &[[i32; 2]],
+    deltas: &[[isize; 2]],
     board: Board,
 ) -> Vec<Coord> {
     iter::apply_deltas_if_no_intervention(coord, deltas, board).collect()
@@ -58,7 +58,7 @@ pub fn apply_deltas_if_no_intervention(
 
 pub fn apply_deltas_if_zero_or_one_intervention(
     coord: Coord,
-    deltas: &[[i32; 2]],
+    deltas: &[[isize; 2]],
     board: Board,
 ) -> Vec<Coord> {
     iter::apply_deltas_if_zero_or_one_intervention(coord, deltas, board).collect()

@@ -5,38 +5,8 @@ use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 pub mod iter;
 pub mod vec;
 
-pub struct CetkaikCore;
-
-pub struct CetkaikCompact;
-
-pub trait CetkaikRepresentation {
-    type AbsoluteCoord;
-    type RelativeCoord;
-    type Perspective;
-    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
-}
-
-impl CetkaikRepresentation for CetkaikCore {
-    type AbsoluteCoord = cetkaik_core::absolute::Coord;
-    type RelativeCoord = cetkaik_core::relative::Coord;
-    type Perspective = crate::Perspective;
-    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
-        crate::to_absolute_coord(coord, p)
-    }
-}
-
-impl CetkaikRepresentation for CetkaikCompact {
-    type AbsoluteCoord = cetkaik_compact_representation::Coord;
-    type RelativeCoord = cetkaik_compact_representation::Coord;
-    type Perspective = cetkaik_compact_representation::Perspective;
-    fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
-        coord
-    }
-}
-
-pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
-    // unconditionally TamHue
-    if coord == [2, 2]
+pub fn is_unconditionally_tam_hue(coord: Coord) -> bool {
+    coord == [2, 2]
         || coord == [2, 6]
         || coord == [3, 3]
         || coord == [3, 5]
@@ -45,7 +15,11 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
         || coord == [5, 5]
         || coord == [6, 2]
         || coord == [6, 6]
-    {
+}
+
+pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
+    // unconditionally TamHue
+    if is_unconditionally_tam_hue(coord) {
         return true;
     }
 
@@ -164,7 +138,7 @@ pub fn calculate_movable_positions_for_nontam(
     tam_itself_is_tam_hue: bool,
     side: Side,
 ) -> MovablePositions {
-    const DIAGONAL: [[i32; 2]; 32] = [
+    const DIAGONAL: [[isize; 2]; 32] = [
         // UP_LEFT:
         [-8, -8],
         [-7, -7],
@@ -202,7 +176,7 @@ pub fn calculate_movable_positions_for_nontam(
         [2, 2],
         [1, 1],
     ];
-    const UP: [[i32; 2]; 8] = [
+    const UP: [[isize; 2]; 8] = [
         [-1, 0],
         [-2, 0],
         [-3, 0],
@@ -212,7 +186,7 @@ pub fn calculate_movable_positions_for_nontam(
         [-7, 0],
         [-8, 0],
     ];
-    const DOWN: [[i32; 2]; 8] = [
+    const DOWN: [[isize; 2]; 8] = [
         [1, 0],
         [2, 0],
         [3, 0],
@@ -222,7 +196,7 @@ pub fn calculate_movable_positions_for_nontam(
         [7, 0],
         [8, 0],
     ];
-    const LEFT_RIGHT: [[i32; 2]; 16] = [
+    const LEFT_RIGHT: [[isize; 2]; 16] = [
         [0, -1],
         [0, -2],
         [0, -3],
@@ -299,7 +273,7 @@ pub fn calculate_movable_positions_for_nontam(
               },
               Profession::Maun1 => {
                 // Horse, 馬, dodor
-                const HORSE_DELTAS: [[i32; 2] ; 28] = [
+                const HORSE_DELTAS: [[isize; 2] ; 28] = [
                   [-8, -8],
                   [-7, -7],
                   [-6, -6],

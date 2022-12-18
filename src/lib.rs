@@ -11,6 +11,68 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
+pub struct CetkaikCore;
+
+pub struct CetkaikCompact;
+
+pub trait CetkaikRepresentation {
+    type AbsoluteCoord;
+    type RelativeCoord;
+    type Perspective;
+    type RelativeBoard;
+    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
+    fn add_delta(
+        coord: Self::RelativeCoord,
+        row_delta: isize,
+        col_delta: isize,
+    ) -> Option<Self::RelativeCoord>;
+}
+
+impl CetkaikRepresentation for CetkaikCore {
+    type AbsoluteCoord = cetkaik_core::absolute::Coord;
+    type RelativeCoord = cetkaik_core::relative::Coord;
+    type Perspective = crate::Perspective;
+    type RelativeBoard = cetkaik_core::relative::Board;
+    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
+        crate::to_absolute_coord(coord, p)
+    }
+    fn add_delta(
+        coord: Self::RelativeCoord,
+        row_delta: isize,
+        col_delta: isize,
+    ) -> Option<Self::RelativeCoord> {
+        crate::add_delta(coord, row_delta, col_delta)
+    }
+}
+
+impl CetkaikRepresentation for CetkaikCompact {
+    type AbsoluteCoord = cetkaik_compact_representation::Coord;
+    type RelativeCoord = cetkaik_compact_representation::Coord;
+    type Perspective = cetkaik_compact_representation::Perspective;
+    type RelativeBoard = cetkaik_compact_representation::Board;
+    fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
+        coord
+    }
+    fn add_delta(
+            coord: Self::RelativeCoord,
+            row_delta: isize,
+            col_delta: isize,
+        ) -> Option<Self::RelativeCoord> {
+        cetkaik_compact_representation::Coord::add_delta(coord, row_delta, col_delta)
+    }
+}
+
+pub fn add_delta(coord: Coord, row_delta: isize, col_delta: isize) -> Option<Coord> {
+    let [i, j] = coord;
+    match (
+        isize::try_from(i).unwrap() + row_delta,
+        isize::try_from(j).unwrap() + col_delta,
+    ) {
+        (l @ 0..=8, m @ 0..=8) => Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()]),
+        _ => None,
+    }
+}
+
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
 pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
@@ -56,8 +118,7 @@ fn can_get_occupied_by(
 }
 
 fn empty_neighbors_of(board: Board, c: Coord) -> impl Iterator<Item = Coord> {
-    calculate_movable::iter::eight_neighborhood(c)
-        .filter(move |[i, j]| board[*i][*j].is_none())
+    calculate_movable::iter::eight_neighborhood(c).filter(move |[i, j]| board[*i][*j].is_none())
 }
 
 fn can_get_occupied_by_non_tam(

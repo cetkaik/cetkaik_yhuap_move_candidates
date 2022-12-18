@@ -15,30 +15,17 @@ pub fn eight_neighborhood(coord: Coord) -> impl Iterator<Item = Coord> {
         .into_iter(),
     )
 }
+
 pub fn apply_deltas(
     coord: Coord,
-    deltas: impl Iterator<Item = [i32; 2]>,
+    deltas: impl Iterator<Item = [isize; 2]>,
 ) -> impl Iterator<Item = Coord> {
-    let [i, j] = coord;
-    deltas
-        .map(move |[delta_x, delta_y]| {
-            [
-                i32::try_from(i).unwrap() + delta_x,
-                i32::try_from(j).unwrap() + delta_y,
-            ]
-        })
-        .filter_map(|[l, m]| {
-            if (0..=8).contains(&l) && (0..=8).contains(&m) {
-                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
-            } else {
-                None
-            }
-        })
+    deltas.filter_map(move |[delta_x, delta_y]| crate::add_delta(coord, delta_x, delta_y))
 }
 
 pub fn apply_single_delta_if_no_intervention(
     coord: Coord,
-    delta: [i32; 2],
+    delta: [isize; 2],
     board: Board,
 ) -> impl Iterator<Item = Coord> {
     let mut blocker = apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
@@ -57,7 +44,7 @@ pub fn apply_single_delta_if_no_intervention(
 
 pub fn apply_deltas_if_no_intervention(
     coord: Coord,
-    deltas: &[[i32; 2]],
+    deltas: &[[isize; 2]],
     board: Board,
 ) -> impl Iterator<Item = Coord> + '_ {
     deltas
@@ -68,7 +55,7 @@ pub fn apply_deltas_if_no_intervention(
 
 pub fn apply_single_delta_if_zero_or_one_intervention(
     coord: Coord,
-    delta: [i32; 2],
+    delta: [isize; 2],
     board: Board,
 ) -> impl Iterator<Item = Coord> {
     let blocker = apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
@@ -87,7 +74,7 @@ pub fn apply_single_delta_if_zero_or_one_intervention(
 
 pub fn apply_deltas_if_zero_or_one_intervention(
     coord: Coord,
-    deltas: &[[i32; 2]],
+    deltas: &[[isize; 2]],
     board: Board,
 ) -> impl Iterator<Item = Coord> + '_ {
     deltas
