@@ -476,6 +476,7 @@ pub fn simple_board_sample_3() -> PureGameState {
 use cetkaik_core::relative::{NonTam2PieceDownward, rotate_board};
 
 pub fn simple_board_sample_4() -> PureGameState {
+    use cetkaik_core::relative::NonTam2PieceUpward;
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
