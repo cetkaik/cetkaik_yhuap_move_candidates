@@ -5,6 +5,24 @@ use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 pub mod iter;
 pub mod vec;
 
+pub struct CetkaikCore;
+
+pub trait CetkaikRepresentation {
+    type AbsoluteCoord;
+    type RelativeCoord;
+    type Perspective;
+    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
+}
+
+impl CetkaikRepresentation for CetkaikCore {
+    type AbsoluteCoord = cetkaik_core::absolute::Coord;
+    type RelativeCoord = cetkaik_core::relative::Coord;
+    type Perspective = crate::Perspective;
+    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
+        crate::to_absolute_coord(coord, p)
+    }
+}
+
 pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
     // unconditionally TamHue
     if coord == [2, 2]
