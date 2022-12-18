@@ -7,6 +7,8 @@ pub mod vec;
 
 pub struct CetkaikCore;
 
+pub struct CetkaikCompact;
+
 pub trait CetkaikRepresentation {
     type AbsoluteCoord;
     type RelativeCoord;
@@ -20,6 +22,15 @@ impl CetkaikRepresentation for CetkaikCore {
     type Perspective = crate::Perspective;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         crate::to_absolute_coord(coord, p)
+    }
+}
+
+impl CetkaikRepresentation for CetkaikCompact {
+    type AbsoluteCoord = cetkaik_compact_representation::Coord;
+    type RelativeCoord = cetkaik_compact_representation::Coord;
+    type Perspective = cetkaik_compact_representation::Perspective;
+    fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
+        coord
     }
 }
 
