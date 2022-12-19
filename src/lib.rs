@@ -179,6 +179,25 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
 }
 
+#[must_use]
+pub fn from_hop1zuo1_candidates2(
+    whose_turn: absolute::Side,
+    tam_itself_is_tam_hue: bool,
+    opponent_has_just_moved_tam: bool,
+    f: &absolute::Field,
+) -> Vec<PureMove> {
+    let perspective = match whose_turn {
+        absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
+        absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
+    };
+    from_hop1zuo1_candidates(&PureGameState {
+        perspective,
+        opponent_has_just_moved_tam,
+        tam_itself_is_tam_hue,
+        f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
+    })
+}
+
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
 pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
@@ -277,7 +296,7 @@ pub fn not_from_hop1zuo1_candidates2(
     tam_itself_is_tam_hue: bool,
     opponent_has_just_moved_tam: bool,
     whose_turn: absolute::Side,
-    f: &absolute::Field
+    f: &absolute::Field,
 ) -> Vec<PureMove> {
     let perspective = match whose_turn {
         absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
