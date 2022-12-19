@@ -158,9 +158,12 @@ fn can_get_occupied_by(
     }
 }
 
-fn empty_neighbors_of(board: Board, c: Coord) -> impl Iterator<Item = Coord> {
-    calculate_movable::iter::eight_neighborhood::<CetkaikCore>(c)
-        .filter(move |[i, j]| board[*i][*j].is_none())
+fn empty_neighbors_of<T: CetkaikRepresentation>(
+    board: T::RelativeBoard,
+    c: T::RelativeCoord,
+) -> impl Iterator<Item = T::RelativeCoord> {
+    calculate_movable::iter::eight_neighborhood::<T>(c)
+        .filter(move |coord| T::relative_get(board, *coord).is_none())
 }
 
 fn can_get_occupied_by_non_tam(
@@ -259,7 +262,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             } else {
                                 /* if not, step from there */
                                 let step: Coord = neighbor;
-                                empty_neighbors_of(subtracted_board, step)
+                                empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
                                     .flat_map(|snd_dst| {
                                     vec![PureMove::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.perspective),
@@ -274,9 +277,9 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 /* not an empty square: must complete the first move */
                                 let step = tentative_dest;
                                 ans.append(
-                                    &mut empty_neighbors_of(subtracted_board, step)
+                                    &mut empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
                                         .flat_map(|fst_dst| {
-                                            let v = empty_neighbors_of(subtracted_board, fst_dst);
+                                            let v = empty_neighbors_of::<CetkaikCore>(subtracted_board, fst_dst);
                                             v.flat_map(move |snd_dst| {
                                                 vec![PureMove::TamMoveStepsDuringFormer {
                                                     first_dest: to_absolute_coord(
