@@ -21,7 +21,7 @@ pub trait CetkaikRepresentation {
     type Perspective;
     type RelativeBoard: Copy;
     type RelativePiece: Eq;
-    type RelativeSide: Copy;
+    type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
         coord: Self::RelativeCoord,
@@ -98,7 +98,11 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> U {
         match piece {
             Piece::Tam2 => f_tam(),
-            Piece::NonTam2Piece { color: _, prof, side } => f_piece(prof, side),
+            Piece::NonTam2Piece {
+                color: _,
+                prof,
+                side,
+            } => f_piece(prof, side),
         }
     }
 }
@@ -188,7 +192,7 @@ fn can_get_occupied_by(
         /* It is allowed to enter an empty square */
         CetkaikCore::relative_get(board, dest).is_none()
     } else {
-        can_get_occupied_by_non_tam(side, dest, board, tam_itself_is_tam_hue)
+        can_get_occupied_by_non_tam::<CetkaikCore>(side, dest, board, tam_itself_is_tam_hue)
     }
 }
 
@@ -200,57 +204,42 @@ fn empty_neighbors_of<T: CetkaikRepresentation>(
         .filter(move |coord| T::relative_get(board, *coord).is_none())
 }
 
-fn can_get_occupied_by_non_tam(
-    side: Side,
-    dest: Coord,
-    board: Board,
+fn can_get_occupied_by_non_tam<T: CetkaikRepresentation>(
+    side: T::RelativeSide,
+    dest: T::RelativeCoord,
+    board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
 ) -> bool {
     /* Intentionally does not verify whether the piece itself is of opponent */
-    let is_protected_by_opponent_tam_hue_auai = |side: Side, coord: Coord| {
-        calculate_movable::vec::eight_neighborhood::<CetkaikCore>(coord)
+    let is_protected_by_opponent_tam_hue_auai = |side: T::RelativeSide, coord: T::RelativeCoord| {
+        calculate_movable::vec::eight_neighborhood::<T>(coord)
             .into_iter()
-            .filter(|[a, b]| {
-                let piece = board[*a][*b];
-                match piece {
-                    None | Some(Piece::Tam2) => false,
-                    Some(Piece::NonTam2Piece {
-                        side: piece_side,
-                        prof: piece_prof,
-                        color: _,
-                    }) => {
+            .filter(|ab| {
+                T::relative_get(board, *ab).map_or(false, |piece| {
+                    T::match_on_piece_and_apply(piece, &|| false, &|piece_prof, piece_side| {
                         piece_prof == Profession::Uai1
                             && piece_side != side
-                            && calculate_movable::is_tam_hue::<CetkaikCore>(
-                                [*a, *b],
-                                board,
-                                tam_itself_is_tam_hue,
-                            )
-                    }
-                }
+                            && calculate_movable::is_tam_hue::<T>(*ab, board, tam_itself_is_tam_hue)
+                    })
+                })
             })
             .count()
             > 0
     };
 
-    let dest_piece = CetkaikCore::relative_get(board, dest);
-
-    match dest_piece {
-        Some(Piece::Tam2) => false, /* Tam2 can never be taken */
-
-        None => true, /* It is always allowed to enter an empty square */
-        Some(Piece::NonTam2Piece {
-            side: piece_side,
-            prof: _,
-            color: _,
-        }) => {
-            piece_side != side /* cannot take your own piece */ &&
-            !is_protected_by_opponent_tam_hue_auai(
-                side,
-                dest
-            )
-        } /* must not be protected by tam2 hue a uai1 */
-    }
+    T::relative_get(board, dest).map_or(true, |piece| {
+        T::match_on_piece_and_apply(
+            piece,
+            &|| false, /* Tam2 can never be taken */
+            &|_, piece_side| {
+                piece_side != side /* cannot take your own piece */ &&
+        !is_protected_by_opponent_tam_hue_auai(
+            side,
+            dest
+        )
+            }, /* must not be protected by tam2 hue a uai1 */
+        )
+    })
 }
 
 const fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coord) -> bool {
