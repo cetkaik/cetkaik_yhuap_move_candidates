@@ -92,15 +92,17 @@ mod get_opponent_pieces_rotated {
         }
     }
 
-    impl From<TamOrUpwardPiece> for Piece {
-        fn from(p: TamOrUpwardPiece) -> Piece {
+    impl From<TamOrUpwardPiece> for cetkaik_core::relative::Piece {
+        fn from(p: TamOrUpwardPiece) -> cetkaik_core::relative::Piece {
             match p {
-                TamOrUpwardPiece::Tam2 => Piece::Tam2,
-                TamOrUpwardPiece::NonTam2Piece { color, prof } => Piece::NonTam2Piece {
-                    color,
-                    prof,
-                    side: Side::Upward,
-                },
+                TamOrUpwardPiece::Tam2 => cetkaik_core::relative::Piece::Tam2,
+                TamOrUpwardPiece::NonTam2Piece { color, prof } => {
+                    cetkaik_core::relative::Piece::NonTam2Piece {
+                        color,
+                        prof,
+                        side: Side::Upward,
+                    }
+                }
             }
         }
     }
@@ -112,7 +114,7 @@ mod get_opponent_pieces_rotated {
     use cetkaik_core::relative::Side;
     use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
-    use crate::{Piece, Vec};
+    use crate::Vec;
 
     use super::PureGameState;
 
@@ -133,11 +135,11 @@ mod get_opponent_pieces_rotated {
                 let piece = game_state.f.current_board[rand_i][rand_j];
                 if let Some(p) = piece {
                     match p {
-                        Piece::Tam2 => ans.push(Rotated {
+                        cetkaik_core::relative::Piece::Tam2 => ans.push(Rotated {
                             rotated_piece: TamOrUpwardPiece::Tam2,
                             rotated_coord: rotate_coord(coord),
                         }),
-                        Piece::NonTam2Piece {
+                        cetkaik_core::relative::Piece::NonTam2Piece {
                             side: Side::Downward,
                             prof,
                             color,
@@ -148,7 +150,7 @@ mod get_opponent_pieces_rotated {
                                 rotated_coord: rotate_coord(coord),
                             });
                         }
-                        Piece::NonTam2Piece {
+                        cetkaik_core::relative::Piece::NonTam2Piece {
                             side: Side::Upward, ..
                         } => {}
                     }

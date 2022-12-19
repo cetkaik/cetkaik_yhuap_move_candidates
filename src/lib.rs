@@ -160,19 +160,19 @@ impl CetkaikRepresentation for CetkaikCore {
         f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
     ) -> U {
         match piece {
-            Piece::Tam2 => f_tam(),
-            Piece::NonTam2Piece {
+            Self::RelativePiece::Tam2 => f_tam(),
+            Self::RelativePiece::NonTam2Piece {
                 color: _,
                 prof,
                 side,
             } => f_piece(prof, side),
         }
     }
-    fn empty_squares_relative(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
+    fn empty_squares_relative(board: &cetkaik_core::relative::Board) -> Vec<cetkaik_core::relative::Coord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
-                let coord: Coord = [rand_i, rand_j];
+                let coord: cetkaik_core::relative::Coord = [rand_i, rand_j];
                 if Self::relative_get(*board, coord).is_none() {
                     ans.push(coord);
                 }
@@ -213,7 +213,7 @@ impl CetkaikRepresentation for CetkaikCore {
         &field.current_board
     }
     fn is_water_relative(c: Self::RelativeCoord) -> bool {
-        is_water(c)
+        cetkaik_core::relative::is_water(c)
     }
     fn loop_over_one_side_and_tam(
         board: &Self::RelativeBoard,
@@ -226,13 +226,13 @@ impl CetkaikRepresentation for CetkaikCore {
                 let piece = board[rand_i][rand_j];
                 if let Some(p) = piece {
                     match p {
-                        Piece::Tam2 => f_tam_or_piece(src, None),
-                        Piece::NonTam2Piece {
+                        Self::RelativePiece::Tam2 => f_tam_or_piece(src, None),
+                        Self::RelativePiece::NonTam2Piece {
                             side: side_,
                             prof,
                             color: _,
                         } if side_ == side => f_tam_or_piece(src, Some(prof)),
-                        Piece::NonTam2Piece { .. } => {}
+                        Self::RelativePiece::NonTam2Piece { .. } => {}
                     }
                 }
             }
@@ -943,12 +943,10 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     ans
 }
 
-use cetkaik_core::relative::{is_water, Coord, Piece};
 use cetkaik_core::PureMove_;
 
 pub use cetkaik_core::absolute;
 
-pub mod pure_move;
 
 pub struct Config {
     pub allow_kut2tam2: bool,

@@ -1,5 +1,5 @@
 use super::*;
-use cetkaik_core::relative::Field;
+use cetkaik_core::relative::{Field, Piece};
 
 #[derive(Debug)]
 pub struct PureGameState {

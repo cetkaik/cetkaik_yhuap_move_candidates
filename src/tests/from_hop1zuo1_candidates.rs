@@ -24,7 +24,7 @@ fn test_initial_board_sample() {
     super::run_test(
         from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-        crate::pure_move::PureMove::serialize,
+        PureMove::serialize,
         &[],
     );
 }
@@ -34,7 +34,7 @@ fn test_simple_board_sample_4() {
     super::run_test(
         from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::simple_board_sample_4(),
-        crate::pure_move::PureMove::serialize,
+        PureMove::serialize,
         &[
             "黒弓KA",
             "黒弓LA",
