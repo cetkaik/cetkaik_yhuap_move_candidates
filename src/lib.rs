@@ -68,6 +68,11 @@ pub trait CetkaikRepresentation {
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
     fn is_water_relative(c: Self::RelativeCoord) -> bool;
+    fn loop_over_one_side_and_tam(
+        board: &Self::RelativeBoard,
+        side: Self::RelativeSide,
+        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
+    );
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -207,6 +212,29 @@ impl CetkaikRepresentation for CetkaikCore {
     fn is_water_relative(c: Self::RelativeCoord) -> bool {
         is_water(c)
     }
+    fn loop_over_one_side_and_tam(
+        board: &Self::RelativeBoard,
+        side: Self::RelativeSide,
+        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
+    ) {
+        for rand_i in 0..9 {
+            for rand_j in 0..9 {
+                let src = [rand_i, rand_j];
+                let piece = board[rand_i][rand_j];
+                if let Some(p) = piece {
+                    match p {
+                        Piece::Tam2 => f_tam_or_piece(src, None),
+                        Piece::NonTam2Piece {
+                            side: side_,
+                            prof,
+                            color: _,
+                        } if side_ == side => f_tam_or_piece(src, Some(prof)),
+                        Piece::NonTam2Piece{ .. } => {}
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -318,6 +346,24 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn is_water_relative(c: Self::RelativeCoord) -> bool {
         cetkaik_compact_representation::Coord::is_water(c)
+    }
+    fn loop_over_one_side_and_tam(
+        board: &Self::RelativeBoard,
+        side: Self::RelativeSide,
+        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
+    ) {
+        let fun = |(src, piece): (Self::RelativeCoord, Self::RelativePiece)| match piece
+            .prof_and_side()
+        {
+            cetkaik_compact_representation::MaybeTam2::Tam2 => f_tam_or_piece(src, None),
+            cetkaik_compact_representation::MaybeTam2::NotTam2((prof, _)) => {
+                f_tam_or_piece(src, Some(prof));
+            }
+        };
+        match side {
+            absolute::Side::ASide => board.a_side_and_tam().for_each(fun),
+            absolute::Side::IASide => board.ia_side_and_tam().for_each(fun),
+        }
     }
 }
 
@@ -682,34 +728,23 @@ fn not_from_hop1zuo1_candidates_(
     f: &cetkaik_core::relative::Field,
 ) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
     let mut ans = vec![];
-    for rand_i in 0..9 {
-        for rand_j in 0..9 {
-            let src = [rand_i, rand_j];
-            let piece = f.current_board[rand_i][rand_j];
-            if let Some(p) = piece {
-                match p {
-                    Piece::Tam2 => candidates_tam2::<CetkaikCore>(src, f, perspective, &mut ans),
-                    Piece::NonTam2Piece {
-                        side: Side::Downward,
-                        prof,
-                        color: _,
-                    } => foo::<CetkaikCore>(
-                        Side::Downward,
-                        config,
-                        prof,
-                        tam_itself_is_tam_hue,
-                        src,
-                        f,
-                        perspective,
-                        &mut ans,
-                    ),
-                    Piece::NonTam2Piece {
-                        side: Side::Upward, ..
-                    } => {}
-                }
-            }
-        }
-    }
+    <CetkaikCore as CetkaikRepresentation>::loop_over_one_side_and_tam(
+        &f.current_board,
+        Side::Downward,
+        &mut |src, maybe_prof| match maybe_prof {
+            None => candidates_tam2::<CetkaikCore>(src, f, perspective, &mut ans),
+            Some(prof) => foo::<CetkaikCore>(
+                Side::Downward,
+                config,
+                prof,
+                tam_itself_is_tam_hue,
+                src,
+                f,
+                perspective,
+                &mut ans,
+            ),
+        },
+    );
 
     ans
 }
