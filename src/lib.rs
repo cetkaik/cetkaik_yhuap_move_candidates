@@ -537,6 +537,154 @@ fn candidates_tam2<T: CetkaikRepresentation>(
     }
 }
 
+fn foo(
+    config: &Config,
+    prof: Profession,
+    color: Color,
+    tam_itself_is_tam_hue: bool,
+    src: <CetkaikCore as CetkaikRepresentation>::RelativeCoord,
+    f: &<CetkaikCore as CetkaikRepresentation>::RelativeField,
+    perspective: <CetkaikCore as CetkaikRepresentation>::Perspective,
+    ans: &mut Vec<PureMove_<<CetkaikCore as CetkaikRepresentation>::AbsoluteCoord>>,
+) {
+    let side = Side::Downward;
+    let MovablePositions { finite, infinite } =
+        calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
+            src,
+            prof,
+            f.current_board,
+            tam_itself_is_tam_hue,
+            side,
+        );
+
+    let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
+    for tentative_dest in candidates {
+        let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
+
+        let candidates_when_stepping = || {
+            let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
+
+            let perspective = perspective;
+            let tam_itself_is_tam_hue: bool = tam_itself_is_tam_hue;
+            /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
+            let mut subtracted_board = f.current_board;
+            subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
+
+            let MovablePositions { finite, infinite } =
+                calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
+                    step,
+                    prof,
+                    subtracted_board,
+                    tam_itself_is_tam_hue,
+                    side,
+                );
+
+            let candidates = finite.into_iter();
+            let candidates_inf = infinite.into_iter();
+            [
+                &candidates
+                    .flat_map(|final_dest| {
+                        if can_get_occupied_by::<CetkaikCore>(
+                            side,
+                            final_dest,
+                            Piece::NonTam2Piece { color, prof, side },
+                            subtracted_board,
+                            tam_itself_is_tam_hue,
+                        ) {
+                            vec![cetkaik_core::PureMove_::NonTamMoveSrcStepDstFinite {
+                                src: to_absolute_coord(src, perspective),
+                                step: to_absolute_coord(step, perspective),
+                                dest: to_absolute_coord(final_dest, perspective),
+                                is_water_entry_ciurl: is_ciurl_required(final_dest, prof, src),
+                            }]
+                            .into_iter()
+                        } else {
+                            vec![].into_iter()
+                        }
+                    })
+                    .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
+                &candidates_inf
+                    .flat_map(|planned_dest| {
+                        if !can_get_occupied_by::<CetkaikCore>(
+                            side,
+                            planned_dest,
+                            Piece::NonTam2Piece { color, prof, side },
+                            subtracted_board,
+                            tam_itself_is_tam_hue,
+                        ) {
+                            return vec![].into_iter();
+                            // retry
+                        }
+                        let obj: cetkaik_core::PureMove_<absolute::Coord> =
+                            cetkaik_core::PureMove_::InfAfterStep {
+                                src: to_absolute_coord(src, perspective),
+                                step: to_absolute_coord(step, perspective),
+                                planned_direction: to_absolute_coord(planned_dest, perspective),
+                            };
+                        vec![obj].into_iter()
+                    })
+                    .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
+            ]
+            .concat()
+        };
+        match dest_piece {
+            None => {
+                // cannot step
+                ans.append(&mut vec![cetkaik_core::PureMove_::NonTamMoveSrcDst {
+                    src: to_absolute_coord(src, perspective),
+                    dest: to_absolute_coord(tentative_dest, perspective),
+                    is_water_entry_ciurl: is_ciurl_required(tentative_dest, prof, src),
+                }]);
+            }
+            Some(Piece::Tam2) => {
+                // if allowed by config, allow stepping on Tam2;
+                if config.allow_kut2tam2 {
+                    ans.append(&mut candidates_when_stepping());
+                } else {
+                    ans.append(&mut vec![]);
+                }
+            }
+            Some(Piece::NonTam2Piece {
+                side: opponent_side,
+                color: _,
+                prof: _,
+            }) if opponent_side != side => {
+                // opponent's piece; stepping and taking both attainable
+
+                // except when protected by tam2 hue a uai1
+                if can_get_occupied_by::<CetkaikCore>(
+                    side,
+                    tentative_dest,
+                    Piece::NonTam2Piece {
+                        color,
+                        prof,
+                        side,
+                    },
+                    f.current_board,
+                    tam_itself_is_tam_hue,
+                ) {
+                    ans.append(
+                        &mut [
+                            &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
+                                src: to_absolute_coord(src, perspective),
+                                dest: to_absolute_coord(tentative_dest, perspective),
+                                is_water_entry_ciurl: is_ciurl_required(tentative_dest, prof, src),
+                            }][..],
+                            &candidates_when_stepping()[..],
+                        ]
+                        .concat(),
+                    );
+                } else {
+                    ans.append(&mut candidates_when_stepping());
+                }
+            }
+            Some(_) => {
+                ans.append(&mut candidates_when_stepping());
+            }
+        }
+    }
+}
+
 fn not_from_hop1zuo1_candidates_(
     config: &Config,
     perspective: Perspective,
@@ -555,173 +703,16 @@ fn not_from_hop1zuo1_candidates_(
                         side: Side::Downward,
                         prof,
                         color,
-                    } => {
-                        let MovablePositions { finite, infinite } =
-                            calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
-                                src,
-                                prof,
-                                f.current_board,
-                                tam_itself_is_tam_hue,
-                                Side::Downward,
-                            );
-
-                        let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
-                        for tentative_dest in candidates {
-                            let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
-
-                            let candidates_when_stepping = || {
-                                let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
-
-                                let perspective = perspective;
-                                let tam_itself_is_tam_hue: bool = tam_itself_is_tam_hue;
-                                /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-                                let mut subtracted_board = f.current_board;
-                                subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
-
-                                let MovablePositions { finite, infinite } =
-                                    calculate_movable::calculate_movable_positions_for_nontam::<
-                                        CetkaikCore,
-                                    >(
-                                        step,
-                                        prof,
-                                        subtracted_board,
-                                        tam_itself_is_tam_hue,
-                                        Side::Downward,
-                                    );
-
-                                let candidates = finite.into_iter();
-                                let candidates_inf = infinite.into_iter();
-                                [
-                                    &candidates
-                                        .flat_map(|final_dest| {
-                                            if can_get_occupied_by::<CetkaikCore>(
-                                                Side::Downward,
-                                                final_dest,
-                                                Piece::NonTam2Piece {
-                                                    color,
-                                                    prof,
-                                                    side: Side::Downward,
-                                                },
-                                                subtracted_board,
-                                                tam_itself_is_tam_hue,
-                                            ) {
-                                                vec![cetkaik_core::PureMove_::NonTamMoveSrcStepDstFinite {
-                                                    src: to_absolute_coord(src, perspective),
-                                                    step: to_absolute_coord(step, perspective),
-                                                    dest: to_absolute_coord(
-                                                        final_dest,
-                                                        perspective,
-                                                    ),
-                                                    is_water_entry_ciurl: is_ciurl_required(
-                                                        final_dest, prof, src,
-                                                    ),
-                                                }]
-                                                .into_iter()
-                                            } else {
-                                                vec![].into_iter()
-                                            }
-                                        })
-                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
-                                    &candidates_inf
-                                        .flat_map(|planned_dest| {
-                                            if !can_get_occupied_by::<CetkaikCore>(
-                                                Side::Downward,
-                                                planned_dest,
-                                                Piece::NonTam2Piece {
-                                                    color,
-                                                    prof,
-                                                    side: Side::Downward,
-                                                },
-                                                subtracted_board,
-                                                tam_itself_is_tam_hue,
-                                            ) {
-                                                return vec![].into_iter();
-                                                // retry
-                                            }
-                                            let obj: cetkaik_core::PureMove_<absolute::Coord> = cetkaik_core::PureMove_::InfAfterStep {
-                                                src: to_absolute_coord(src, perspective),
-                                                step: to_absolute_coord(step, perspective),
-                                                planned_direction: to_absolute_coord(
-                                                    planned_dest,
-                                                    perspective,
-                                                ),
-                                            };
-                                            vec![obj].into_iter()
-                                        })
-                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
-                                ]
-                                .concat()
-                            };
-                            match dest_piece {
-                                None => {
-                                    // cannot step
-                                    ans.append(&mut vec![
-                                        cetkaik_core::PureMove_::NonTamMoveSrcDst {
-                                            src: to_absolute_coord(src, perspective),
-                                            dest: to_absolute_coord(tentative_dest, perspective),
-                                            is_water_entry_ciurl: is_ciurl_required(
-                                                tentative_dest,
-                                                prof,
-                                                src,
-                                            ),
-                                        },
-                                    ]);
-                                }
-                                Some(Piece::Tam2) => {
-                                    // if allowed by config, allow stepping on Tam2;
-                                    if config.allow_kut2tam2 {
-                                        ans.append(&mut candidates_when_stepping());
-                                    } else {
-                                        ans.append(&mut vec![]);
-                                    }
-                                }
-                                Some(Piece::NonTam2Piece {
-                                    side: Side::Upward,
-                                    color: _,
-                                    prof: _,
-                                }) => {
-                                    // opponent's piece; stepping and taking both attainable
-
-                                    // except when protected by tam2 hue a uai1
-                                    if can_get_occupied_by::<CetkaikCore>(
-                                        Side::Downward,
-                                        tentative_dest,
-                                        Piece::NonTam2Piece {
-                                            color,
-                                            prof,
-                                            side: Side::Downward,
-                                        },
-                                        f.current_board,
-                                        tam_itself_is_tam_hue,
-                                    ) {
-                                        ans.append(
-                                            &mut [
-                                                &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
-                                                    src: to_absolute_coord(src, perspective),
-                                                    dest: to_absolute_coord(
-                                                        tentative_dest,
-                                                        perspective,
-                                                    ),
-                                                    is_water_entry_ciurl: is_ciurl_required(
-                                                        tentative_dest,
-                                                        prof,
-                                                        src,
-                                                    ),
-                                                }][..],
-                                                &candidates_when_stepping()[..],
-                                            ]
-                                            .concat(),
-                                        );
-                                    } else {
-                                        ans.append(&mut candidates_when_stepping());
-                                    }
-                                }
-                                Some(_) => {
-                                    ans.append(&mut candidates_when_stepping());
-                                }
-                            }
-                        }
-                    }
+                    } => foo(
+                        config,
+                        prof,
+                        color,
+                        tam_itself_is_tam_hue,
+                        src,
+                        f,
+                        perspective,
+                        &mut ans,
+                    ),
                     Piece::NonTam2Piece {
                         side: Side::Upward, ..
                     } => {}
