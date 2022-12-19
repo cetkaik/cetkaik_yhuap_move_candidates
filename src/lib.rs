@@ -435,6 +435,74 @@ pub fn not_from_hop1zuo1_candidates2(
     )
 }
 
+fn candidates_tam2(
+    src: [usize; 2],
+    f: &cetkaik_core::relative::Field,
+    perspective: Perspective,
+    ans: &mut Vec<PureMove_<absolute::Coord>>,
+) {
+    let candidates: Vec<<CetkaikCore as CetkaikRepresentation>::RelativeCoord> =
+        calculate_movable::vec::eight_neighborhood::<CetkaikCore>(src);
+    for tentative_dest in candidates {
+        let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
+
+        /* avoid self-occlusion */
+        let mut subtracted_board = f.current_board;
+        subtracted_board[src[0]][src[1]] = None;
+        if dest_piece.is_none() {
+            /* empty square; first move is completed without stepping */
+            let fst_dst: Coord = tentative_dest;
+            ans.append(&mut calculate_movable::iter::eight_neighborhood::<CetkaikCore>(fst_dst).flat_map(|neighbor| {
+                            /* if the neighbor is empty, that is the second destination */
+                            let snd_dst: <CetkaikCore as CetkaikRepresentation>::RelativeCoord = neighbor;
+                            if f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
+                                neighbor == src
+                            /* the neighbor is occupied by yourself, which means it is actually empty */
+                            {
+                                vec![cetkaik_core::PureMove_::TamMoveNoStep {
+                                    second_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(snd_dst, perspective),
+                                    first_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(fst_dst, perspective),
+                                    src: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(src, perspective),
+                                }].into_iter()
+                            } else {
+                                /* if not, step from there */
+                                let step: <CetkaikCore as CetkaikRepresentation>::RelativeCoord = neighbor;
+                                empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
+                                    .flat_map(|snd_dst| {
+                                    vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
+                                        first_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(fst_dst, perspective),
+                                        second_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(snd_dst, perspective),
+                                        src: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(src, perspective),
+                                        step: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(step, perspective),
+                                    }].into_iter()
+                                }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>().into_iter()
+                            }
+                        }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>());
+        } else {
+            /* not an empty square: must complete the first move */
+            let step = tentative_dest;
+            ans.append(
+                &mut empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
+                    .flat_map(|fst_dst| {
+                        let v = empty_neighbors_of::<CetkaikCore>(subtracted_board, fst_dst);
+                        v.flat_map(move |snd_dst| {
+                            vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
+                                first_dest: to_absolute_coord(fst_dst, perspective),
+                                second_dest: to_absolute_coord(snd_dst, perspective),
+                                src: to_absolute_coord(src, perspective),
+                                step: to_absolute_coord(step, perspective),
+                            }]
+                            .into_iter()
+                        })
+                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()
+                        .into_iter()
+                    })
+                    .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>(),
+            );
+        }
+    }
+}
+
 fn not_from_hop1zuo1_candidates_(
     config: &Config,
     perspective: Perspective,
@@ -448,83 +516,7 @@ fn not_from_hop1zuo1_candidates_(
             let piece = f.current_board[rand_i][rand_j];
             if let Some(p) = piece {
                 match p {
-                    Piece::Tam2 => {
-                        let candidates: Vec<<CetkaikCore as CetkaikRepresentation>::RelativeCoord> =
-                            calculate_movable::vec::eight_neighborhood::<CetkaikCore>(src);
-                        for tentative_dest in candidates {
-                            let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
-
-                            /* avoid self-occlusion */
-                            let mut subtracted_board = f.current_board;
-                            subtracted_board[src[0]][src[1]] = None;
-                            if dest_piece.is_none() {
-                                /* empty square; first move is completed without stepping */
-                                let fst_dst: Coord = tentative_dest;
-                                ans.append(&mut calculate_movable::iter::eight_neighborhood::<CetkaikCore>(fst_dst).flat_map(|neighbor| {
-                            /* if the neighbor is empty, that is the second destination */
-                            let snd_dst: Coord = neighbor;
-                            if f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
-                                neighbor == src
-                            /* the neighbor is occupied by yourself, which means it is actually empty */
-                            {
-                                vec![cetkaik_core::PureMove_::TamMoveNoStep {
-                                    second_dest: to_absolute_coord(snd_dst, perspective),
-                                    first_dest: to_absolute_coord(fst_dst, perspective),
-                                    src: to_absolute_coord(src, perspective),
-                                }].into_iter()
-                            } else {
-                                /* if not, step from there */
-                                let step: Coord = neighbor;
-                                empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
-                                    .flat_map(|snd_dst| {
-                                    vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
-                                        first_dest: to_absolute_coord(fst_dst, perspective),
-                                        second_dest: to_absolute_coord(snd_dst, perspective),
-                                        src: to_absolute_coord(src, perspective),
-                                        step: to_absolute_coord(step, perspective),
-                                    }].into_iter()
-                                }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>().into_iter()
-                            }
-                        }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>());
-                            } else {
-                                /* not an empty square: must complete the first move */
-                                let step = tentative_dest;
-                                ans.append(
-                                    &mut empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
-                                        .flat_map(|fst_dst| {
-                                            let v = empty_neighbors_of::<CetkaikCore>(
-                                                subtracted_board,
-                                                fst_dst,
-                                            );
-                                            v.flat_map(move |snd_dst| {
-                                                vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
-                                                    first_dest: to_absolute_coord(
-                                                        fst_dst,
-                                                        perspective,
-                                                    ),
-                                                    second_dest: to_absolute_coord(
-                                                        snd_dst,
-                                                        perspective,
-                                                    ),
-                                                    src: to_absolute_coord(
-                                                        src,
-                                                        perspective,
-                                                    ),
-                                                    step: to_absolute_coord(
-                                                        step,
-                                                        perspective,
-                                                    ),
-                                                }]
-                                                .into_iter()
-                                            })
-                                            .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()
-                                            .into_iter()
-                                        })
-                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>(),
-                                );
-                            }
-                        }
-                    }
+                    Piece::Tam2 => candidates_tam2(src, f, perspective, &mut ans),
                     Piece::NonTam2Piece {
                         side: Side::Downward,
                         prof,
@@ -708,6 +700,7 @@ fn not_from_hop1zuo1_candidates_(
 }
 
 use cetkaik_core::relative::{is_water, Coord, Piece, Side};
+use cetkaik_core::PureMove_;
 
 pub use cetkaik_core::absolute;
 
@@ -722,7 +715,6 @@ mod tests;
 
 pub use cetkaik_core::perspective::{to_absolute_coord, Perspective};
 pub use cetkaik_core::{Color, Profession};
-
 
 /// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,
 /// this function was a bottleneck that accounted for roughly fifty percent of all the runtime
