@@ -16,11 +16,20 @@ pub struct CetkaikCore;
 pub struct CetkaikCompact;
 
 pub trait CetkaikRepresentation {
+    type Perspective;
+
     type AbsoluteCoord;
     type RelativeCoord: Copy;
-    type Perspective;
+
+    type AbsoluteBoard;
     type RelativeBoard: Copy;
+
+    type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
+
+    type AbsoluteField;
+
+    type AbsoluteSide: Copy + Eq;
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
@@ -32,6 +41,10 @@ pub trait CetkaikRepresentation {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece>;
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece>;
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
     fn tam2() -> Self::RelativePiece;
     fn is_upward(s: Self::RelativeSide) -> bool;
@@ -40,16 +53,29 @@ pub trait CetkaikRepresentation {
         f_tam: &dyn Fn() -> U,
         f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
     ) -> U;
-    fn empty_squares(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
+    fn empty_squares_relative(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
+    fn empty_squares_absolute(current_board: &Self::AbsoluteBoard) -> Vec<Self::AbsoluteCoord>;
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: &Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)>;
+    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
 impl CetkaikRepresentation for CetkaikCore {
+    type Perspective = crate::Perspective;
+
     type AbsoluteCoord = cetkaik_core::absolute::Coord;
     type RelativeCoord = cetkaik_core::relative::Coord;
-    type Perspective = crate::Perspective;
+
+    type AbsoluteBoard = cetkaik_core::absolute::Board;
     type RelativeBoard = cetkaik_core::relative::Board;
+
+    type AbsolutePiece = cetkaik_core::absolute::Piece;
     type RelativePiece = cetkaik_core::relative::Piece;
+
+    type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::relative::Side;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         cetkaik_core::perspective::to_absolute_coord(coord, p)
@@ -74,6 +100,12 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> Option<Self::RelativePiece> {
         let [i, j] = coord;
         board[i][j]
+    }
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece> {
+        board.get(&coord).copied()
     }
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
         coord == [2, 2]
@@ -106,7 +138,7 @@ impl CetkaikRepresentation for CetkaikCore {
             } => f_piece(prof, side),
         }
     }
-    fn empty_squares(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
+    fn empty_squares_relative(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
@@ -118,17 +150,56 @@ impl CetkaikRepresentation for CetkaikCore {
         }
         ans
     }
+    fn empty_squares_absolute(board: &cetkaik_core::absolute::Board) -> Vec<Self::AbsoluteCoord> {
+        use absolute::Column::{C, K, L, M, N, P, T, X, Z};
+        use absolute::Row::{A, AI, AU, E, I, IA, O, U, Y};
+        let mut ans = vec![];
+        for row in &[A, E, I, U, O, Y, AI, AU, IA] {
+            for column in &[K, L, N, T, Z, X, C, M, P] {
+                let coord = absolute::Coord(*row, *column);
+                if Self::absolute_get(board, coord).is_none() {
+                    ans.push(coord);
+                }
+            }
+        }
+        ans
+    }
+    type AbsoluteField = cetkaik_core::absolute::Field;
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: &Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)> {
+        match side {
+            absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
+            absolute::Side::ASide => field.a_side_hop1zuo1.iter(),
+        }
+        .copied()
+        .map(|absolute::NonTam2Piece { color, prof }| (color, prof))
+        .collect()
+    }
+    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
+        &field.board
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
 /// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
 /// つまり、`Upward` は常に `IASide` へと読み替えられる。
 impl CetkaikRepresentation for CetkaikCompact {
+    type Perspective = cetkaik_compact_representation::Perspective;
+
     type AbsoluteCoord = cetkaik_compact_representation::Coord;
     type RelativeCoord = cetkaik_compact_representation::Coord;
-    type Perspective = cetkaik_compact_representation::Perspective;
+
+    type AbsoluteBoard = cetkaik_compact_representation::Board;
     type RelativeBoard = cetkaik_compact_representation::Board;
+
+    type AbsolutePiece = cetkaik_compact_representation::PieceWithSide;
     type RelativePiece = cetkaik_compact_representation::PieceWithSide;
+
+    type AbsoluteField = cetkaik_compact_representation::Field;
+
+    type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
     fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
         coord
@@ -144,6 +215,12 @@ impl CetkaikRepresentation for CetkaikCompact {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece> {
+        board.peek(coord)
+    }
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece> {
         board.peek(coord)
     }
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
@@ -165,7 +242,7 @@ impl CetkaikRepresentation for CetkaikCompact {
             cetkaik_compact_representation::MaybeTam2::NotTam2((prof, side)) => f_piece(prof, side),
         }
     }
-    fn empty_squares(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
+    fn empty_squares_relative(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
@@ -177,42 +254,92 @@ impl CetkaikRepresentation for CetkaikCompact {
         }
         ans
     }
-}
+    fn empty_squares_absolute(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
+        Self::empty_squares_relative(board)
+    }
 
-#[must_use]
-pub fn from_hop1zuo1_candidates2(
-    whose_turn: absolute::Side,
-    tam_itself_is_tam_hue: bool,
-    f: &absolute::Field,
-) -> Vec<PureMove> {
-    let perspective = match whose_turn {
-        absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
-        absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
-    };
-    from_hop1zuo1_candidates(&PureGameState {
-        perspective,
-        tam_itself_is_tam_hue,
-        f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
-    })
-}
-
-/// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
-#[must_use]
-fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
-    let mut ans = vec![];
-    for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in CetkaikCore::empty_squares(&game_state.f.current_board) {
-            ans.push(PureMove::NonTamMoveFromHopZuo {
-                color: piece.color,
-                prof: piece.prof,
-                dest: to_absolute_coord(empty_square, game_state.perspective),
-            });
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: &Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)> {
+        match side {
+            absolute::Side::ASide => field
+                .to_hop1zuo1()
+                .a_side_hop1zuo1_color_and_prof()
+                .collect(),
+            absolute::Side::IASide => field
+                .to_hop1zuo1()
+                .ia_side_hop1zuo1_color_and_prof()
+                .collect(),
         }
     }
-    ans
+    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
+        field.as_board()
+    }
 }
 
-pub use pure_move::PureMove;
+/// # Example
+/// 
+/// Using `cetkaik_core`:
+/// ```
+/// use cetkaik_yhuap_move_candidates::from_hop1zuo1_candidates_vec;
+/// use cetkaik_core::*;
+/// use cetkaik_core::absolute::Field;
+/// use cetkaik_core::absolute::NonTam2Piece;
+/// use cetkaik_core::absolute::Coord;
+/// use cetkaik_core::absolute::Column::*;
+/// use cetkaik_core::absolute::Row::*;
+/// use cetkaik_yhuap_move_candidates::CetkaikCore;
+/// use std::collections::HashSet;
+///
+/// // There are eighty unoccupied squares on the board, and `IASide` has two pieces in hop1zuo1
+/// let vec = from_hop1zuo1_candidates_vec::<CetkaikCore>(
+///     cetkaik_core::absolute::Side::IASide,
+///     &Field {
+///         a_side_hop1zuo1: vec![NonTam2Piece {
+///             color: Color::Huok2,
+///             prof: Profession::Gua2,
+///         }],
+///         ia_side_hop1zuo1: vec![NonTam2Piece {
+///             color: Color::Kok1,
+///             prof: Profession::Kauk2,
+///         }, NonTam2Piece {
+///             color: Color::Huok2,
+///             prof: Profession::Nuak1,
+///         }],
+///         board: vec![
+///             (Coord(AU, C), absolute::Piece::NonTam2Piece {
+///             color: Color::Kok1,
+///             prof: Profession::Nuak1,
+///             side: absolute::Side::IASide
+///         })
+///         ]
+///         .into_iter()
+///         .collect(),
+///     }
+/// );
+///
+/// assert_eq!(vec.len(), 80 * 2)
+///
+/// ```
+#[must_use]
+pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
+    whose_turn: T::AbsoluteSide,
+    field: &T::AbsoluteField,
+) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
+    T::hop1zuo1_of(whose_turn, field)
+        .into_iter()
+        .flat_map(|(color, prof)| {
+            T::empty_squares_absolute(&T::as_board(field))
+                .into_iter()
+                .map(move |dest| cetkaik_core::PureMove_::NonTamMoveFromHopZuo {
+                    color,
+                    prof,
+                    dest,
+                })
+        })
+        .collect()
+}
 
 mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
@@ -294,7 +421,7 @@ pub fn not_from_hop1zuo1_candidates2(
     tam_itself_is_tam_hue: bool,
     whose_turn: absolute::Side,
     f: &absolute::Field,
-) -> Vec<PureMove> {
+) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
     let perspective = match whose_turn {
         absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
         absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
@@ -312,7 +439,10 @@ pub fn not_from_hop1zuo1_candidates2(
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 /// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
 #[must_use]
-fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
+fn not_from_hop1zuo1_candidates_(
+    config: &Config,
+    game_state: &PureGameState,
+) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
@@ -340,7 +470,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                 neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
-                                vec![PureMove::TamMoveNoStep {
+                                vec![cetkaik_core::PureMove_::TamMoveNoStep {
                                     second_dest: to_absolute_coord(snd_dst, game_state.perspective),
                                     first_dest: to_absolute_coord(fst_dst, game_state.perspective),
                                     src: to_absolute_coord(src, game_state.perspective),
@@ -350,15 +480,15 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                 let step: Coord = neighbor;
                                 empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
                                     .flat_map(|snd_dst| {
-                                    vec![PureMove::TamMoveStepsDuringLatter {
+                                    vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
                                         first_dest: to_absolute_coord(fst_dst, game_state.perspective),
                                         second_dest: to_absolute_coord(snd_dst, game_state.perspective),
                                         src: to_absolute_coord(src, game_state.perspective),
                                         step: to_absolute_coord(step, game_state.perspective),
                                     }].into_iter()
-                                }).collect::<Vec<PureMove>>().into_iter()
+                                }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>().into_iter()
                             }
-                        }).collect::<Vec<PureMove>>());
+                        }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>());
                             } else {
                                 /* not an empty square: must complete the first move */
                                 let step = tentative_dest;
@@ -370,7 +500,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                                 fst_dst,
                                             );
                                             v.flat_map(move |snd_dst| {
-                                                vec![PureMove::TamMoveStepsDuringFormer {
+                                                vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
                                                     first_dest: to_absolute_coord(
                                                         fst_dst,
                                                         game_state.perspective,
@@ -390,10 +520,10 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                                 }]
                                                 .into_iter()
                                             })
-                                            .collect::<Vec<PureMove>>()
+                                            .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()
                                             .into_iter()
                                         })
-                                        .collect::<Vec<PureMove>>(),
+                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>(),
                                 );
                             }
                         }
@@ -453,7 +583,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                                 subtracted_board,
                                                 tam_itself_is_tam_hue,
                                             ) {
-                                                vec![PureMove::NonTamMoveSrcStepDstFinite {
+                                                vec![cetkaik_core::PureMove_::NonTamMoveSrcStepDstFinite {
                                                     src: to_absolute_coord(src, perspective),
                                                     step: to_absolute_coord(step, perspective),
                                                     dest: to_absolute_coord(
@@ -469,7 +599,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                                 vec![].into_iter()
                                             }
                                         })
-                                        .collect::<Vec<PureMove>>()[..],
+                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
                                     &candidates_inf
                                         .flat_map(|planned_dest| {
                                             if !can_get_occupied_by::<CetkaikCore>(
@@ -486,7 +616,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                                 return vec![].into_iter();
                                                 // retry
                                             }
-                                            let obj: PureMove = PureMove::InfAfterStep {
+                                            let obj: cetkaik_core::PureMove_<absolute::Coord> = cetkaik_core::PureMove_::InfAfterStep {
                                                 src: to_absolute_coord(src, perspective),
                                                 step: to_absolute_coord(step, perspective),
                                                 planned_direction: to_absolute_coord(
@@ -496,25 +626,27 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                             };
                                             vec![obj].into_iter()
                                         })
-                                        .collect::<Vec<PureMove>>()[..],
+                                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
                                 ]
                                 .concat()
                             };
                             match dest_piece {
                                 None => {
                                     // cannot step
-                                    ans.append(&mut vec![PureMove::NonTamMoveSrcDst {
-                                        src: to_absolute_coord(src, game_state.perspective),
-                                        dest: to_absolute_coord(
-                                            tentative_dest,
-                                            game_state.perspective,
-                                        ),
-                                        is_water_entry_ciurl: is_ciurl_required(
-                                            tentative_dest,
-                                            prof,
-                                            src,
-                                        ),
-                                    }]);
+                                    ans.append(&mut vec![
+                                        cetkaik_core::PureMove_::NonTamMoveSrcDst {
+                                            src: to_absolute_coord(src, game_state.perspective),
+                                            dest: to_absolute_coord(
+                                                tentative_dest,
+                                                game_state.perspective,
+                                            ),
+                                            is_water_entry_ciurl: is_ciurl_required(
+                                                tentative_dest,
+                                                prof,
+                                                src,
+                                            ),
+                                        },
+                                    ]);
                                 }
                                 Some(Piece::Tam2) => {
                                     // if allowed by config, allow stepping on Tam2;
@@ -545,7 +677,7 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                                     ) {
                                         ans.append(
                                             &mut [
-                                                &[PureMove::NonTamMoveSrcDst {
+                                                &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
                                                     src: to_absolute_coord(
                                                         src,
                                                         game_state.perspective,

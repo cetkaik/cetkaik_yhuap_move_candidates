@@ -1,7 +1,26 @@
+use cetkaik_core::{absolute::PureMove, perspective::to_absolute_coord};
+
+use crate::{PureGameState, CetkaikCore, CetkaikRepresentation};
+
+#[must_use]
+fn from_hop1zuo1_candidates_old(game_state: &PureGameState) -> Vec<PureMove> {
+    let mut ans = vec![];
+    for piece in &game_state.f.hop1zuo1of_downward {
+        for empty_square in CetkaikCore::empty_squares_relative(&game_state.f.current_board) {
+            ans.push(PureMove::NonTamMoveFromHopZuo {
+                color: piece.color,
+                prof: piece.prof,
+                dest: to_absolute_coord(empty_square, game_state.perspective),
+            });
+        }
+    }
+    ans
+}
+
 #[test]
 fn test_initial_board_sample() {
     super::run_test(
-        crate::from_hop1zuo1_candidates,
+        from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
         crate::pure_move::PureMove::serialize,
         &[],
@@ -11,7 +30,7 @@ fn test_initial_board_sample() {
 #[test]
 fn test_simple_board_sample_4() {
     super::run_test(
-        crate::from_hop1zuo1_candidates,
+        from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::simple_board_sample_4(),
         crate::pure_move::PureMove::serialize,
         &[

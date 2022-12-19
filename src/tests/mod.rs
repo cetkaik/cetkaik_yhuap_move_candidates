@@ -1,3 +1,5 @@
+use cetkaik_core::absolute::PureMove;
+
 use super::*;
 
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
@@ -52,7 +54,7 @@ mod empty_squares {
     fn test_initial_board_sample() {
         use crate::CetkaikRepresentation;
         super::run_test(
-            |game_state| crate::CetkaikCore::empty_squares(&game_state.f.current_board),
+            |game_state| crate::CetkaikCore::empty_squares_relative(&game_state.f.current_board),
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             relative::serialize_coord,
             &[
