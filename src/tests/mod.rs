@@ -1,22 +1,28 @@
-use cetkaik_core::absolute::PureMove;
-
+use self::test_cases::PureGameState;
 use super::*;
+use cetkaik_core::{absolute::PureMove, relative::Side};
 
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_(
+    not_from_hop1zuo1_candidates_::<CetkaikCore>(
+        Side::Downward,
         &Config {
             allow_kut2tam2: false,
         },
-        game_state,
+        game_state.perspective,
+        game_state.tam_itself_is_tam_hue,
+        &game_state.f,
     )
 }
 
 fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_(
+    not_from_hop1zuo1_candidates_::<CetkaikCore>(
+        Side::Downward,
         &Config {
             allow_kut2tam2: true,
         },
-        game_state,
+        game_state.perspective,
+        game_state.tam_itself_is_tam_hue,
+        &game_state.f,
     )
 }
 
@@ -103,9 +109,12 @@ mod get_opponent_pieces_rotated {
         rotated_piece: TamOrUpwardPiece,
         rotated_coord: Coord,
     }
+    use cetkaik_core::relative::Side;
     use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
-    use crate::{Piece, PureGameState, Side, Vec};
+    use crate::{Piece, Vec};
+
+    use super::PureGameState;
 
     #[allow(clippy::needless_pass_by_value)]
     fn serialize_rotated(r: Rotated) -> String {
