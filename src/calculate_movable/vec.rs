@@ -1,6 +1,10 @@
-use super::{iter, Board, Coord, Vec};
-pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
-    apply_deltas(
+use crate::CetkaikRepresentation;
+
+use super::{iter, Vec};
+pub fn eight_neighborhood<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+) -> Vec<T::RelativeCoord> {
+    apply_deltas::<T>(
         coord,
         &[
             [-1, -1],
@@ -14,52 +18,44 @@ pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
         ],
     )
 }
-pub fn apply_deltas(coord: Coord, deltas: &[[i32; 2]]) -> Vec<Coord> {
-    let [i, j] = coord;
+
+pub fn apply_deltas<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    deltas: &[[isize; 2]],
+) -> Vec<T::RelativeCoord> {
     deltas
         .iter()
-        .map(|[delta_x, delta_y]| {
-            [
-                i32::try_from(i).unwrap() + delta_x,
-                i32::try_from(j).unwrap() + delta_y,
-            ]
-        })
-        .filter_map(|[l, m]| {
-            if (0..=8).contains(&l) && (0..=8).contains(&m) {
-                Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()])
-            } else {
-                None
-            }
-        })
+        .filter_map(move |[delta_x, delta_y]| T::add_delta(coord, *delta_x, *delta_y))
         .collect()
 }
-pub fn apply_single_delta_if_no_intervention(
-    coord: Coord,
-    delta: [i32; 2],
-    board: Board,
-) -> Vec<Coord> {
-    let mut blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+
+pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    delta: [isize; 2],
+    board: T::RelativeBoard,
+) -> Vec<T::RelativeCoord> {
+    let mut blocker = iter::apply_deltas::<T>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    if blocker.all(|[i, j]| board[i][j].is_none()) {
-        apply_deltas(coord, &[delta])
+    if blocker.all(|block| T::relative_get(board, block).is_none()) {
+        apply_deltas::<T>(coord, &[delta])
     } else {
         vec![]
     }
 }
 
-pub fn apply_deltas_if_no_intervention(
-    coord: Coord,
-    deltas: &[[i32; 2]],
-    board: Board,
-) -> Vec<Coord> {
-    iter::apply_deltas_if_no_intervention(coord, deltas, board).collect()
+pub fn apply_deltas_if_no_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    deltas: &[[isize; 2]],
+    board: T::RelativeBoard,
+) -> Vec<T::RelativeCoord> {
+    iter::apply_deltas_if_no_intervention::<T>(coord, deltas, board).collect()
 }
 
-pub fn apply_deltas_if_zero_or_one_intervention(
-    coord: Coord,
-    deltas: &[[i32; 2]],
-    board: Board,
-) -> Vec<Coord> {
-    iter::apply_deltas_if_zero_or_one_intervention(coord, deltas, board).collect()
+pub fn apply_deltas_if_zero_or_one_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    deltas: &[[isize; 2]],
+    board: T::RelativeBoard,
+) -> Vec<T::RelativeCoord> {
+    iter::apply_deltas_if_zero_or_one_intervention::<T>(coord, deltas, board).collect()
 }

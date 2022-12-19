@@ -26,7 +26,7 @@ use num::signum;
 /// assert_eq_ignoring_order(&naive([-9,6]), &vec![[-3,2], [-6,4]]);
 /// ```
 #[must_use]
-pub fn naive(delta: [i32; 2]) -> Vec<[i32; 2]> {
+pub fn naive(delta: [isize; 2]) -> Vec<[isize; 2]> {
     /*
     We list the coordinates [dx_block, dy_block] that can block an attempt for a piece to move to [dx, dy].
     The criteria required for [dx_block, dy_block] to block the move are
@@ -36,7 +36,7 @@ pub fn naive(delta: [i32; 2]) -> Vec<[i32; 2]> {
     */
     let [dx, dy] = delta;
 
-    let mut ans: Vec<[i32; 2]> = vec![];
+    let mut ans: Vec<[isize; 2]> = vec![];
 
     for dx_block in -8..=8 {
         for dy_block in -8..=8 {
@@ -83,7 +83,7 @@ pub fn naive(delta: [i32; 2]) -> Vec<[i32; 2]> {
 /// assert_eq_ignoring_order(&fast([-9,6]), &vec![[-3,2], [-6,4]]);
 /// ```
 #[must_use]
-pub fn fast(delta: [i32; 2]) -> Vec<[i32; 2]> {
+pub fn fast(delta: [isize; 2]) -> Vec<[isize; 2]> {
     if let [0, 0] = delta {
         return vec![];
     }
@@ -99,7 +99,7 @@ pub fn fast(delta: [i32; 2]) -> Vec<[i32; 2]> {
     let qx = dx / g;
     let qy = dy / g;
 
-    let mut ans: Vec<[i32; 2]> = vec![];
+    let mut ans: Vec<[isize; 2]> = vec![];
 
     for mult in 1.. {
         let dx_block = mult * qx;
@@ -115,17 +115,17 @@ pub fn fast(delta: [i32; 2]) -> Vec<[i32; 2]> {
 }
 
 pub struct Blocker {
-    d_length: i32,
-    qx: i32,
-    qy: i32,
-    mult: i32,
+    d_length: isize,
+    qx: isize,
+    qy: isize,
+    mult: isize,
 }
 
 impl Iterator for Blocker {
-    type Item = [i32; 2];
+    type Item = [isize; 2];
 
     #[inline]
-    fn next(&mut self) -> Option<[i32; 2]> {
+    fn next(&mut self) -> Option<[isize; 2]> {
         let dx_block = self.mult * self.qx;
         let dy_block = self.mult * self.qy;
         let d_block_length = dx_block * dx_block + dy_block * dy_block;
@@ -160,7 +160,7 @@ impl Iterator for Blocker {
 /// assert_eq_ignoring_order(&ultrafast([-5,0]).collect::<Vec<_>>(), &vec![[-1,0], [-2,0], [-3,0], [-4,0]]);
 /// assert_eq_ignoring_order(&ultrafast([0,5]).collect::<Vec<_>>(), &vec![[0,1], [0,2], [0,3], [0,4]]);
 /// ```
-pub fn ultrafast(delta: [i32; 2]) -> impl Iterator<Item = [i32; 2]> {
+pub fn ultrafast(delta: [isize; 2]) -> impl Iterator<Item = [isize; 2]> {
     let [dx, dy] = delta;
     let d_length = dx * dx + dy * dy;
     let qx = signum(dx);

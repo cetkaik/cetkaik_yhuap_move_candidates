@@ -22,7 +22,7 @@ pub const TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE: PureGameState = PureGameState {
     },
 };
 
-pub const SIMPLE_BOARD: Board = [
+pub const SIMPLE_BOARD: cetkaik_core::relative::Board = [
     [
         Some(Piece::NonTam2Piece {
             color: Color::Huok2,
@@ -62,7 +62,7 @@ pub const SIMPLE_BOARD: Board = [
     [None, None, None, None, None, None, None, None, None],
 ];
 
-pub const fn complicated_board() -> Board {
+pub const fn complicated_board() -> cetkaik_core::relative::Board {
     [
         [
             None,
@@ -358,7 +358,7 @@ pub const fn complicated_board() -> Board {
     ]
 }
 
-pub const fn tam_corner() -> Board {
+pub const fn tam_corner() -> cetkaik_core::relative::Board {
     [
         [None, None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None, None],
@@ -534,7 +534,7 @@ pub const fn tam_corner_sample() -> PureGameState {
     }
 }
 
-const INITIAL_BOARD: Board = [
+const INITIAL_BOARD: cetkaik_core::relative::Board = [
     [
         Some(Piece::NonTam2Piece {
             color: Color::Huok2,

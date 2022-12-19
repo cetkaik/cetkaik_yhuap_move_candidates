@@ -1,35 +1,35 @@
 use alloc::vec::Vec;
 
-use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
+use crate::CetkaikRepresentation;
+use cetkaik_core::Profession;
+use super::MovablePositions;
 
 pub mod iter;
 pub mod vec;
 
-pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
-    // unconditionally TamHue
-    if coord == [2, 2]
-        || coord == [2, 6]
-        || coord == [3, 3]
-        || coord == [3, 5]
-        || coord == [4, 4]
-        || coord == [5, 3]
-        || coord == [5, 5]
-        || coord == [6, 2]
-        || coord == [6, 6]
-    {
+pub fn is_tam_hue<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    board: T::RelativeBoard,
+    tam_itself_is_tam_hue: bool,
+) -> bool {
+    if T::is_tam_hue_by_default(coord) {
         return true;
     }
 
-    if tam_itself_is_tam_hue && board[coord[0]][coord[1]] == Some(Piece::Tam2) {
+    if tam_itself_is_tam_hue && T::relative_get(board, coord) == Some(T::tam2()) {
         return true;
     }
 
     // is Tam2 available at any neighborhood?
-    iter::eight_neighborhood(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
+    iter::eight_neighborhood::<T>(coord)
+        .any(|coord| T::relative_get(board, coord) == Some(T::tam2()))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
+/// Supports both `cetkaik_core` and `cetkaik_compact_representation`.
 /// # Examples
+/// 
+/// With `cetkaik_core`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
 /// use cetkaik_core::*;
@@ -46,7 +46,7 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
 /// }
 ///
 /// let MovablePositions { finite, infinite } =
-///     calculate_movable_positions_for_either_side(
+///     calculate_movable_positions_for_either_side::<CetkaikCore>(
 ///         [2, 0], /* if, at [2,0], */
 ///         relative::Piece::NonTam2Piece {
 ///             color: Color::Huok2,
@@ -102,40 +102,98 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
 ///  * Note that you need two calls to this function in order to handle stepping. */
 /// assert_eq_ignoring_order(&infinite, &vec![[3, 0], [4, 0], [5, 0], [6, 0], [1, 0], [0, 0]]);
 /// ```
+/// 
+/// With `cetkaik_compact_representation`:
+/// ```
+/// use cetkaik_yhuap_move_candidates::*;
+/// use cetkaik_core::*;
+/// use cetkaik_compact_representation::*;
+/// use std::collections::HashSet;
+///
+/// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
+/// where
+///     T: Eq + core::hash::Hash + std::fmt::Debug,
+/// {
+///     let a: HashSet<_> = a.iter().collect();
+///     let b: HashSet<_> = b.iter().collect();
+///
+///     assert_eq!(a, b)
+/// }
+///
+/// let MovablePositions { finite, infinite } =
+///     calculate_movable_positions_for_either_side::<CetkaikCompact>(
+///         Coord::new(2, 0).unwrap(), /* if, at [2,0], */
+///         PieceWithSide::new(0o240).unwrap(), /* a black Kua2 belonging to the opponent = ASide exists, */
+///         /* while the opponent's Gua2 is in [0,0] and your Kauk2 in [6,0], */
+///         unsafe {
+///           std::mem::transmute::<[[u8; 9]; 9], Board>([
+///             [0o220, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o100, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///           ])
+///         },
+///         false
+///     );
+///
+/// /* then the opponent's Gua2 can either move one step to the side, */
+/// assert_eq_ignoring_order(&finite, &[Coord::new(2, 1).unwrap()]);
+///
+/// /* or it can run to anywhere from [0,0] to [6,0].
+///  * Note that you need two calls to this function in order to handle stepping. */
+/// assert_eq_ignoring_order(&infinite, &[
+///     Coord::new(3, 0).unwrap(), 
+///     Coord::new(4, 0).unwrap(), 
+///     Coord::new(5, 0).unwrap(), 
+///     Coord::new(6, 0).unwrap(), 
+///     Coord::new(1, 0).unwrap(), 
+///     Coord::new(0, 0).unwrap()
+/// ]);
+/// ```
 #[must_use]
-pub fn calculate_movable_positions_for_either_side(
-    coord: Coord,
-    piece: Piece,
-    board: Board,
+pub fn calculate_movable_positions_for_either_side<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    piece: T::RelativePiece,
+    board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
-) -> MovablePositions {
-    match piece {
-        Piece::Tam2 => calculate_movable_positions_for_tam(coord),
-        Piece::NonTam2Piece {
-            prof,
-            color: _,
-            side,
-        } => {
-            calculate_movable_positions_for_nontam(coord, prof, board, tam_itself_is_tam_hue, side)
-        }
-    }
+) -> MovablePositions<T::RelativeCoord> {
+    T::match_on_piece_and_apply(
+        piece,
+        &|| calculate_movable_positions_for_tam::<T>(coord),
+        &|prof, side| {
+            calculate_movable_positions_for_nontam::<T>(
+                coord,
+                prof,
+                board,
+                tam_itself_is_tam_hue,
+                side,
+            )
+        },
+    )
 }
 
-pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
+pub fn calculate_movable_positions_for_tam<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+) -> MovablePositions<T::RelativeCoord> {
     MovablePositions {
-        finite: vec::eight_neighborhood(coord),
+        finite: vec::eight_neighborhood::<T>(coord),
         infinite: vec![],
     }
 }
 
-pub fn calculate_movable_positions_for_nontam(
-    coord: Coord,
+pub fn calculate_movable_positions_for_nontam<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     prof: Profession,
-    board: Board,
+    board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
-    side: Side,
-) -> MovablePositions {
-    const DIAGONAL: [[i32; 2]; 32] = [
+    side: T::RelativeSide,
+) -> MovablePositions<T::RelativeCoord> {
+    const DIAGONAL: [[isize; 2]; 32] = [
         // UP_LEFT:
         [-8, -8],
         [-7, -7],
@@ -173,7 +231,7 @@ pub fn calculate_movable_positions_for_nontam(
         [2, 2],
         [1, 1],
     ];
-    const UP: [[i32; 2]; 8] = [
+    const UP: [[isize; 2]; 8] = [
         [-1, 0],
         [-2, 0],
         [-3, 0],
@@ -183,7 +241,7 @@ pub fn calculate_movable_positions_for_nontam(
         [-7, 0],
         [-8, 0],
     ];
-    const DOWN: [[i32; 2]; 8] = [
+    const DOWN: [[isize; 2]; 8] = [
         [1, 0],
         [2, 0],
         [3, 0],
@@ -193,7 +251,7 @@ pub fn calculate_movable_positions_for_nontam(
         [7, 0],
         [8, 0],
     ];
-    const LEFT_RIGHT: [[i32; 2]; 16] = [
+    const LEFT_RIGHT: [[isize; 2]; 16] = [
         [0, -1],
         [0, -2],
         [0, -3],
@@ -213,13 +271,13 @@ pub fn calculate_movable_positions_for_nontam(
     ];
 
     let piece_prof = prof;
-    if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
+    if is_tam_hue::<T>(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
            Profession::Io | Profession::Uai1 => // General, 将, varxle
-            MovablePositions { finite: vec::eight_neighborhood(coord), infinite: vec![] },
+            MovablePositions { finite: vec::eight_neighborhood::<T>(coord), infinite: vec![] },
             Profession::Kaun1 =>
             MovablePositions {
-              finite: vec::apply_deltas(coord, &[
+              finite: vec::apply_deltas::<T>(coord, &[
                 [-2, -2],
                 [-2, 2],
                 [2, 2],
@@ -230,24 +288,24 @@ pub fn calculate_movable_positions_for_nontam(
             Profession::Kauk2 => // Pawn, 兵, elmer
             MovablePositions  {
               finite: [
-                &vec::apply_deltas(coord, &[
+                &vec::apply_deltas::<T>(coord, &[
                   [-1, 0],
                   [0, -1],
                   [0, 1],
                   [1, 0]
                 ])[..],
-                &vec::apply_single_delta_if_no_intervention(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
+                &vec::apply_single_delta_if_no_intervention::<T>(coord,  if T::is_upward(side) {[-2, 0]} else {[2,0]}, board)[..]
               ].concat(),
               infinite: vec![]
             },
             Profession::Nuak1 => // Vessel, 船, felkana
             MovablePositions  {
               finite: [
-                &vec::apply_deltas(coord, &[
+                &vec::apply_deltas::<T>(coord, &[
                   [0, -1],
                   [0, 1]
                 ])[..],
-                &vec::apply_deltas_if_no_intervention(
+                &vec::apply_deltas_if_no_intervention::<T>(
                   coord,
                   &[
                     [0, -2],
@@ -256,13 +314,13 @@ pub fn calculate_movable_positions_for_nontam(
                   board
                 )[..]
               ].concat(),
-              infinite: vec::apply_deltas_if_no_intervention(coord, &[&UP[..], &DOWN[..]].concat(), board)
+              infinite: vec::apply_deltas_if_no_intervention::<T>(coord, &[&UP[..], &DOWN[..]].concat(), board)
             },
             Profession::Gua2 | // Rook, 弓, gustuer
             Profession::Dau2 => // Tiger, 虎, stistyst
                MovablePositions {
                 finite: vec![],
-                infinite: vec::apply_deltas_if_no_intervention(
+                infinite: vec::apply_deltas_if_no_intervention::<T>(
                     coord,
                     &DIAGONAL,
                     board
@@ -270,7 +328,7 @@ pub fn calculate_movable_positions_for_nontam(
               },
               Profession::Maun1 => {
                 // Horse, 馬, dodor
-                const HORSE_DELTAS: [[i32; 2] ; 28] = [
+                const HORSE_DELTAS: [[isize; 2] ; 28] = [
                   [-8, -8],
                   [-7, -7],
                   [-6, -6],
@@ -300,7 +358,7 @@ pub fn calculate_movable_positions_for_nontam(
                   [3, 3],
                   [2, 2]
                 ];
-                let mut inf: Vec<Coord> = vec![];
+                let mut inf: Vec<T::RelativeCoord> = vec![];
                 for delta in &HORSE_DELTAS {
                   let blocker_deltas = crate::get_blocker_deltas::ultrafast(*delta).filter(
                     |d|
@@ -310,10 +368,10 @@ pub fn calculate_movable_positions_for_nontam(
                        */
                       !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
                   );
-                  let mut blocker = iter::apply_deltas(coord, blocker_deltas);
+                  let mut blocker = iter::apply_deltas::<T>(coord, blocker_deltas);
                   // if nothing is blocking the way
-                  if blocker.all(|[i, j]| board[i][j].is_none()) {
-                    inf.append(&mut vec::apply_deltas(coord, &[*delta]));
+                  if blocker.all(|block| T::relative_get(board, block).is_none()) {
+                    inf.append(&mut vec::apply_deltas::<T>(coord, &[*delta]));
                   }
                 }
                 MovablePositions  {
@@ -324,7 +382,7 @@ pub fn calculate_movable_positions_for_nontam(
               Profession::Kua2 => // Clerk, 筆, kua
               MovablePositions  {
                finite: vec![],
-               infinite: vec::apply_deltas_if_no_intervention(
+               infinite: vec::apply_deltas_if_no_intervention::<T>(
                  coord,
                  &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                  board
@@ -333,7 +391,7 @@ pub fn calculate_movable_positions_for_nontam(
            Profession::Tuk2 => // Shaman, 巫, terlsk
               MovablePositions {
                finite: vec![],
-               infinite: vec::apply_deltas_if_zero_or_one_intervention(
+               infinite: vec::apply_deltas_if_zero_or_one_intervention::<T>(
                  coord,
                  &[
                    &UP[..],
@@ -348,22 +406,18 @@ pub fn calculate_movable_positions_for_nontam(
     } else {
         match piece_prof {
             Profession::Io => MovablePositions {
-                finite: vec::eight_neighborhood(coord),
+                finite: vec::eight_neighborhood::<T>(coord),
                 infinite: vec![],
             },
             Profession::Kauk2 => MovablePositions {
-                finite: vec::apply_deltas(
+                finite: vec::apply_deltas::<T>(
                     coord,
-                    &[if side == Side::Upward {
-                        [-1, 0]
-                    } else {
-                        [1, 0]
-                    }],
+                    &[if T::is_upward(side) { [-1, 0] } else { [1, 0] }],
                 ),
                 infinite: vec![],
             }, // Pawn, 兵, elmer
             Profession::Kaun1 => MovablePositions {
-                finite: vec::apply_deltas(coord, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
+                finite: vec::apply_deltas::<T>(coord, &[[-2, 0], [2, 0], [0, -2], [0, 2]]),
                 infinite: vec![],
             }, // 車, vadyrd
 
@@ -371,7 +425,7 @@ pub fn calculate_movable_positions_for_nontam(
             // Tiger, 虎, stistyst
             {
                 MovablePositions {
-                    finite: vec::apply_deltas(coord, &[[-1, -1], [-1, 1], [1, -1], [1, 1]]),
+                    finite: vec::apply_deltas::<T>(coord, &[[-1, -1], [-1, 1], [1, -1], [1, 1]]),
                     infinite: vec![],
                 }
             }
@@ -380,7 +434,7 @@ pub fn calculate_movable_positions_for_nontam(
             // Horse, 馬, dodor
             {
                 MovablePositions {
-                    finite: vec::apply_deltas(coord, &[[-2, -2], [-2, 2], [2, 2], [2, -2]]),
+                    finite: vec::apply_deltas::<T>(coord, &[[-2, -2], [-2, 2], [2, 2], [2, -2]]),
                     infinite: vec![],
                 }
             }
@@ -389,9 +443,9 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention::<T>(
                         coord,
-                        if side == Side::Upward { &UP } else { &DOWN },
+                        if T::is_upward(side) { &UP } else { &DOWN },
                         board,
                     ),
                 }
@@ -401,7 +455,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention::<T>(
                         coord,
                         &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                         board,
@@ -412,8 +466,8 @@ pub fn calculate_movable_positions_for_nontam(
             // Clerk, 筆, kua
             {
                 MovablePositions {
-                    finite: vec::apply_deltas(coord, &[[0, -1], [0, 1]]),
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    finite: vec::apply_deltas::<T>(coord, &[[0, -1], [0, 1]]),
+                    infinite: vec::apply_deltas_if_no_intervention::<T>(
                         coord,
                         &[&UP[..], &DOWN[..]].concat(),
                         board,
@@ -425,8 +479,8 @@ pub fn calculate_movable_positions_for_nontam(
             // Shaman, 巫, terlsk
             {
                 MovablePositions {
-                    finite: vec::apply_deltas(coord, &[[-1, 0], [1, 0]]),
-                    infinite: vec::apply_deltas_if_no_intervention(coord, &LEFT_RIGHT, board),
+                    finite: vec::apply_deltas::<T>(coord, &[[-1, 0], [1, 0]]),
+                    infinite: vec::apply_deltas_if_no_intervention::<T>(coord, &LEFT_RIGHT, board),
                 }
             }
 
@@ -434,15 +488,11 @@ pub fn calculate_movable_positions_for_nontam(
             // General, 将, varxle
             {
                 MovablePositions {
-                    finite: vec::apply_deltas(
+                    finite: vec::apply_deltas::<T>(
                         coord,
                         &[
                             [-1, -1],
-                            if side == Side::Upward {
-                                [-1, 0]
-                            } else {
-                                [1, 0]
-                            },
+                            if T::is_upward(side) { [-1, 0] } else { [1, 0] },
                             [-1, 1],
                             [0, -1],
                             [0, 1],
