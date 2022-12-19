@@ -54,21 +54,22 @@ impl CetkaikRepresentation for CetkaikCompact {
         coord
     }
     fn add_delta(
-            coord: Self::RelativeCoord,
-            row_delta: isize,
-            col_delta: isize,
-        ) -> Option<Self::RelativeCoord> {
+        coord: Self::RelativeCoord,
+        row_delta: isize,
+        col_delta: isize,
+    ) -> Option<Self::RelativeCoord> {
         cetkaik_compact_representation::Coord::add_delta(coord, row_delta, col_delta)
     }
 }
 
-pub fn add_delta(coord: Coord, row_delta: isize, col_delta: isize) -> Option<Coord> {
+#[must_use]
+pub const fn add_delta(coord: Coord, row_delta: isize, col_delta: isize) -> Option<Coord> {
     let [i, j] = coord;
     match (
-        isize::try_from(i).unwrap() + row_delta,
-        isize::try_from(j).unwrap() + col_delta,
+        i.checked_add_signed(row_delta),
+        j.checked_add_signed(col_delta),
     ) {
-        (l @ 0..=8, m @ 0..=8) => Some([usize::try_from(l).unwrap(), usize::try_from(m).unwrap()]),
+        (Some(l @ 0..=8), Some(m @ 0..=8)) => Some([l, m]),
         _ => None,
     }
 }
