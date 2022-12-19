@@ -1,6 +1,5 @@
-use crate::{CetkaikCore, CetkaikRepresentation};
+use crate::CetkaikRepresentation;
 
-use super::{Board, Coord};
 pub fn eight_neighborhood<T: CetkaikRepresentation>(
     coord: T::RelativeCoord,
 ) -> impl Iterator<Item = T::RelativeCoord> {
@@ -54,22 +53,27 @@ where
     <T as CetkaikRepresentation>::RelativeBoard: 'a,
     <T as CetkaikRepresentation>::RelativeCoord: 'a,
 {
-    let iter = deltas.iter().copied();
-
-    iter.flat_map(move |delta| apply_single_delta_if_no_intervention::<T>(coord, delta, board))
+    deltas
+        .iter()
+        .copied()
+        .flat_map(move |delta| apply_single_delta_if_no_intervention::<T>(coord, delta, board))
 }
 
-pub fn apply_single_delta_if_zero_or_one_intervention(
-    coord: Coord,
+pub fn apply_single_delta_if_zero_or_one_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     delta: [isize; 2],
-    board: Board,
-) -> impl Iterator<Item = Coord> {
-    let blocker = apply_deltas::<CetkaikCore>(coord, crate::get_blocker_deltas::ultrafast(delta));
+    board: T::RelativeBoard,
+) -> impl Iterator<Item = T::RelativeCoord> {
+    let blocker = apply_deltas::<T>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if no piece or a single piece is blocking the way
-    apply_deltas::<CetkaikCore>(
+    apply_deltas::<T>(
         coord,
-        if blocker.filter(|[i, j]| board[*i][*j].is_some()).count() <= 1 {
+        if blocker
+            .filter(|block| T::relative_get(board, *block).is_some())
+            .count()
+            <= 1
+        {
             Some(delta)
         } else {
             None
@@ -78,13 +82,16 @@ pub fn apply_single_delta_if_zero_or_one_intervention(
     )
 }
 
-pub fn apply_deltas_if_zero_or_one_intervention(
-    coord: Coord,
-    deltas: &[[isize; 2]],
-    board: Board,
-) -> impl Iterator<Item = Coord> + '_ {
-    deltas
-        .iter()
-        .copied()
-        .flat_map(move |delta| apply_single_delta_if_zero_or_one_intervention(coord, delta, board))
+pub fn apply_deltas_if_zero_or_one_intervention<'a, T: CetkaikRepresentation + 'a>(
+    coord: T::RelativeCoord,
+    deltas: &'a [[isize; 2]],
+    board: T::RelativeBoard,
+) -> impl Iterator<Item = T::RelativeCoord> + '_
+where
+    <T as CetkaikRepresentation>::RelativeBoard: 'a,
+    <T as CetkaikRepresentation>::RelativeCoord: 'a,
+{
+    deltas.iter().copied().flat_map(move |delta| {
+        apply_single_delta_if_zero_or_one_intervention::<T>(coord, delta, board)
+    })
 }

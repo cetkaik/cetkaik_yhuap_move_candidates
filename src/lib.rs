@@ -34,6 +34,7 @@ pub trait CetkaikRepresentation {
     ) -> Option<Self::RelativePiece>;
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
     fn tam2() -> Self::RelativePiece;
+    fn is_upward(s: Self::RelativeSide) -> bool;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -82,10 +83,14 @@ impl CetkaikRepresentation for CetkaikCore {
     fn tam2() -> Self::RelativePiece {
         cetkaik_core::relative::Piece::Tam2
     }
+    fn is_upward(s: Self::RelativeSide) -> bool {
+        s == cetkaik_core::relative::Side::Upward
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
 /// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
+/// つまり、`Upward` は常に `IASide` へと読み替えられる。 
 impl CetkaikRepresentation for CetkaikCompact {
     type AbsoluteCoord = cetkaik_compact_representation::Coord;
     type RelativeCoord = cetkaik_compact_representation::Coord;
@@ -114,6 +119,9 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn tam2() -> Self::RelativePiece {
         unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
+    }
+    fn is_upward(s: Self::RelativeSide) -> bool {
+        s == cetkaik_core::absolute::Side::IASide
     }
 }
 
@@ -319,7 +327,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                         color,
                     } => {
                         let MovablePositions { finite, infinite } =
-                            calculate_movable::calculate_movable_positions_for_nontam(
+                            calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
                                 src,
                                 prof,
                                 game_state.f.current_board,
@@ -342,7 +350,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
 
                                 let MovablePositions { finite, infinite } =
-                                    calculate_movable::calculate_movable_positions_for_nontam(
+                                    calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
                                         step,
                                         prof,
                                         subtracted_board,

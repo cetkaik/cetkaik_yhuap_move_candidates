@@ -1,6 +1,6 @@
 use crate::CetkaikRepresentation;
 
-use super::{iter, Board, Coord, Vec};
+use super::{iter, Vec};
 pub fn eight_neighborhood<T: CetkaikRepresentation>(
     coord: T::RelativeCoord,
 ) -> Vec<T::RelativeCoord> {
@@ -52,10 +52,10 @@ pub fn apply_deltas_if_no_intervention<T: CetkaikRepresentation>(
     iter::apply_deltas_if_no_intervention::<T>(coord, deltas, board).collect()
 }
 
-pub fn apply_deltas_if_zero_or_one_intervention(
-    coord: Coord,
+pub fn apply_deltas_if_zero_or_one_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     deltas: &[[isize; 2]],
-    board: Board,
-) -> Vec<Coord> {
-    iter::apply_deltas_if_zero_or_one_intervention(coord, deltas, board).collect()
+    board: T::RelativeBoard,
+) -> Vec<T::RelativeCoord> {
+    iter::apply_deltas_if_zero_or_one_intervention::<T>(coord, deltas, board).collect()
 }
