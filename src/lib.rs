@@ -229,7 +229,7 @@ impl CetkaikRepresentation for CetkaikCore {
                             prof,
                             color: _,
                         } if side_ == side => f_tam_or_piece(src, Some(prof)),
-                        Piece::NonTam2Piece{ .. } => {}
+                        Piece::NonTam2Piece { .. } => {}
                     }
                 }
             }
@@ -507,7 +507,8 @@ pub fn not_from_hop1zuo1_candidates2(
         absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
         absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
     };
-    not_from_hop1zuo1_candidates_(
+    not_from_hop1zuo1_candidates_::<CetkaikCore>(
+        Side::Downward,
         config,
         perspective,
         tam_itself_is_tam_hue,
@@ -721,20 +722,19 @@ fn foo<T: CetkaikRepresentation>(
     }
 }
 
-fn not_from_hop1zuo1_candidates_(
+fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
+    side: T::RelativeSide,
     config: &Config,
-    perspective: Perspective,
+    perspective: T::Perspective,
     tam_itself_is_tam_hue: bool,
-    f: &cetkaik_core::relative::Field,
-) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
+    f: &T::RelativeField,
+) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
     let mut ans = vec![];
-    <CetkaikCore as CetkaikRepresentation>::loop_over_one_side_and_tam(
-        &f.current_board,
-        Side::Downward,
-        &mut |src, maybe_prof| match maybe_prof {
-            None => candidates_tam2::<CetkaikCore>(src, f, perspective, &mut ans),
-            Some(prof) => foo::<CetkaikCore>(
-                Side::Downward,
+    T::loop_over_one_side_and_tam(T::as_board_relative(f), side, &mut |src, maybe_prof| {
+        match maybe_prof {
+            None => candidates_tam2::<T>(src, f, perspective, &mut ans),
+            Some(prof) => foo::<T>(
+                side,
                 config,
                 prof,
                 tam_itself_is_tam_hue,
@@ -743,9 +743,8 @@ fn not_from_hop1zuo1_candidates_(
                 perspective,
                 &mut ans,
             ),
-        },
-    );
-
+        }
+    });
     ans
 }
 
