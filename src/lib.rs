@@ -35,6 +35,11 @@ pub trait CetkaikRepresentation {
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
     fn tam2() -> Self::RelativePiece;
     fn is_upward(s: Self::RelativeSide) -> bool;
+    fn match_on_piece_and_apply<U>(
+        piece: Self::RelativePiece,
+        f_tam: &dyn Fn() -> U,
+        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
+    ) -> U;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -86,11 +91,21 @@ impl CetkaikRepresentation for CetkaikCore {
     fn is_upward(s: Self::RelativeSide) -> bool {
         s == cetkaik_core::relative::Side::Upward
     }
+    fn match_on_piece_and_apply<U>(
+        piece: Self::RelativePiece,
+        f_tam: &dyn Fn() -> U,
+        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
+    ) -> U {
+        match piece {
+            Piece::Tam2 => f_tam(),
+            Piece::NonTam2Piece { color: _, prof, side } => f_piece(prof, side),
+        }
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
 /// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
-/// つまり、`Upward` は常に `IASide` へと読み替えられる。 
+/// つまり、`Upward` は常に `IASide` へと読み替えられる。
 impl CetkaikRepresentation for CetkaikCompact {
     type AbsoluteCoord = cetkaik_compact_representation::Coord;
     type RelativeCoord = cetkaik_compact_representation::Coord;
@@ -122,6 +137,16 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn is_upward(s: Self::RelativeSide) -> bool {
         s == cetkaik_core::absolute::Side::IASide
+    }
+    fn match_on_piece_and_apply<U>(
+        piece: Self::RelativePiece,
+        f_tam: &dyn Fn() -> U,
+        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
+    ) -> U {
+        match piece.prof_and_side() {
+            cetkaik_compact_representation::MaybeTam2::Tam2 => f_tam(),
+            cetkaik_compact_representation::MaybeTam2::NotTam2((prof, side)) => f_piece(prof, side),
+        }
     }
 }
 
@@ -350,7 +375,9 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
 
                                 let MovablePositions { finite, infinite } =
-                                    calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
+                                    calculate_movable::calculate_movable_positions_for_nontam::<
+                                        CetkaikCore,
+                                    >(
                                         step,
                                         prof,
                                         subtracted_board,

@@ -106,20 +106,19 @@ pub fn calculate_movable_positions_for_either_side(
     board: Board,
     tam_itself_is_tam_hue: bool,
 ) -> MovablePositions<Coord> {
-    match piece {
-        Piece::Tam2 => calculate_movable_positions_for_tam::<CetkaikCore>(coord),
-        Piece::NonTam2Piece {
-            prof,
-            color: _,
-            side,
-        } => calculate_movable_positions_for_nontam::<CetkaikCore>(
-            coord,
-            prof,
-            board,
-            tam_itself_is_tam_hue,
-            side,
-        ),
-    }
+    CetkaikCore::match_on_piece_and_apply(
+        piece,
+        &|| calculate_movable_positions_for_tam::<CetkaikCore>(coord),
+        &|prof, side| {
+            calculate_movable_positions_for_nontam::<CetkaikCore>(
+                coord,
+                prof,
+                board,
+                tam_itself_is_tam_hue,
+                side,
+            )
+        },
+    )
 }
 
 pub fn calculate_movable_positions_for_tam<T: CetkaikRepresentation>(
