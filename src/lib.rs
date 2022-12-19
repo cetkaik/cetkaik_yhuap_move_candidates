@@ -42,14 +42,21 @@ impl CetkaikRepresentation for CetkaikCore {
     type RelativeBoard = cetkaik_core::relative::Board;
     type RelativePiece = cetkaik_core::relative::Piece;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
-        crate::to_absolute_coord(coord, p)
+        cetkaik_core::perspective::to_absolute_coord(coord, p)
     }
     fn add_delta(
         coord: Self::RelativeCoord,
         row_delta: isize,
         col_delta: isize,
     ) -> Option<Self::RelativeCoord> {
-        crate::add_delta(coord, row_delta, col_delta)
+        let [i, j] = coord;
+        match (
+            i.checked_add_signed(row_delta),
+            j.checked_add_signed(col_delta),
+        ) {
+            (Some(l @ 0..=8), Some(m @ 0..=8)) => Some([l, m]),
+            _ => None,
+        }
     }
     fn relative_get(
         board: Self::RelativeBoard,
@@ -101,18 +108,6 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn tam2() -> Self::RelativePiece {
         unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
-    }
-}
-
-#[must_use]
-pub const fn add_delta(coord: Coord, row_delta: isize, col_delta: isize) -> Option<Coord> {
-    let [i, j] = coord;
-    match (
-        i.checked_add_signed(row_delta),
-        j.checked_add_signed(col_delta),
-    ) {
-        (Some(l @ 0..=8), Some(m @ 0..=8)) => Some([l, m]),
-        _ => None,
     }
 }
 
@@ -279,7 +274,10 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 ans.append(
                                     &mut empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
                                         .flat_map(|fst_dst| {
-                                            let v = empty_neighbors_of::<CetkaikCore>(subtracted_board, fst_dst);
+                                            let v = empty_neighbors_of::<CetkaikCore>(
+                                                subtracted_board,
+                                                fst_dst,
+                                            );
                                             v.flat_map(move |snd_dst| {
                                                 vec![PureMove::TamMoveStepsDuringFormer {
                                                     first_dest: to_absolute_coord(
@@ -520,7 +518,7 @@ pub struct Config {
 #[cfg(test)]
 mod tests;
 
-pub use cetkaik_core::perspective::*;
+pub use cetkaik_core::perspective::{Perspective, to_absolute_coord};
 pub use cetkaik_core::{Color, Profession};
 
 #[derive(Debug)]
