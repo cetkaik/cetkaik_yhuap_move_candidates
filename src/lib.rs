@@ -27,7 +27,7 @@ pub trait CetkaikRepresentation {
     type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
 
-    type AbsoluteField;
+    type AbsoluteField: Clone;
     type RelativeField;
 
     type AbsoluteSide: Copy + Eq;
@@ -75,6 +75,7 @@ pub trait CetkaikRepresentation {
     );
     fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField;
     fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide;
+    fn get_one_perspective() -> Self::Perspective;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -243,6 +244,10 @@ impl CetkaikRepresentation for CetkaikCore {
     fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide {
         cetkaik_core::perspective::to_relative_side(side, p)
     }
+    fn get_one_perspective() -> Self::Perspective {
+        // arbitrary
+        cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -381,6 +386,10 @@ impl CetkaikRepresentation for CetkaikCompact {
     fn to_relative_side(side: Self::AbsoluteSide, _p: Self::Perspective) -> Self::RelativeSide {
         side
     }
+    fn get_one_perspective() -> Self::Perspective {
+        // the sole choice available
+        cetkaik_compact_representation::Perspective::IaIsDownAndPointsUpward
+    }
 }
 
 /// # Example
@@ -514,8 +523,9 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
 /// # Example
 /// ```
-/// use cetkaik_yhuap_move_candidates::not_from_hop1zuo1_candidates2;
+/// use cetkaik_yhuap_move_candidates::not_from_hop1zuo1_candidates_vec;
 /// use cetkaik_yhuap_move_candidates::Config;
+/// use cetkaik_yhuap_move_candidates::CetkaikCore;
 /// use cetkaik_core::*;
 /// use cetkaik_core::absolute::*;
 /// use cetkaik_core::absolute::Row::*;
@@ -532,10 +542,10 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 ///
 ///     assert_eq!(a, b)
 /// }
-/// 
+///
 /// // 船一つ
 /// assert_eq_ignoring_order(
-///     &not_from_hop1zuo1_candidates2(
+///     &not_from_hop1zuo1_candidates_vec::<CetkaikCore>(
 ///         &Config {
 ///             allow_kut2tam2: false,
 ///         },
@@ -556,20 +566,20 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 ///         }
 ///     ),
 ///     &[
-///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(A, C), is_water_entry_ciurl: false }, 
-///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(E, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(A, C), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(E, C), is_water_entry_ciurl: false },
 ///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(I, C), is_water_entry_ciurl: false },
-///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(U, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(U, C), is_water_entry_ciurl: false },
 ///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(O, C), is_water_entry_ciurl: false },
-///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(Y, C), is_water_entry_ciurl: false }, 
-///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(AI, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(Y, C), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(AI, C), is_water_entry_ciurl: false },
 ///     ]
 /// );
-/// 
-/// 
+///
+///
 /// // 弓が色々踏む
 /// assert_eq_ignoring_order(
-///     &not_from_hop1zuo1_candidates2(
+///     &not_from_hop1zuo1_candidates_vec::<CetkaikCore>(
 ///         &Config {
 ///             allow_kut2tam2: false,
 ///         },
@@ -611,96 +621,93 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 ///     ),
 ///     &[
 ///         // 左
-///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AI, K), is_water_entry_ciurl: false }, 
-/// 
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AI, K), is_water_entry_ciurl: false },
+///
 ///         // 下
-///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AU, L), is_water_entry_ciurl: false }, 
-/// 
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AU, L), is_water_entry_ciurl: false },
+///
 ///         // 下のち左
 ///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, K) },
-/// 
+///
 ///         // 下のち下
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(IA, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(IA, L) },
 ///         
 ///         // 下のち右
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, N) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, T) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, Z) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, X) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, C) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, M) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, P) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, N) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, T) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, Z) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, X) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, C) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, M) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, P) },
+///
 ///         // 下のち上
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AI, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(Y, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(O, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(U, L) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AI, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(Y, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(O, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(U, L) },
+///
 ///         // 右
 ///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AI, N), is_water_entry_ciurl: false },
-/// 
+///
 ///         // 右のち左上
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, K) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, K) },
+///
 ///         // 右のち右上
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, T) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, Z) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(U, X) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, T) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, Z) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(U, X) },
 ///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(I, C) },
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(E, M) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(A, P) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(E, M) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(A, P) },
+///
 ///         // 右のち左下
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, L) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, L) },
+///
 ///         // 右のち右下
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, T) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(IA, Z) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, T) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(IA, Z) },
+///
 ///         // 上
 ///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(Y, L), is_water_entry_ciurl: false },
-///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(O, L), is_water_entry_ciurl: false }, 
-///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(U, L), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(O, L), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(U, L), is_water_entry_ciurl: false },
 ///         // LI は皇処之将に守られているので取れない
-/// 
+///
 ///         // 上のち上
 ///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(E, L) },
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(A, L) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(A, L) },
+///
 ///         // 上のち下
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(U, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(U, L) },
 ///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(O, L) },
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(Y, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AI, L) }, 
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AU, L) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(Y, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AI, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AU, L) },
+///
 ///         // 上のち右
-///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(I, N) }, 
-/// 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(I, N) },
+///
 ///         // 上のち左
 ///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(I, K) }
 ///     ]
 /// );
 /// ```
 #[must_use]
-pub fn not_from_hop1zuo1_candidates2(
+pub fn not_from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     config: &Config,
     tam_itself_is_tam_hue: bool,
-    whose_turn: absolute::Side,
-    f: &absolute::Field,
-) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
-    let perspective = match whose_turn {
-        absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
-        absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
-    };
-    not_from_hop1zuo1_candidates_::<CetkaikCore>(
-        <CetkaikCore as CetkaikRepresentation>::to_relative_side(whose_turn, perspective),
+    whose_turn: T::AbsoluteSide,
+    f: &T::AbsoluteField,
+) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
+    let perspective = T::get_one_perspective();
+    not_from_hop1zuo1_candidates_::<T>(
+        T::to_relative_side(whose_turn, perspective),
         config,
         perspective,
         tam_itself_is_tam_hue,
-        &<CetkaikCore as CetkaikRepresentation>::to_relative_field(f.clone(), perspective),
+        &T::to_relative_field((*f).clone(), perspective),
     )
 }
 
