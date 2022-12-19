@@ -231,10 +231,50 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
 }
 
+/// # Example
+/// ```
+/// use cetkaik_yhuap_move_candidates::from_hop1zuo1_candidates_vec;
+/// use cetkaik_core::*;
+/// use cetkaik_core::absolute::Field;
+/// use cetkaik_core::absolute::NonTam2Piece;
+/// use cetkaik_core::absolute::Coord;
+/// use cetkaik_core::absolute::Column::*;
+/// use cetkaik_core::absolute::Row::*;
+/// use std::collections::HashSet;
+///
+/// // There are eighty unoccupied squares on the board, and `IASide` has two pieces in hop1zuo1
+/// let vec = from_hop1zuo1_candidates_vec(
+///     cetkaik_core::absolute::Side::IASide,
+///     &Field {
+///         a_side_hop1zuo1: vec![NonTam2Piece {
+///             color: Color::Huok2,
+///             prof: Profession::Gua2,
+///         }],
+///         ia_side_hop1zuo1: vec![NonTam2Piece {
+///             color: Color::Kok1,
+///             prof: Profession::Kauk2,
+///         }, NonTam2Piece {
+///             color: Color::Huok2,
+///             prof: Profession::Nuak1,
+///         }],
+///         board: vec![
+///             (Coord(AU, C), absolute::Piece::NonTam2Piece {
+///             color: Color::Kok1,
+///             prof: Profession::Nuak1,
+///             side: absolute::Side::IASide
+///         })
+///         ]
+///         .into_iter()
+///         .collect(),
+///     }
+/// );
+/// 
+/// assert_eq!(vec.len(), 80 * 2)
+/// 
+/// ```
 #[must_use]
-pub fn from_hop1zuo1_candidates2(
+pub fn from_hop1zuo1_candidates_vec(
     whose_turn: absolute::Side,
-    tam_itself_is_tam_hue: bool,
     field: &absolute::Field,
 ) -> Vec<PureMove> {
     let mut ans = vec![];
