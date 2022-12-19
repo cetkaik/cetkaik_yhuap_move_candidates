@@ -1,13 +1,13 @@
 use alloc::vec::Vec;
 
-use crate::CetkaikCore;
+use crate::{CetkaikCore, CetkaikRepresentation};
 
 use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 
 pub mod iter;
 pub mod vec;
 
-pub fn is_unconditionally_tam_hue(coord: Coord) -> bool {
+pub fn is_tam_hue_by_default(coord: Coord) -> bool {
     coord == [2, 2]
         || coord == [2, 6]
         || coord == [3, 3]
@@ -20,17 +20,17 @@ pub fn is_unconditionally_tam_hue(coord: Coord) -> bool {
 }
 
 pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
-    // unconditionally TamHue
-    if is_unconditionally_tam_hue(coord) {
+    if is_tam_hue_by_default(coord) {
         return true;
     }
 
-    if tam_itself_is_tam_hue && board[coord[0]][coord[1]] == Some(Piece::Tam2) {
+    if tam_itself_is_tam_hue && CetkaikCore::relative_get(board, coord) == Some(Piece::Tam2) {
         return true;
     }
 
     // is Tam2 available at any neighborhood?
-    iter::eight_neighborhood::<CetkaikCore>(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
+    iter::eight_neighborhood::<CetkaikCore>(coord)
+        .any(|coord| CetkaikCore::relative_get(board, coord) == Some(Piece::Tam2))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.

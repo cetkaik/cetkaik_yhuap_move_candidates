@@ -26,18 +26,17 @@ pub fn apply_deltas<T: CetkaikRepresentation>(
     deltas.filter_map(move |[delta_x, delta_y]| T::add_delta(coord, delta_x, delta_y))
 }
 
-pub fn apply_single_delta_if_no_intervention(
-    coord: Coord,
+pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     delta: [isize; 2],
-    board: Board,
-) -> impl Iterator<Item = Coord> {
-    let mut blocker =
-        apply_deltas::<CetkaikCore>(coord, crate::get_blocker_deltas::ultrafast(delta));
+    board: T::RelativeBoard,
+) -> impl Iterator<Item = T::RelativeCoord> {
+    let mut blocker = apply_deltas::<T>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    apply_deltas::<CetkaikCore>(
+    apply_deltas::<T>(
         coord,
-        if blocker.all(|[i, j]: [usize; 2]| board[i][j].is_none()) {
+        if blocker.all(|coord| T::relative_get(board, coord).is_none()) {
             Some(delta)
         } else {
             None
@@ -51,10 +50,9 @@ pub fn apply_deltas_if_no_intervention(
     deltas: &[[isize; 2]],
     board: Board,
 ) -> impl Iterator<Item = Coord> + '_ {
-    deltas
-        .iter()
-        .copied()
-        .flat_map(move |delta| apply_single_delta_if_no_intervention(coord, delta, board))
+    deltas.iter().copied().flat_map(move |delta| {
+        apply_single_delta_if_no_intervention::<CetkaikCore>(coord, delta, board)
+    })
 }
 
 pub fn apply_single_delta_if_zero_or_one_intervention(

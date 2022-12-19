@@ -19,13 +19,18 @@ pub trait CetkaikRepresentation {
     type AbsoluteCoord;
     type RelativeCoord: Copy;
     type Perspective;
-    type RelativeBoard;
+    type RelativeBoard: Copy;
+    type RelativePiece;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
         coord: Self::RelativeCoord,
         row_delta: isize,
         col_delta: isize,
     ) -> Option<Self::RelativeCoord>;
+    fn relative_get(
+        board: Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+    ) -> Option<Self::RelativePiece>;
 }
 
 impl CetkaikRepresentation for CetkaikCore {
@@ -33,6 +38,7 @@ impl CetkaikRepresentation for CetkaikCore {
     type RelativeCoord = cetkaik_core::relative::Coord;
     type Perspective = crate::Perspective;
     type RelativeBoard = cetkaik_core::relative::Board;
+    type RelativePiece = cetkaik_core::relative::Piece;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         crate::to_absolute_coord(coord, p)
     }
@@ -43,6 +49,13 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> Option<Self::RelativeCoord> {
         crate::add_delta(coord, row_delta, col_delta)
     }
+    fn relative_get(
+        board: Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+    ) -> Option<Self::RelativePiece> {
+        let [i, j] = coord;
+        board[i][j]
+    }
 }
 
 impl CetkaikRepresentation for CetkaikCompact {
@@ -50,6 +63,7 @@ impl CetkaikRepresentation for CetkaikCompact {
     type RelativeCoord = cetkaik_compact_representation::Coord;
     type Perspective = cetkaik_compact_representation::Perspective;
     type RelativeBoard = cetkaik_compact_representation::Board;
+    type RelativePiece = cetkaik_compact_representation::PieceWithSide;
     fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
         coord
     }
@@ -59,6 +73,12 @@ impl CetkaikRepresentation for CetkaikCompact {
         col_delta: isize,
     ) -> Option<Self::RelativeCoord> {
         cetkaik_compact_representation::Coord::add_delta(coord, row_delta, col_delta)
+    }
+    fn relative_get(
+        board: Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+    ) -> Option<Self::RelativePiece> {
+        board.peek(coord)
     }
 }
 
@@ -109,10 +129,8 @@ fn can_get_occupied_by(
     tam_itself_is_tam_hue: bool,
 ) -> bool {
     if piece_to_move == Piece::Tam2 {
-        let [i, j] = dest;
-        let dest_piece = board[i][j];
         /* It is allowed to enter an empty square */
-        dest_piece.is_none()
+        CetkaikCore::relative_get(board, dest).is_none()
     } else {
         can_get_occupied_by_non_tam(side, dest, board, tam_itself_is_tam_hue)
     }
@@ -152,8 +170,7 @@ fn can_get_occupied_by_non_tam(
             > 0
     };
 
-    let [i, j] = dest;
-    let dest_piece = board[i][j];
+    let dest_piece = CetkaikCore::relative_get(board, dest);
 
     match dest_piece {
         Some(Piece::Tam2) => false, /* Tam2 can never be taken */
