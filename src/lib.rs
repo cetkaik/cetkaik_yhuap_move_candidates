@@ -20,7 +20,7 @@ pub trait CetkaikRepresentation {
     type RelativeCoord: Copy;
     type Perspective;
     type RelativeBoard: Copy;
-    type RelativePiece: Eq;
+    type RelativePiece: Copy + Eq;
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
@@ -181,18 +181,18 @@ pub struct MovablePositions<T> {
     pub infinite: Vec<T>,
 }
 
-fn can_get_occupied_by(
-    side: Side,
-    dest: Coord,
-    piece_to_move: Piece,
-    board: Board,
+fn can_get_occupied_by<T: CetkaikRepresentation>(
+    side: T::RelativeSide,
+    dest: T::RelativeCoord,
+    piece_to_move: T::RelativePiece,
+    board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
 ) -> bool {
-    if piece_to_move == Piece::Tam2 {
+    if piece_to_move == T::tam2() {
         /* It is allowed to enter an empty square */
-        CetkaikCore::relative_get(board, dest).is_none()
+        T::relative_get(board, dest).is_none()
     } else {
-        can_get_occupied_by_non_tam::<CetkaikCore>(side, dest, board, tam_itself_is_tam_hue)
+        can_get_occupied_by_non_tam::<T>(side, dest, board, tam_itself_is_tam_hue)
     }
 }
 
@@ -379,7 +379,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                 [
                                     &candidates
                                         .flat_map(|final_dest| {
-                                            if can_get_occupied_by(
+                                            if can_get_occupied_by::<CetkaikCore>(
                                                 Side::Downward,
                                                 final_dest,
                                                 Piece::NonTam2Piece {
@@ -409,7 +409,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                         .collect::<Vec<PureMove>>()[..],
                                     &candidates_inf
                                         .flat_map(|planned_dest| {
-                                            if !can_get_occupied_by(
+                                            if !can_get_occupied_by::<CetkaikCore>(
                                                 Side::Downward,
                                                 planned_dest,
                                                 Piece::NonTam2Piece {
@@ -469,7 +469,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                                     // opponent's piece; stepping and taking both attainable
 
                                     // except when protected by tam2 hue a uai1
-                                    if can_get_occupied_by(
+                                    if can_get_occupied_by::<CetkaikCore>(
                                         Side::Downward,
                                         tentative_dest,
                                         Piece::NonTam2Piece {
@@ -535,7 +535,7 @@ fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
     ans
 }
 
-use cetkaik_core::relative::{is_water, Board, Coord, Field, Piece, Side};
+use cetkaik_core::relative::{is_water, Coord, Field, Piece, Side};
 
 pub use cetkaik_core::absolute;
 
