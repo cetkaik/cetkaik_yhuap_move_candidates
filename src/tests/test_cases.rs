@@ -1,5 +1,12 @@
 use super::*;
 
+#[derive(Debug)]
+pub struct PureGameState {
+    pub f: Field,
+    pub perspective: Perspective,
+    pub tam_itself_is_tam_hue: bool,
+}
+
 pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
     perspective: Perspective::IaIsDownAndPointsUpward,
     tam_itself_is_tam_hue: true,
@@ -468,7 +475,7 @@ pub fn simple_board_sample_3() -> PureGameState {
     }
 }
 
-use cetkaik_core::relative::{NonTam2PieceDownward, rotate_board};
+use cetkaik_core::relative::{rotate_board, NonTam2PieceDownward};
 
 pub fn simple_board_sample_4() -> PureGameState {
     use cetkaik_core::relative::NonTam2PieceUpward;

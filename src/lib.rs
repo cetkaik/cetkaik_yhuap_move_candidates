@@ -279,7 +279,7 @@ impl CetkaikRepresentation for CetkaikCompact {
 }
 
 /// # Example
-/// 
+///
 /// Using `cetkaik_core`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::from_hop1zuo1_candidates_vec;
@@ -330,7 +330,7 @@ pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     T::hop1zuo1_of(whose_turn, field)
         .into_iter()
         .flat_map(|(color, prof)| {
-            T::empty_squares_absolute(&T::as_board(field))
+            T::empty_squares_absolute(T::as_board(field))
                 .into_iter()
                 .map(move |dest| cetkaik_core::PureMove_::NonTamMoveFromHopZuo {
                     color,
@@ -415,6 +415,7 @@ const fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coor
     is_water(dest) && !is_water(src) && !matches!(moving_piece_prof, Profession::Nuak1)
 }
 
+/// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
 #[must_use]
 pub fn not_from_hop1zuo1_candidates2(
     config: &Config,
@@ -428,37 +429,33 @@ pub fn not_from_hop1zuo1_candidates2(
     };
     not_from_hop1zuo1_candidates_(
         config,
-        &PureGameState {
-            perspective,
-            tam_itself_is_tam_hue,
-            f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
-        },
+        perspective,
+        tam_itself_is_tam_hue,
+        &cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
     )
 }
 
-/// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
-/// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
-#[must_use]
 fn not_from_hop1zuo1_candidates_(
     config: &Config,
-    game_state: &PureGameState,
-) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
+    perspective: Perspective,
+    tam_itself_is_tam_hue: bool,
+    f: &cetkaik_core::relative::Field,
+) -> Vec<cetkaik_core::PureMove_<<CetkaikCore as CetkaikRepresentation>::AbsoluteCoord>> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
             let src = [rand_i, rand_j];
-            let piece = game_state.f.current_board[rand_i][rand_j];
+            let piece = f.current_board[rand_i][rand_j];
             if let Some(p) = piece {
                 match p {
                     Piece::Tam2 => {
-                        let candidates: Vec<Coord> =
+                        let candidates: Vec<<CetkaikCore as CetkaikRepresentation>::RelativeCoord> =
                             calculate_movable::vec::eight_neighborhood::<CetkaikCore>(src);
                         for tentative_dest in candidates {
-                            let dest_piece =
-                                game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
+                            let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
 
                             /* avoid self-occlusion */
-                            let mut subtracted_board = game_state.f.current_board;
+                            let mut subtracted_board = f.current_board;
                             subtracted_board[src[0]][src[1]] = None;
                             if dest_piece.is_none() {
                                 /* empty square; first move is completed without stepping */
@@ -466,14 +463,14 @@ fn not_from_hop1zuo1_candidates_(
                                 ans.append(&mut calculate_movable::iter::eight_neighborhood::<CetkaikCore>(fst_dst).flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: Coord = neighbor;
-                            if game_state.f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
+                            if f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
                                 neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
                                 vec![cetkaik_core::PureMove_::TamMoveNoStep {
-                                    second_dest: to_absolute_coord(snd_dst, game_state.perspective),
-                                    first_dest: to_absolute_coord(fst_dst, game_state.perspective),
-                                    src: to_absolute_coord(src, game_state.perspective),
+                                    second_dest: to_absolute_coord(snd_dst, perspective),
+                                    first_dest: to_absolute_coord(fst_dst, perspective),
+                                    src: to_absolute_coord(src, perspective),
                                 }].into_iter()
                             } else {
                                 /* if not, step from there */
@@ -481,10 +478,10 @@ fn not_from_hop1zuo1_candidates_(
                                 empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
                                     .flat_map(|snd_dst| {
                                     vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
-                                        first_dest: to_absolute_coord(fst_dst, game_state.perspective),
-                                        second_dest: to_absolute_coord(snd_dst, game_state.perspective),
-                                        src: to_absolute_coord(src, game_state.perspective),
-                                        step: to_absolute_coord(step, game_state.perspective),
+                                        first_dest: to_absolute_coord(fst_dst, perspective),
+                                        second_dest: to_absolute_coord(snd_dst, perspective),
+                                        src: to_absolute_coord(src, perspective),
+                                        step: to_absolute_coord(step, perspective),
                                     }].into_iter()
                                 }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>().into_iter()
                             }
@@ -503,19 +500,19 @@ fn not_from_hop1zuo1_candidates_(
                                                 vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
                                                     first_dest: to_absolute_coord(
                                                         fst_dst,
-                                                        game_state.perspective,
+                                                        perspective,
                                                     ),
                                                     second_dest: to_absolute_coord(
                                                         snd_dst,
-                                                        game_state.perspective,
+                                                        perspective,
                                                     ),
                                                     src: to_absolute_coord(
                                                         src,
-                                                        game_state.perspective,
+                                                        perspective,
                                                     ),
                                                     step: to_absolute_coord(
                                                         step,
-                                                        game_state.perspective,
+                                                        perspective,
                                                     ),
                                                 }]
                                                 .into_iter()
@@ -537,23 +534,22 @@ fn not_from_hop1zuo1_candidates_(
                             calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
                                 src,
                                 prof,
-                                game_state.f.current_board,
-                                game_state.tam_itself_is_tam_hue,
+                                f.current_board,
+                                tam_itself_is_tam_hue,
                                 Side::Downward,
                             );
 
                         let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
                         for tentative_dest in candidates {
-                            let dest_piece =
-                                game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
+                            let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
 
                             let candidates_when_stepping = || {
                                 let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
 
-                                let perspective = game_state.perspective;
-                                let tam_itself_is_tam_hue: bool = game_state.tam_itself_is_tam_hue;
+                                let perspective = perspective;
+                                let tam_itself_is_tam_hue: bool = tam_itself_is_tam_hue;
                                 /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-                                let mut subtracted_board = game_state.f.current_board;
+                                let mut subtracted_board = f.current_board;
                                 subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
 
                                 let MovablePositions { finite, infinite } =
@@ -635,11 +631,8 @@ fn not_from_hop1zuo1_candidates_(
                                     // cannot step
                                     ans.append(&mut vec![
                                         cetkaik_core::PureMove_::NonTamMoveSrcDst {
-                                            src: to_absolute_coord(src, game_state.perspective),
-                                            dest: to_absolute_coord(
-                                                tentative_dest,
-                                                game_state.perspective,
-                                            ),
+                                            src: to_absolute_coord(src, perspective),
+                                            dest: to_absolute_coord(tentative_dest, perspective),
                                             is_water_entry_ciurl: is_ciurl_required(
                                                 tentative_dest,
                                                 prof,
@@ -672,19 +665,16 @@ fn not_from_hop1zuo1_candidates_(
                                             prof,
                                             side: Side::Downward,
                                         },
-                                        game_state.f.current_board,
-                                        game_state.tam_itself_is_tam_hue,
+                                        f.current_board,
+                                        tam_itself_is_tam_hue,
                                     ) {
                                         ans.append(
                                             &mut [
                                                 &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
-                                                    src: to_absolute_coord(
-                                                        src,
-                                                        game_state.perspective,
-                                                    ),
+                                                    src: to_absolute_coord(src, perspective),
                                                     dest: to_absolute_coord(
                                                         tentative_dest,
-                                                        game_state.perspective,
+                                                        perspective,
                                                     ),
                                                     is_water_entry_ciurl: is_ciurl_required(
                                                         tentative_dest,
@@ -733,12 +723,6 @@ mod tests;
 pub use cetkaik_core::perspective::{to_absolute_coord, Perspective};
 pub use cetkaik_core::{Color, Profession};
 
-#[derive(Debug)]
-pub struct PureGameState {
-    pub f: Field,
-    pub perspective: Perspective,
-    pub tam_itself_is_tam_hue: bool,
-}
 
 /// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,
 /// this function was a bottleneck that accounted for roughly fifty percent of all the runtime

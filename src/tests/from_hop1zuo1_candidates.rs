@@ -1,6 +1,8 @@
 use cetkaik_core::{absolute::PureMove, perspective::to_absolute_coord};
 
-use crate::{PureGameState, CetkaikCore, CetkaikRepresentation};
+use crate::{CetkaikCore, CetkaikRepresentation};
+
+use super::PureGameState;
 
 #[must_use]
 fn from_hop1zuo1_candidates_old(game_state: &PureGameState) -> Vec<PureMove> {

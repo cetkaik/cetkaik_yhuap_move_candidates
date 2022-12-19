@@ -1,9 +1,26 @@
 use cetkaik_core::absolute::PureMove;
-
+use self::test_cases::PureGameState;
 use super::*;
 
-fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
+
+
+/// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
+/// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
+#[must_use]
+fn not_from_hop1zuo1_candidates_old(
+    config: &Config,
+    game_state: &PureGameState,
+) -> Vec<cetkaik_core::PureMove_<<CetkaikCore as CetkaikRepresentation>::AbsoluteCoord>> {
     not_from_hop1zuo1_candidates_(
+        config,
+        game_state.perspective,
+        game_state.tam_itself_is_tam_hue,
+        &game_state.f,
+    )
+}
+
+fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
+    not_from_hop1zuo1_candidates_old(
         &Config {
             allow_kut2tam2: false,
         },
@@ -12,7 +29,7 @@ fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 }
 
 fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_(
+    not_from_hop1zuo1_candidates_old(
         &Config {
             allow_kut2tam2: true,
         },
@@ -105,7 +122,9 @@ mod get_opponent_pieces_rotated {
     }
     use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
-    use crate::{Piece, PureGameState, Side, Vec};
+    use crate::{Piece, Side, Vec};
+
+    use super::PureGameState;
 
     #[allow(clippy::needless_pass_by_value)]
     fn serialize_rotated(r: Rotated) -> String {
