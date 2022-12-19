@@ -200,7 +200,7 @@ pub fn from_hop1zuo1_candidates2(
 
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
 #[must_use]
-pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
+fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
         for empty_square in CetkaikCore::empty_squares(&game_state.f.current_board) {
@@ -315,7 +315,7 @@ pub fn not_from_hop1zuo1_candidates2(
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 #[must_use]
-pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
+fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
