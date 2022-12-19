@@ -183,7 +183,6 @@ impl CetkaikRepresentation for CetkaikCompact {
 pub fn from_hop1zuo1_candidates2(
     whose_turn: absolute::Side,
     tam_itself_is_tam_hue: bool,
-    opponent_has_just_moved_tam: bool,
     f: &absolute::Field,
 ) -> Vec<PureMove> {
     let perspective = match whose_turn {
@@ -192,7 +191,6 @@ pub fn from_hop1zuo1_candidates2(
     };
     from_hop1zuo1_candidates(&PureGameState {
         perspective,
-        opponent_has_just_moved_tam,
         tam_itself_is_tam_hue,
         f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
     })
@@ -294,7 +292,6 @@ const fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coor
 pub fn not_from_hop1zuo1_candidates2(
     config: &Config,
     tam_itself_is_tam_hue: bool,
-    opponent_has_just_moved_tam: bool,
     whose_turn: absolute::Side,
     f: &absolute::Field,
 ) -> Vec<PureMove> {
@@ -306,7 +303,6 @@ pub fn not_from_hop1zuo1_candidates2(
         config,
         &PureGameState {
             perspective,
-            opponent_has_just_moved_tam,
             tam_itself_is_tam_hue,
             f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
         },
@@ -314,6 +310,7 @@ pub fn not_from_hop1zuo1_candidates2(
 }
 
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
+/// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
 #[must_use]
 fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
@@ -333,7 +330,6 @@ fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) ->
                             /* avoid self-occlusion */
                             let mut subtracted_board = game_state.f.current_board;
                             subtracted_board[src[0]][src[1]] = None;
-                            // FIXME: tam2 ty sak2 not handled
                             if dest_piece.is_none() {
                                 /* empty square; first move is completed without stepping */
                                 let fst_dst: Coord = tentative_dest;
@@ -610,7 +606,6 @@ pub struct PureGameState {
     pub f: Field,
     pub perspective: Perspective,
     pub tam_itself_is_tam_hue: bool,
-    pub opponent_has_just_moved_tam: bool,
 }
 
 /// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,

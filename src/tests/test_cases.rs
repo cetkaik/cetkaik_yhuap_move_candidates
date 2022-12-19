@@ -3,7 +3,6 @@ use super::*;
 pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
     perspective: Perspective::IaIsDownAndPointsUpward,
     tam_itself_is_tam_hue: true,
-    opponent_has_just_moved_tam: false,
     f: Field {
         hop1zuo1of_downward: vec![],
         hop1zuo1of_upward: vec![],
@@ -14,7 +13,6 @@ pub const INITIAL_BOARD_SAMPLE: PureGameState = PureGameState {
 pub const TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE: PureGameState = PureGameState {
     perspective: Perspective::IaIsDownAndPointsUpward,
     tam_itself_is_tam_hue: false,
-    opponent_has_just_moved_tam: false,
     f: Field {
         hop1zuo1of_downward: vec![],
         hop1zuo1of_upward: vec![],
@@ -438,7 +436,6 @@ pub const fn simple_board_sample_1() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
@@ -451,7 +448,6 @@ pub const fn simple_board_sample_2() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsUpAndPointsDownward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
@@ -464,7 +460,6 @@ pub fn simple_board_sample_3() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
@@ -480,7 +475,6 @@ pub fn simple_board_sample_4() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![NonTam2PieceDownward {
                 color: Color::Huok2,
@@ -499,7 +493,6 @@ pub const fn complicated_board_sample_1() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
@@ -512,7 +505,6 @@ pub fn complicated_board_sample_2() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
@@ -525,7 +517,6 @@ pub const fn tam_corner_sample() -> PureGameState {
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
-        opponent_has_just_moved_tam: false,
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
