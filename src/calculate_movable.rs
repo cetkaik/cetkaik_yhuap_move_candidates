@@ -30,7 +30,7 @@ pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bo
     }
 
     // is Tam2 available at any neighborhood?
-    iter::eight_neighborhood(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
+    iter::eight_neighborhood::<CetkaikCore>(coord).any(|[i, j]| board[i][j] == Some(Piece::Tam2))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.

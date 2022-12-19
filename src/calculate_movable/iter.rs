@@ -1,8 +1,10 @@
 use crate::{CetkaikCore, CetkaikRepresentation};
 
 use super::{Board, Coord};
-pub fn eight_neighborhood(coord: Coord) -> impl Iterator<Item = Coord> {
-    apply_deltas::<CetkaikCore>(
+pub fn eight_neighborhood<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+) -> impl Iterator<Item = T::RelativeCoord> {
+    apply_deltas::<T>(
         coord,
         [
             [-1, -1],

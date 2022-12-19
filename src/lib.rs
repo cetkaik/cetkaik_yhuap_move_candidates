@@ -119,7 +119,8 @@ fn can_get_occupied_by(
 }
 
 fn empty_neighbors_of(board: Board, c: Coord) -> impl Iterator<Item = Coord> {
-    calculate_movable::iter::eight_neighborhood(c).filter(move |[i, j]| board[*i][*j].is_none())
+    calculate_movable::iter::eight_neighborhood::<CetkaikCore>(c)
+        .filter(move |[i, j]| board[*i][*j].is_none())
 }
 
 fn can_get_occupied_by_non_tam(
@@ -200,7 +201,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                             if dest_piece.is_none() {
                                 /* empty square; first move is completed without stepping */
                                 let fst_dst: Coord = tentative_dest;
-                                ans.append(&mut calculate_movable::iter::eight_neighborhood(fst_dst).flat_map(|neighbor| {
+                                ans.append(&mut calculate_movable::iter::eight_neighborhood::<CetkaikCore>(fst_dst).flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: Coord = neighbor;
                             if game_state.f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
