@@ -189,23 +189,18 @@ pub fn from_hop1zuo1_candidates2(
         absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
         absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
     };
-    from_hop1zuo1_candidates(&PureGameState {
-        perspective,
-        tam_itself_is_tam_hue,
-        f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
-    })
-}
 
-/// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
-#[must_use]
-fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
-    for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in CetkaikCore::empty_squares(&game_state.f.current_board) {
+    for piece in
+        &cetkaik_core::perspective::to_relative_field(f.clone(), perspective).hop1zuo1of_downward
+    {
+        for empty_square in CetkaikCore::empty_squares(
+            &cetkaik_core::perspective::to_relative_field(f.clone(), perspective).current_board,
+        ) {
             ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,
-                dest: to_absolute_coord(empty_square, game_state.perspective),
+                dest: to_absolute_coord(empty_square, perspective),
             });
         }
     }
