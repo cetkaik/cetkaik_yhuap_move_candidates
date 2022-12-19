@@ -57,7 +57,7 @@ pub trait CetkaikRepresentation {
     fn empty_squares_absolute(current_board: &Self::AbsoluteBoard) -> Vec<Self::AbsoluteCoord>;
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
-        field: Self::AbsoluteField,
+        field: &Self::AbsoluteField,
     ) -> Vec<(Color, Profession)>;
 }
 
@@ -166,7 +166,7 @@ impl CetkaikRepresentation for CetkaikCore {
     type AbsoluteField = cetkaik_core::absolute::Field;
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
-        field: Self::AbsoluteField,
+        field: &Self::AbsoluteField,
     ) -> Vec<(Color, Profession)> {
         match side {
             absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
@@ -176,7 +176,6 @@ impl CetkaikRepresentation for CetkaikCore {
         .map(|absolute::NonTam2Piece { color, prof }| (color, prof))
         .collect()
     }
-
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -257,11 +256,17 @@ impl CetkaikRepresentation for CetkaikCompact {
 
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
-        field: Self::AbsoluteField,
+        field: &Self::AbsoluteField,
     ) -> Vec<(Color, Profession)> {
         match side {
-            absolute::Side::ASide => field.get_hop1zuo1().a_side_hop1zuo1_color_and_prof().collect(),
-            absolute::Side::IASide => field.get_hop1zuo1().ia_side_hop1zuo1_color_and_prof().collect(),
+            absolute::Side::ASide => field
+                .get_hop1zuo1()
+                .a_side_hop1zuo1_color_and_prof()
+                .collect(),
+            absolute::Side::IASide => field
+                .get_hop1zuo1()
+                .ia_side_hop1zuo1_color_and_prof()
+                .collect(),
         }
     }
 }
@@ -312,17 +317,14 @@ pub fn from_hop1zuo1_candidates_vec(
     whose_turn: absolute::Side,
     field: &absolute::Field,
 ) -> Vec<PureMove> {
-    match whose_turn {
-        absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
-        absolute::Side::ASide => field.a_side_hop1zuo1.iter(),
-    }
-    .copied()
-    .flat_map(|absolute::NonTam2Piece { color, prof }| {
-        CetkaikCore::empty_squares_absolute(&field.board)
-            .into_iter()
-            .map(move |dest| PureMove::NonTamMoveFromHopZuo { color, prof, dest })
-    })
-    .collect()
+    CetkaikCore::hop1zuo1_of(whose_turn, field)
+        .into_iter()
+        .flat_map(|(color, prof)| {
+            CetkaikCore::empty_squares_absolute(&field.board)
+                .into_iter()
+                .map(move |dest| PureMove::NonTamMoveFromHopZuo { color, prof, dest })
+        })
+        .collect()
 }
 
 pub use pure_move::PureMove;
