@@ -1,3 +1,5 @@
+use crate::CetkaikCore;
+
 use super::{iter, Board, Coord, Vec};
 pub fn eight_neighborhood(coord: Coord) -> Vec<Coord> {
     apply_deltas(
@@ -38,10 +40,11 @@ pub fn apply_single_delta_if_no_intervention(
     delta: [isize; 2],
     board: Board,
 ) -> Vec<Coord> {
-    let mut blocker = iter::apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+    let mut blocker =
+        iter::apply_deltas::<CetkaikCore>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    if blocker.all(|[i, j]| board[i][j].is_none()) {
+    if blocker.all(|[i, j]: [usize; 2]| board[i][j].is_none()) {
         apply_deltas(coord, &[delta])
     } else {
         vec![]

@@ -17,7 +17,7 @@ pub struct CetkaikCompact;
 
 pub trait CetkaikRepresentation {
     type AbsoluteCoord;
-    type RelativeCoord;
+    type RelativeCoord: Copy;
     type Perspective;
     type RelativeBoard;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;

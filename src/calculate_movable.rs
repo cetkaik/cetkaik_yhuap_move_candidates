@@ -1,5 +1,7 @@
 use alloc::vec::Vec;
 
+use crate::CetkaikCore;
+
 use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 
 pub mod iter;
@@ -313,9 +315,9 @@ pub fn calculate_movable_positions_for_nontam(
                        */
                       !((d[0] == -1 || d[0] == 1) && (d[1] == -1 || d[1] == 1))
                   );
-                  let mut blocker = iter::apply_deltas(coord, blocker_deltas);
+                  let mut blocker = iter::apply_deltas::<CetkaikCore>(coord, blocker_deltas);
                   // if nothing is blocking the way
-                  if blocker.all(|[i, j]| board[i][j].is_none()) {
+                  if blocker.all(|[i, j] : [usize; 2]| board[i][j].is_none()) {
                     inf.append(&mut vec::apply_deltas(coord, &[*delta]));
                   }
                 }

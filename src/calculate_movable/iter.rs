@@ -1,6 +1,8 @@
+use crate::{CetkaikCore, CetkaikRepresentation};
+
 use super::{Board, Coord};
 pub fn eight_neighborhood(coord: Coord) -> impl Iterator<Item = Coord> {
-    apply_deltas(
+    apply_deltas::<CetkaikCore>(
         coord,
         [
             [-1, -1],
@@ -15,12 +17,11 @@ pub fn eight_neighborhood(coord: Coord) -> impl Iterator<Item = Coord> {
         .into_iter(),
     )
 }
-
-pub fn apply_deltas(
-    coord: Coord,
+pub fn apply_deltas<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     deltas: impl Iterator<Item = [isize; 2]>,
-) -> impl Iterator<Item = Coord> {
-    deltas.filter_map(move |[delta_x, delta_y]| crate::add_delta(coord, delta_x, delta_y))
+) -> impl Iterator<Item = T::RelativeCoord> {
+    deltas.filter_map(move |[delta_x, delta_y]| T::add_delta(coord, delta_x, delta_y))
 }
 
 pub fn apply_single_delta_if_no_intervention(
@@ -28,12 +29,13 @@ pub fn apply_single_delta_if_no_intervention(
     delta: [isize; 2],
     board: Board,
 ) -> impl Iterator<Item = Coord> {
-    let mut blocker = apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+    let mut blocker =
+        apply_deltas::<CetkaikCore>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    apply_deltas(
+    apply_deltas::<CetkaikCore>(
         coord,
-        if blocker.all(|[i, j]| board[i][j].is_none()) {
+        if blocker.all(|[i, j]: [usize; 2]| board[i][j].is_none()) {
             Some(delta)
         } else {
             None
@@ -58,10 +60,10 @@ pub fn apply_single_delta_if_zero_or_one_intervention(
     delta: [isize; 2],
     board: Board,
 ) -> impl Iterator<Item = Coord> {
-    let blocker = apply_deltas(coord, crate::get_blocker_deltas::ultrafast(delta));
+    let blocker = apply_deltas::<CetkaikCore>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if no piece or a single piece is blocking the way
-    apply_deltas(
+    apply_deltas::<CetkaikCore>(
         coord,
         if blocker.filter(|[i, j]| board[*i][*j].is_some()).count() <= 1 {
             Some(delta)
