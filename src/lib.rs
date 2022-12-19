@@ -16,10 +16,10 @@ pub struct CetkaikCore;
 pub struct CetkaikCompact;
 
 pub trait CetkaikRepresentation {
-    type Perspective;
+    type Perspective: Copy;
 
     type AbsoluteCoord;
-    type RelativeCoord: Copy;
+    type RelativeCoord: Copy + Eq;
 
     type AbsoluteBoard;
     type RelativeBoard: Copy;
@@ -28,6 +28,7 @@ pub trait CetkaikRepresentation {
     type RelativePiece: Copy + Eq;
 
     type AbsoluteField;
+    type RelativeField;
 
     type AbsoluteSide: Copy + Eq;
     type RelativeSide: Copy + Eq;
@@ -41,6 +42,11 @@ pub trait CetkaikRepresentation {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece>;
+    fn relative_clone_and_set(
+        board: &Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+        p: Option<Self::RelativePiece>,
+    ) -> Self::RelativeBoard;
     fn absolute_get(
         board: &Self::AbsoluteBoard,
         coord: Self::AbsoluteCoord,
@@ -59,7 +65,8 @@ pub trait CetkaikRepresentation {
         side: Self::AbsoluteSide,
         field: &Self::AbsoluteField,
     ) -> Vec<(Color, Profession)>;
-    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
+    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
+    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -77,6 +84,10 @@ impl CetkaikRepresentation for CetkaikCore {
 
     type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::relative::Side;
+
+    type AbsoluteField = cetkaik_core::absolute::Field;
+    type RelativeField = cetkaik_core::relative::Field;
+
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         cetkaik_core::perspective::to_absolute_coord(coord, p)
     }
@@ -100,6 +111,16 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> Option<Self::RelativePiece> {
         let [i, j] = coord;
         board[i][j]
+    }
+    fn relative_clone_and_set(
+        board: &Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+        p: Option<Self::RelativePiece>,
+    ) -> Self::RelativeBoard {
+        let [i, j] = coord;
+        let mut new_board = *board;
+        new_board[i][j] = p;
+        new_board
     }
     fn absolute_get(
         board: &Self::AbsoluteBoard,
@@ -164,7 +185,6 @@ impl CetkaikRepresentation for CetkaikCore {
         }
         ans
     }
-    type AbsoluteField = cetkaik_core::absolute::Field;
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
         field: &Self::AbsoluteField,
@@ -177,8 +197,11 @@ impl CetkaikRepresentation for CetkaikCore {
         .map(|absolute::NonTam2Piece { color, prof }| (color, prof))
         .collect()
     }
-    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
+    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
         &field.board
+    }
+    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
+        &field.current_board
     }
 }
 
@@ -198,6 +221,7 @@ impl CetkaikRepresentation for CetkaikCompact {
     type RelativePiece = cetkaik_compact_representation::PieceWithSide;
 
     type AbsoluteField = cetkaik_compact_representation::Field;
+    type RelativeField = cetkaik_compact_representation::Field;
 
     type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
@@ -216,6 +240,15 @@ impl CetkaikRepresentation for CetkaikCompact {
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece> {
         board.peek(coord)
+    }
+    fn relative_clone_and_set(
+        board: &Self::RelativeBoard,
+        coord: Self::RelativeCoord,
+        p: Option<Self::RelativePiece>,
+    ) -> Self::RelativeBoard {
+        let mut new_board = *board;
+        new_board.put(coord, p);
+        new_board
     }
     fn absolute_get(
         board: &Self::AbsoluteBoard,
@@ -273,7 +306,10 @@ impl CetkaikRepresentation for CetkaikCompact {
                 .collect(),
         }
     }
-    fn as_board(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
+    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
+        field.as_board()
+    }
+    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
         field.as_board()
     }
 }
@@ -330,7 +366,7 @@ pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     T::hop1zuo1_of(whose_turn, field)
         .into_iter()
         .flat_map(|(color, prof)| {
-            T::empty_squares_absolute(T::as_board(field))
+            T::empty_squares_absolute(T::as_board_absolute(field))
                 .into_iter()
                 .map(move |dest| cetkaik_core::PureMove_::NonTamMoveFromHopZuo {
                     color,
@@ -435,69 +471,67 @@ pub fn not_from_hop1zuo1_candidates2(
     )
 }
 
-fn candidates_tam2(
-    src: [usize; 2],
-    f: &cetkaik_core::relative::Field,
-    perspective: Perspective,
-    ans: &mut Vec<PureMove_<absolute::Coord>>,
+fn candidates_tam2<T: CetkaikRepresentation>(
+    src: T::RelativeCoord,
+    f: &T::RelativeField,
+    perspective: T::Perspective,
+    ans: &mut Vec<PureMove_<T::AbsoluteCoord>>,
 ) {
-    let candidates: Vec<<CetkaikCore as CetkaikRepresentation>::RelativeCoord> =
-        calculate_movable::vec::eight_neighborhood::<CetkaikCore>(src);
+    let candidates: Vec<T::RelativeCoord> = calculate_movable::vec::eight_neighborhood::<T>(src);
     for tentative_dest in candidates {
-        let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
+        let dest_piece = T::relative_get(*T::as_board_relative(f), tentative_dest);
 
         /* avoid self-occlusion */
-        let mut subtracted_board = f.current_board;
-        subtracted_board[src[0]][src[1]] = None;
+        let subtracted_board = T::relative_clone_and_set(T::as_board_relative(f), src, None);
         if dest_piece.is_none() {
             /* empty square; first move is completed without stepping */
-            let fst_dst: Coord = tentative_dest;
-            ans.append(&mut calculate_movable::iter::eight_neighborhood::<CetkaikCore>(fst_dst).flat_map(|neighbor| {
+            let fst_dst: T::RelativeCoord = tentative_dest;
+            ans.append(&mut calculate_movable::iter::eight_neighborhood::<T>(fst_dst).flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
-                            let snd_dst: <CetkaikCore as CetkaikRepresentation>::RelativeCoord = neighbor;
-                            if f.current_board[neighbor[0]][neighbor[1]].is_none() /* the neighbor is utterly occupied */ ||
+                            let snd_dst: T::RelativeCoord = neighbor;
+                            if T::relative_get(*T::as_board_relative(f), neighbor).is_none() /* the neighbor is utterly occupied */ ||
                                 neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
                                 vec![cetkaik_core::PureMove_::TamMoveNoStep {
-                                    second_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(snd_dst, perspective),
-                                    first_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(fst_dst, perspective),
-                                    src: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(src, perspective),
+                                    second_dest: T::to_absolute_coord(snd_dst, perspective),
+                                    first_dest: T::to_absolute_coord(fst_dst, perspective),
+                                    src: T::to_absolute_coord(src, perspective),
                                 }].into_iter()
                             } else {
                                 /* if not, step from there */
-                                let step: <CetkaikCore as CetkaikRepresentation>::RelativeCoord = neighbor;
-                                empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
+                                let step: T::RelativeCoord = neighbor;
+                                empty_neighbors_of::<T>(subtracted_board, step)
                                     .flat_map(|snd_dst| {
                                     vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
-                                        first_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(fst_dst, perspective),
-                                        second_dest: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(snd_dst, perspective),
-                                        src: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(src, perspective),
-                                        step: <CetkaikCore as CetkaikRepresentation>::to_absolute_coord(step, perspective),
+                                        first_dest: T::to_absolute_coord(fst_dst, perspective),
+                                        second_dest: T::to_absolute_coord(snd_dst, perspective),
+                                        src: T::to_absolute_coord(src, perspective),
+                                        step: T::to_absolute_coord(step, perspective),
                                     }].into_iter()
-                                }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>().into_iter()
+                                }).collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>().into_iter()
                             }
-                        }).collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>());
+                        }).collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>());
         } else {
             /* not an empty square: must complete the first move */
             let step = tentative_dest;
             ans.append(
-                &mut empty_neighbors_of::<CetkaikCore>(subtracted_board, step)
+                &mut empty_neighbors_of::<T>(subtracted_board, step)
                     .flat_map(|fst_dst| {
-                        let v = empty_neighbors_of::<CetkaikCore>(subtracted_board, fst_dst);
+                        let v = empty_neighbors_of::<T>(subtracted_board, fst_dst);
                         v.flat_map(move |snd_dst| {
                             vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
-                                first_dest: to_absolute_coord(fst_dst, perspective),
-                                second_dest: to_absolute_coord(snd_dst, perspective),
-                                src: to_absolute_coord(src, perspective),
-                                step: to_absolute_coord(step, perspective),
+                                first_dest: T::to_absolute_coord(fst_dst, perspective),
+                                second_dest: T::to_absolute_coord(snd_dst, perspective),
+                                src: T::to_absolute_coord(src, perspective),
+                                step: T::to_absolute_coord(step, perspective),
                             }]
                             .into_iter()
                         })
-                        .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()
+                        .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>()
                         .into_iter()
                     })
-                    .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>(),
+                    .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>(),
             );
         }
     }
@@ -508,7 +542,7 @@ fn not_from_hop1zuo1_candidates_(
     perspective: Perspective,
     tam_itself_is_tam_hue: bool,
     f: &cetkaik_core::relative::Field,
-) -> Vec<cetkaik_core::PureMove_<<CetkaikCore as CetkaikRepresentation>::AbsoluteCoord>> {
+) -> Vec<cetkaik_core::PureMove_<absolute::Coord>> {
     let mut ans = vec![];
     for rand_i in 0..9 {
         for rand_j in 0..9 {
@@ -516,7 +550,7 @@ fn not_from_hop1zuo1_candidates_(
             let piece = f.current_board[rand_i][rand_j];
             if let Some(p) = piece {
                 match p {
-                    Piece::Tam2 => candidates_tam2(src, f, perspective, &mut ans),
+                    Piece::Tam2 => candidates_tam2::<CetkaikCore>(src, f, perspective, &mut ans),
                     Piece::NonTam2Piece {
                         side: Side::Downward,
                         prof,
