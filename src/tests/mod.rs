@@ -1,6 +1,6 @@
 use self::test_cases::PureGameState;
 use super::*;
-use cetkaik_core::absolute::PureMove;
+use cetkaik_core::{absolute::PureMove, relative::Side};
 
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hop1zuo1_candidates_::<CetkaikCore>(
@@ -109,9 +109,10 @@ mod get_opponent_pieces_rotated {
         rotated_piece: TamOrUpwardPiece,
         rotated_coord: Coord,
     }
+    use cetkaik_core::relative::Side;
     use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
-    use crate::{Piece, Side, Vec};
+    use crate::{Piece, Vec};
 
     use super::PureGameState;
 

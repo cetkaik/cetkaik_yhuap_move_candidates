@@ -73,6 +73,8 @@ pub trait CetkaikRepresentation {
         side: Self::RelativeSide,
         f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
     );
+    fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField;
+    fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -235,6 +237,12 @@ impl CetkaikRepresentation for CetkaikCore {
             }
         }
     }
+    fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField {
+        cetkaik_core::perspective::to_relative_field(field, p)
+    }
+    fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide {
+        cetkaik_core::perspective::to_relative_side(side, p)
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -364,6 +372,14 @@ impl CetkaikRepresentation for CetkaikCompact {
             absolute::Side::ASide => board.a_side_and_tam().for_each(fun),
             absolute::Side::IASide => board.ia_side_and_tam().for_each(fun),
         }
+    }
+
+    fn to_relative_field(field: Self::AbsoluteField, _p: Self::Perspective) -> Self::RelativeField {
+        field
+    }
+
+    fn to_relative_side(side: Self::AbsoluteSide, _p: Self::Perspective) -> Self::RelativeSide {
+        side
     }
 }
 
@@ -508,11 +524,11 @@ pub fn not_from_hop1zuo1_candidates2(
         absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
     };
     not_from_hop1zuo1_candidates_::<CetkaikCore>(
-        Side::Downward,
+        <CetkaikCore as CetkaikRepresentation>::to_relative_side(whose_turn, perspective),
         config,
         perspective,
         tam_itself_is_tam_hue,
-        &cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
+        &<CetkaikCore as CetkaikRepresentation>::to_relative_field(f.clone(), perspective),
     )
 }
 
@@ -748,7 +764,7 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     ans
 }
 
-use cetkaik_core::relative::{is_water, Coord, Piece, Side};
+use cetkaik_core::relative::{is_water, Coord, Piece};
 use cetkaik_core::PureMove_;
 
 pub use cetkaik_core::absolute;
