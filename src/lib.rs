@@ -512,6 +512,178 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 }
 
 /// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
+/// # Example
+/// ```
+/// use cetkaik_yhuap_move_candidates::not_from_hop1zuo1_candidates2;
+/// use cetkaik_yhuap_move_candidates::Config;
+/// use cetkaik_core::*;
+/// use cetkaik_core::absolute::*;
+/// use cetkaik_core::absolute::Row::*;
+/// use cetkaik_core::absolute::Column::*;
+/// use cetkaik_core::PureMove_::*;
+/// use std::collections::HashSet;
+///
+/// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
+/// where
+///     T: Eq + core::hash::Hash + std::fmt::Debug,
+/// {
+///     let a: HashSet<_> = a.iter().collect();
+///     let b: HashSet<_> = b.iter().collect();
+///
+///     assert_eq!(a, b)
+/// }
+/// 
+/// // 船一つ
+/// assert_eq_ignoring_order(
+///     &not_from_hop1zuo1_candidates2(
+///         &Config {
+///             allow_kut2tam2: false,
+///         },
+///         false,
+///         absolute::Side::IASide,
+///         &absolute::Field {
+///              a_side_hop1zuo1: vec![],
+///              ia_side_hop1zuo1: vec![],
+///              board: vec![
+///                  (absolute::Coord(AU, C), absolute::Piece::NonTam2Piece {
+///                      color: Color::Kok1,
+///                      prof: Profession::Nuak1,
+///                      side: absolute::Side::IASide
+///                  })
+///             ]
+///             .into_iter()
+///             .collect()
+///         }
+///     ),
+///     &[
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(A, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(E, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(I, C), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(U, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(O, C), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(Y, C), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: absolute::Coord(AU, C), dest: absolute::Coord(AI, C), is_water_entry_ciurl: false }, 
+///     ]
+/// );
+/// 
+/// 
+/// // 弓が色々踏む
+/// assert_eq_ignoring_order(
+///     &not_from_hop1zuo1_candidates2(
+///         &Config {
+///             allow_kut2tam2: false,
+///         },
+///         false,
+///         absolute::Side::IASide,
+///         &absolute::Field {
+///              a_side_hop1zuo1: vec![],
+///              ia_side_hop1zuo1: vec![],
+///              board: vec![
+///                  (absolute::Coord(AI, L), absolute::Piece::NonTam2Piece {
+///                      color: Color::Huok2,
+///                      prof: Profession::Gua2,
+///                      side: absolute::Side::IASide
+///                  }),
+///                  (absolute::Coord(I, L), absolute::Piece::NonTam2Piece {
+///                      color: Color::Huok2,
+///                      prof: Profession::Kauk2,
+///                      side: absolute::Side::ASide
+///                  }),
+///                  (absolute::Coord(I, N), absolute::Piece::NonTam2Piece {
+///                      color: Color::Kok1,
+///                      prof: Profession::Uai1,
+///                      side: absolute::Side::ASide
+///                  }),
+///                  (absolute::Coord(AI, N), absolute::Piece::NonTam2Piece {
+///                      color: Color::Huok2,
+///                      prof: Profession::Kaun1,
+///                      side: absolute::Side::ASide
+///                  }),
+///                  (absolute::Coord(AU, L), absolute::Piece::NonTam2Piece {
+///                      color: Color::Huok2,
+///                      prof: Profession::Kauk2,
+///                      side: absolute::Side::ASide
+///                  }),
+///             ]
+///             .into_iter()
+///             .collect()
+///         }
+///     ),
+///     &[
+///         // 左
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AI, K), is_water_entry_ciurl: false }, 
+/// 
+///         // 下
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AU, L), is_water_entry_ciurl: false }, 
+/// 
+///         // 下のち左
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, K) },
+/// 
+///         // 下のち下
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(IA, L) }, 
+///         
+///         // 下のち右
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, N) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, T) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, Z) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, X) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, C) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, M) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AU, P) }, 
+/// 
+///         // 下のち上
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(AI, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(Y, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(O, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AU, L), planned_direction: Coord(U, L) }, 
+/// 
+///         // 右
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(AI, N), is_water_entry_ciurl: false },
+/// 
+///         // 右のち左上
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, K) }, 
+/// 
+///         // 右のち右上
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(Y, T) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(O, Z) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(U, X) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(I, C) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(E, M) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(A, P) }, 
+/// 
+///         // 右のち左下
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, L) }, 
+/// 
+///         // 右のち右下
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(AU, T) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(AI, N), planned_direction: Coord(IA, Z) }, 
+/// 
+///         // 上
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(Y, L), is_water_entry_ciurl: false },
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(O, L), is_water_entry_ciurl: false }, 
+///         NonTamMoveSrcDst { src: Coord(AI, L), dest: Coord(U, L), is_water_entry_ciurl: false }, 
+///         // LI は皇処之将に守られているので取れない
+/// 
+///         // 上のち上
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(E, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(A, L) }, 
+/// 
+///         // 上のち下
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(U, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(O, L) },
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(Y, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AI, L) }, 
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(AU, L) }, 
+/// 
+///         // 上のち右
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(I, N) }, 
+/// 
+///         // 上のち左
+///         InfAfterStep { src: Coord(AI, L), step: Coord(I, L), planned_direction: Coord(I, K) }
+///     ]
+/// );
+/// ```
 #[must_use]
 pub fn not_from_hop1zuo1_candidates2(
     config: &Config,
