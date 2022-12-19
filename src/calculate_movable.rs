@@ -235,7 +235,7 @@ pub fn calculate_movable_positions_for_nontam(
                   [0, 1],
                   [1, 0]
                 ])[..],
-                &vec::apply_single_delta_if_no_intervention(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
+                &vec::apply_single_delta_if_no_intervention::<CetkaikCore>(coord,  if side == Side::Upward {[-2, 0]} else {[2,0]}, board)[..]
               ].concat(),
               infinite: vec![]
             },
