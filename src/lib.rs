@@ -21,6 +21,7 @@ pub trait CetkaikRepresentation {
     type Perspective;
     type RelativeBoard: Copy;
     type RelativePiece: Eq;
+    type RelativeSide: Copy;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
         coord: Self::RelativeCoord,
@@ -35,12 +36,14 @@ pub trait CetkaikRepresentation {
     fn tam2() -> Self::RelativePiece;
 }
 
+/// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
 impl CetkaikRepresentation for CetkaikCore {
     type AbsoluteCoord = cetkaik_core::absolute::Coord;
     type RelativeCoord = cetkaik_core::relative::Coord;
     type Perspective = crate::Perspective;
     type RelativeBoard = cetkaik_core::relative::Board;
     type RelativePiece = cetkaik_core::relative::Piece;
+    type RelativeSide = cetkaik_core::relative::Side;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         cetkaik_core::perspective::to_absolute_coord(coord, p)
     }
@@ -81,12 +84,15 @@ impl CetkaikRepresentation for CetkaikCore {
     }
 }
 
+/// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
+/// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
 impl CetkaikRepresentation for CetkaikCompact {
     type AbsoluteCoord = cetkaik_compact_representation::Coord;
     type RelativeCoord = cetkaik_compact_representation::Coord;
     type Perspective = cetkaik_compact_representation::Perspective;
     type RelativeBoard = cetkaik_compact_representation::Board;
     type RelativePiece = cetkaik_compact_representation::PieceWithSide;
+    type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
     fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
         coord
     }

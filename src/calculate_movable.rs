@@ -246,7 +246,7 @@ pub fn calculate_movable_positions_for_nontam(
                   [0, -1],
                   [0, 1]
                 ])[..],
-                &vec::apply_deltas_if_no_intervention(
+                &vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                   coord,
                   &[
                     [0, -2],
@@ -255,13 +255,13 @@ pub fn calculate_movable_positions_for_nontam(
                   board
                 )[..]
               ].concat(),
-              infinite: vec::apply_deltas_if_no_intervention(coord, &[&UP[..], &DOWN[..]].concat(), board)
+              infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(coord, &[&UP[..], &DOWN[..]].concat(), board)
             },
             Profession::Gua2 | // Rook, 弓, gustuer
             Profession::Dau2 => // Tiger, 虎, stistyst
                MovablePositions {
                 finite: vec![],
-                infinite: vec::apply_deltas_if_no_intervention(
+                infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                     coord,
                     &DIAGONAL,
                     board
@@ -323,7 +323,7 @@ pub fn calculate_movable_positions_for_nontam(
               Profession::Kua2 => // Clerk, 筆, kua
               MovablePositions  {
                finite: vec![],
-               infinite: vec::apply_deltas_if_no_intervention(
+               infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                  coord,
                  &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                  board
@@ -397,7 +397,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                         coord,
                         if side == Side::Upward { &UP } else { &DOWN },
                         board,
@@ -409,7 +409,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec![],
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                         coord,
                         &[&UP[..], &DOWN[..], &LEFT_RIGHT[..]].concat(),
                         board,
@@ -421,7 +421,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec::apply_deltas::<CetkaikCore>(coord, &[[0, -1], [0, 1]]),
-                    infinite: vec::apply_deltas_if_no_intervention(
+                    infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(
                         coord,
                         &[&UP[..], &DOWN[..]].concat(),
                         board,
@@ -434,7 +434,7 @@ pub fn calculate_movable_positions_for_nontam(
             {
                 MovablePositions {
                     finite: vec::apply_deltas::<CetkaikCore>(coord, &[[-1, 0], [1, 0]]),
-                    infinite: vec::apply_deltas_if_no_intervention(coord, &LEFT_RIGHT, board),
+                    infinite: vec::apply_deltas_if_no_intervention::<CetkaikCore>(coord, &LEFT_RIGHT, board),
                 }
             }
 

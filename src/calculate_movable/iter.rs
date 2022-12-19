@@ -45,14 +45,18 @@ pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
     )
 }
 
-pub fn apply_deltas_if_no_intervention(
-    coord: Coord,
-    deltas: &[[isize; 2]],
-    board: Board,
-) -> impl Iterator<Item = Coord> + '_ {
-    deltas.iter().copied().flat_map(move |delta| {
-        apply_single_delta_if_no_intervention::<CetkaikCore>(coord, delta, board)
-    })
+pub fn apply_deltas_if_no_intervention<'a, T: CetkaikRepresentation + 'a>(
+    coord: T::RelativeCoord,
+    deltas: &'a [[isize; 2]],
+    board: T::RelativeBoard,
+) -> impl Iterator<Item = T::RelativeCoord> + '_
+where
+    <T as CetkaikRepresentation>::RelativeBoard: 'a,
+    <T as CetkaikRepresentation>::RelativeCoord: 'a,
+{
+    let iter = deltas.iter().copied();
+
+    iter.flat_map(move |delta| apply_single_delta_if_no_intervention::<T>(coord, delta, board))
 }
 
 pub fn apply_single_delta_if_zero_or_one_intervention(

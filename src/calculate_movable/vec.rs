@@ -44,12 +44,12 @@ pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
     }
 }
 
-pub fn apply_deltas_if_no_intervention(
-    coord: Coord,
+pub fn apply_deltas_if_no_intervention<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
     deltas: &[[isize; 2]],
-    board: Board,
-) -> Vec<Coord> {
-    iter::apply_deltas_if_no_intervention(coord, deltas, board).collect()
+    board: T::RelativeBoard,
+) -> Vec<T::RelativeCoord> {
+    iter::apply_deltas_if_no_intervention::<T>(coord, deltas, board).collect()
 }
 
 pub fn apply_deltas_if_zero_or_one_intervention(
