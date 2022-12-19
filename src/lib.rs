@@ -707,7 +707,7 @@ fn not_from_hop1zuo1_candidates_(
     ans
 }
 
-use cetkaik_core::relative::{is_water, Coord, Field, Piece, Side};
+use cetkaik_core::relative::{is_water, Coord, Piece, Side};
 
 pub use cetkaik_core::absolute;
 
