@@ -1,39 +1,26 @@
-use cetkaik_core::absolute::PureMove;
 use self::test_cases::PureGameState;
 use super::*;
+use cetkaik_core::absolute::PureMove;
 
-
-
-/// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
-/// Note that 皇再来 (tam2 ty sak2) is explicitly allowed, since its filtering / handling is the job of `cetkaik_full_state_transition`.
-#[must_use]
-fn not_from_hop1zuo1_candidates_old(
-    config: &Config,
-    game_state: &PureGameState,
-) -> Vec<cetkaik_core::PureMove_<<CetkaikCore as CetkaikRepresentation>::AbsoluteCoord>> {
+fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hop1zuo1_candidates_(
-        config,
+        &Config {
+            allow_kut2tam2: false,
+        },
         game_state.perspective,
         game_state.tam_itself_is_tam_hue,
         &game_state.f,
     )
 }
 
-fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_old(
-        &Config {
-            allow_kut2tam2: false,
-        },
-        game_state,
-    )
-}
-
 fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_old(
+    not_from_hop1zuo1_candidates_(
         &Config {
             allow_kut2tam2: true,
         },
-        game_state,
+        game_state.perspective,
+        game_state.tam_itself_is_tam_hue,
+        &game_state.f,
     )
 }
 
