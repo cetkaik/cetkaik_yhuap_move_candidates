@@ -50,8 +50,9 @@ mod empty_squares {
     use cetkaik_core::relative;
     #[test]
     fn test_initial_board_sample() {
+        use crate::CetkaikRepresentation;
         super::run_test(
-            crate::empty_squares,
+            |game_state| crate::CetkaikCore::empty_squares(&game_state.f.current_board),
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             relative::serialize_coord,
             &[

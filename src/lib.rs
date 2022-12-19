@@ -40,6 +40,7 @@ pub trait CetkaikRepresentation {
         f_tam: &dyn Fn() -> U,
         f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
     ) -> U;
+    fn empty_squares(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -105,6 +106,18 @@ impl CetkaikRepresentation for CetkaikCore {
             } => f_piece(prof, side),
         }
     }
+    fn empty_squares(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
+        let mut ans = vec![];
+        for rand_i in 0..9 {
+            for rand_j in 0..9 {
+                let coord: Coord = [rand_i, rand_j];
+                if Self::relative_get(*board, coord).is_none() {
+                    ans.push(coord);
+                }
+            }
+        }
+        ans
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -152,6 +165,18 @@ impl CetkaikRepresentation for CetkaikCompact {
             cetkaik_compact_representation::MaybeTam2::NotTam2((prof, side)) => f_piece(prof, side),
         }
     }
+    fn empty_squares(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
+        let mut ans = vec![];
+        for rand_i in 0..9 {
+            for rand_j in 0..9 {
+                let coord: Self::RelativeCoord = Self::RelativeCoord::new(rand_i, rand_j).unwrap();
+                if Self::relative_get(*board, coord).is_none() {
+                    ans.push(coord);
+                }
+            }
+        }
+        ans
+    }
 }
 
 /// Spits out all the possible opponent (downward)'s move that is played from the hop1zuo1 onto the board.
@@ -159,7 +184,7 @@ impl CetkaikRepresentation for CetkaikCompact {
 pub fn from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in empty_squares(game_state) {
+        for empty_square in CetkaikCore::empty_squares(&game_state.f.current_board) {
             ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,
@@ -519,19 +544,6 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
         }
     }
 
-    ans
-}
-
-fn empty_squares(game_state: &PureGameState) -> Vec<Coord> {
-    let mut ans = vec![];
-    for rand_i in 0..9 {
-        for rand_j in 0..9 {
-            let coord: Coord = [rand_i, rand_j];
-            if game_state.f.current_board[rand_i][rand_j].is_none() {
-                ans.push(coord);
-            }
-        }
-    }
     ans
 }
 
