@@ -6,7 +6,7 @@ use crate::{PureGameState, CetkaikCore, CetkaikRepresentation};
 fn from_hop1zuo1_candidates_old(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in CetkaikCore::empty_squares(&game_state.f.current_board) {
+        for empty_square in CetkaikCore::empty_squares_relative(&game_state.f.current_board) {
             ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,

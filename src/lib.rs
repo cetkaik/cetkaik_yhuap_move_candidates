@@ -16,11 +16,17 @@ pub struct CetkaikCore;
 pub struct CetkaikCompact;
 
 pub trait CetkaikRepresentation {
+    type Perspective;
+
     type AbsoluteCoord;
     type RelativeCoord: Copy;
-    type Perspective;
+
+    type AbsoluteBoard;
     type RelativeBoard: Copy;
+
+    type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
+
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
@@ -32,6 +38,10 @@ pub trait CetkaikRepresentation {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece>;
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece>;
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
     fn tam2() -> Self::RelativePiece;
     fn is_upward(s: Self::RelativeSide) -> bool;
@@ -40,16 +50,23 @@ pub trait CetkaikRepresentation {
         f_tam: &dyn Fn() -> U,
         f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
     ) -> U;
-    fn empty_squares(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
+    fn empty_squares_relative(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
+    fn empty_squares_absolute(current_board: &Self::AbsoluteBoard) -> Vec<Self::AbsoluteCoord>;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
 impl CetkaikRepresentation for CetkaikCore {
+    type Perspective = crate::Perspective;
+
     type AbsoluteCoord = cetkaik_core::absolute::Coord;
     type RelativeCoord = cetkaik_core::relative::Coord;
-    type Perspective = crate::Perspective;
+
+    type AbsoluteBoard = cetkaik_core::absolute::Board;
     type RelativeBoard = cetkaik_core::relative::Board;
+
+    type AbsolutePiece = cetkaik_core::absolute::Piece;
     type RelativePiece = cetkaik_core::relative::Piece;
+
     type RelativeSide = cetkaik_core::relative::Side;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         cetkaik_core::perspective::to_absolute_coord(coord, p)
@@ -74,6 +91,12 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> Option<Self::RelativePiece> {
         let [i, j] = coord;
         board[i][j]
+    }
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece> {
+        board.get(&coord).copied()
     }
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
         coord == [2, 2]
@@ -106,12 +129,26 @@ impl CetkaikRepresentation for CetkaikCore {
             } => f_piece(prof, side),
         }
     }
-    fn empty_squares(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
+    fn empty_squares_relative(board: &cetkaik_core::relative::Board) -> Vec<Coord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
                 let coord: Coord = [rand_i, rand_j];
                 if Self::relative_get(*board, coord).is_none() {
+                    ans.push(coord);
+                }
+            }
+        }
+        ans
+    }
+    fn empty_squares_absolute(board: &cetkaik_core::absolute::Board) -> Vec<Self::AbsoluteCoord> {
+        use absolute::Column::{C, K, L, M, N, P, T, X, Z};
+        use absolute::Row::{A, AI, AU, E, I, IA, O, U, Y};
+        let mut ans = vec![];
+        for row in &[A, E, I, U, O, Y, AI, AU, IA] {
+            for column in &[K, L, N, T, Z, X, C, M, P] {
+                let coord = absolute::Coord(*row, *column);
+                if Self::absolute_get(board, coord).is_none() {
                     ans.push(coord);
                 }
             }
@@ -124,11 +161,17 @@ impl CetkaikRepresentation for CetkaikCore {
 /// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
 /// つまり、`Upward` は常に `IASide` へと読み替えられる。
 impl CetkaikRepresentation for CetkaikCompact {
+    type Perspective = cetkaik_compact_representation::Perspective;
+
     type AbsoluteCoord = cetkaik_compact_representation::Coord;
     type RelativeCoord = cetkaik_compact_representation::Coord;
-    type Perspective = cetkaik_compact_representation::Perspective;
+
+    type AbsoluteBoard = cetkaik_compact_representation::Board;
     type RelativeBoard = cetkaik_compact_representation::Board;
+
+    type AbsolutePiece = cetkaik_compact_representation::PieceWithSide;
     type RelativePiece = cetkaik_compact_representation::PieceWithSide;
+
     type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
     fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
         coord
@@ -144,6 +187,12 @@ impl CetkaikRepresentation for CetkaikCompact {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece> {
+        board.peek(coord)
+    }
+    fn absolute_get(
+        board: &Self::AbsoluteBoard,
+        coord: Self::AbsoluteCoord,
+    ) -> Option<Self::AbsolutePiece> {
         board.peek(coord)
     }
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
@@ -165,7 +214,7 @@ impl CetkaikRepresentation for CetkaikCompact {
             cetkaik_compact_representation::MaybeTam2::NotTam2((prof, side)) => f_piece(prof, side),
         }
     }
-    fn empty_squares(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
+    fn empty_squares_relative(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
@@ -177,30 +226,33 @@ impl CetkaikRepresentation for CetkaikCompact {
         }
         ans
     }
+    fn empty_squares_absolute(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
+        Self::empty_squares_relative(board)
+    }
 }
 
 #[must_use]
 pub fn from_hop1zuo1_candidates2(
     whose_turn: absolute::Side,
     tam_itself_is_tam_hue: bool,
-    f: &absolute::Field,
+    field: &absolute::Field,
 ) -> Vec<PureMove> {
-    let perspective = match whose_turn {
-        absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
-        absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
-    };
-
     let mut ans = vec![];
-    for piece in
-        &cetkaik_core::perspective::to_relative_field(f.clone(), perspective).hop1zuo1of_downward
-    {
-        for empty_square in CetkaikCore::empty_squares(
-            &cetkaik_core::perspective::to_relative_field(f.clone(), perspective).current_board,
-        ) {
+    let hop1zuo1: Vec<cetkaik_core::relative::NonTam2PieceDownward> =
+        match whose_turn {
+            absolute::Side::IASide => field.ia_side_hop1zuo1.iter().copied(),
+            absolute::Side::ASide => field.a_side_hop1zuo1.iter().copied(),
+        }
+        .map(|absolute::NonTam2Piece { color, prof }| {
+            cetkaik_core::relative::NonTam2PieceDownward { color, prof }
+        })
+        .collect();
+    for piece in &hop1zuo1 {
+        for empty_square in CetkaikCore::empty_squares_absolute(&field.board) {
             ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,
-                dest: to_absolute_coord(empty_square, perspective),
+                dest: empty_square,
             });
         }
     }
