@@ -1,8 +1,8 @@
 use alloc::vec::Vec;
 
-use crate::{CetkaikCore, CetkaikRepresentation};
-
-use super::{Board, Coord, MovablePositions, Piece, Profession};
+use crate::CetkaikRepresentation;
+use cetkaik_core::Profession;
+use super::MovablePositions;
 
 pub mod iter;
 pub mod vec;
@@ -26,7 +26,10 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
+/// Supports both `cetkaik_core` and `cetkaik_compact_representation`.
 /// # Examples
+/// 
+/// With `cetkaik_core`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
 /// use cetkaik_core::*;
@@ -43,7 +46,7 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 /// }
 ///
 /// let MovablePositions { finite, infinite } =
-///     calculate_movable_positions_for_either_side(
+///     calculate_movable_positions_for_either_side::<CetkaikCore>(
 ///         [2, 0], /* if, at [2,0], */
 ///         relative::Piece::NonTam2Piece {
 ///             color: Color::Huok2,
@@ -99,18 +102,71 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 ///  * Note that you need two calls to this function in order to handle stepping. */
 /// assert_eq_ignoring_order(&infinite, &vec![[3, 0], [4, 0], [5, 0], [6, 0], [1, 0], [0, 0]]);
 /// ```
+/// 
+/// With `cetkaik_compact_representation`:
+/// ```
+/// use cetkaik_yhuap_move_candidates::*;
+/// use cetkaik_core::*;
+/// use cetkaik_compact_representation::*;
+/// use std::collections::HashSet;
+///
+/// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
+/// where
+///     T: Eq + core::hash::Hash + std::fmt::Debug,
+/// {
+///     let a: HashSet<_> = a.iter().collect();
+///     let b: HashSet<_> = b.iter().collect();
+///
+///     assert_eq!(a, b)
+/// }
+///
+/// let MovablePositions { finite, infinite } =
+///     calculate_movable_positions_for_either_side::<CetkaikCompact>(
+///         Coord::new(2, 0).unwrap(), /* if, at [2,0], */
+///         PieceWithSide::new(0o240).unwrap(), /* a black Kua2 belonging to the opponent = ASide exists, */
+///         /* while the opponent's Gua2 is in [0,0] and your Kauk2 in [6,0], */
+///         unsafe {
+///           std::mem::transmute::<[[u8; 9]; 9], Board>([
+///             [0o220, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o100, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///             [0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000, 0o000],
+///           ])
+///         },
+///         false
+///     );
+///
+/// /* then the opponent's Gua2 can either move one step to the side, */
+/// assert_eq_ignoring_order(&finite, &[Coord::new(2, 1).unwrap()]);
+///
+/// /* or it can run to anywhere from [0,0] to [6,0].
+///  * Note that you need two calls to this function in order to handle stepping. */
+/// assert_eq_ignoring_order(&infinite, &[
+///     Coord::new(3, 0).unwrap(), 
+///     Coord::new(4, 0).unwrap(), 
+///     Coord::new(5, 0).unwrap(), 
+///     Coord::new(6, 0).unwrap(), 
+///     Coord::new(1, 0).unwrap(), 
+///     Coord::new(0, 0).unwrap()
+/// ]);
+/// ```
 #[must_use]
-pub fn calculate_movable_positions_for_either_side(
-    coord: Coord,
-    piece: Piece,
-    board: Board,
+pub fn calculate_movable_positions_for_either_side<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    piece: T::RelativePiece,
+    board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
-) -> MovablePositions<Coord> {
-    CetkaikCore::match_on_piece_and_apply(
+) -> MovablePositions<T::RelativeCoord> {
+    T::match_on_piece_and_apply(
         piece,
-        &|| calculate_movable_positions_for_tam::<CetkaikCore>(coord),
+        &|| calculate_movable_positions_for_tam::<T>(coord),
         &|prof, side| {
-            calculate_movable_positions_for_nontam::<CetkaikCore>(
+            calculate_movable_positions_for_nontam::<T>(
                 coord,
                 prof,
                 board,
