@@ -169,7 +169,7 @@ fn can_get_occupied_by_non_tam(
 ) -> bool {
     /* Intentionally does not verify whether the piece itself is of opponent */
     let is_protected_by_opponent_tam_hue_auai = |side: Side, coord: Coord| {
-        calculate_movable::vec::eight_neighborhood(coord)
+        calculate_movable::vec::eight_neighborhood::<CetkaikCore>(coord)
             .into_iter()
             .filter(|[a, b]| {
                 let piece = board[*a][*b];
@@ -230,7 +230,7 @@ pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState
                 match p {
                     Piece::Tam2 => {
                         let candidates: Vec<Coord> =
-                            calculate_movable::vec::eight_neighborhood(src);
+                            calculate_movable::vec::eight_neighborhood::<CetkaikCore>(src);
                         for tentative_dest in candidates {
                             let dest_piece =
                                 game_state.f.current_board[tentative_dest[0]][tentative_dest[1]];
@@ -518,7 +518,7 @@ pub struct Config {
 #[cfg(test)]
 mod tests;
 
-pub use cetkaik_core::perspective::{Perspective, to_absolute_coord};
+pub use cetkaik_core::perspective::{to_absolute_coord, Perspective};
 pub use cetkaik_core::{Color, Profession};
 
 #[derive(Debug)]
