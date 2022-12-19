@@ -29,7 +29,7 @@ dependencies = [
 
 [[package]]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.3.4"
+version = "0.4.0"
 dependencies = [
  "cetkaik_compact_representation",
  "cetkaik_core",
