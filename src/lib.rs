@@ -20,7 +20,7 @@ pub trait CetkaikRepresentation {
     type RelativeCoord: Copy;
     type Perspective;
     type RelativeBoard: Copy;
-    type RelativePiece;
+    type RelativePiece: Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
         coord: Self::RelativeCoord,
@@ -31,6 +31,8 @@ pub trait CetkaikRepresentation {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece>;
+    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
+    fn tam2() -> Self::RelativePiece;
 }
 
 impl CetkaikRepresentation for CetkaikCore {
@@ -56,6 +58,20 @@ impl CetkaikRepresentation for CetkaikCore {
         let [i, j] = coord;
         board[i][j]
     }
+    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
+        coord == [2, 2]
+            || coord == [2, 6]
+            || coord == [3, 3]
+            || coord == [3, 5]
+            || coord == [4, 4]
+            || coord == [5, 3]
+            || coord == [5, 5]
+            || coord == [6, 2]
+            || coord == [6, 6]
+    }
+    fn tam2() -> Self::RelativePiece {
+        cetkaik_core::relative::Piece::Tam2
+    }
 }
 
 impl CetkaikRepresentation for CetkaikCompact {
@@ -79,6 +95,12 @@ impl CetkaikRepresentation for CetkaikCompact {
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece> {
         board.peek(coord)
+    }
+    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
+        Self::RelativeCoord::is_tam_hue_by_default(coord)
+    }
+    fn tam2() -> Self::RelativePiece {
+        unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
     }
 }
 
@@ -162,7 +184,11 @@ fn can_get_occupied_by_non_tam(
                     }) => {
                         piece_prof == Profession::Uai1
                             && piece_side != side
-                            && calculate_movable::is_tam_hue([*a, *b], board, tam_itself_is_tam_hue)
+                            && calculate_movable::is_tam_hue::<CetkaikCore>(
+                                [*a, *b],
+                                board,
+                                tam_itself_is_tam_hue,
+                            )
                     }
                 }
             })

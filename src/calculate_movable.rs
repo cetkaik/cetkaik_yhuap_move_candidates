@@ -7,30 +7,22 @@ use super::{Board, Coord, MovablePositions, Piece, Profession, Side};
 pub mod iter;
 pub mod vec;
 
-pub fn is_tam_hue_by_default(coord: Coord) -> bool {
-    coord == [2, 2]
-        || coord == [2, 6]
-        || coord == [3, 3]
-        || coord == [3, 5]
-        || coord == [4, 4]
-        || coord == [5, 3]
-        || coord == [5, 5]
-        || coord == [6, 2]
-        || coord == [6, 6]
-}
-
-pub fn is_tam_hue(coord: Coord, board: Board, tam_itself_is_tam_hue: bool) -> bool {
-    if is_tam_hue_by_default(coord) {
+pub fn is_tam_hue<T: CetkaikRepresentation>(
+    coord: T::RelativeCoord,
+    board: T::RelativeBoard,
+    tam_itself_is_tam_hue: bool,
+) -> bool {
+    if T::is_tam_hue_by_default(coord) {
         return true;
     }
 
-    if tam_itself_is_tam_hue && CetkaikCore::relative_get(board, coord) == Some(Piece::Tam2) {
+    if tam_itself_is_tam_hue && T::relative_get(board, coord) == Some(T::tam2()) {
         return true;
     }
 
     // is Tam2 available at any neighborhood?
-    iter::eight_neighborhood::<CetkaikCore>(coord)
-        .any(|coord| CetkaikCore::relative_get(board, coord) == Some(Piece::Tam2))
+    iter::eight_neighborhood::<T>(coord)
+        .any(|coord| T::relative_get(board, coord) == Some(T::tam2()))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
@@ -218,7 +210,7 @@ pub fn calculate_movable_positions_for_nontam(
     ];
 
     let piece_prof = prof;
-    if is_tam_hue(coord, board, tam_itself_is_tam_hue) {
+    if is_tam_hue::<CetkaikCore>(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
            Profession::Io | Profession::Uai1 => // General, 将, varxle
             MovablePositions { finite: vec::eight_neighborhood(coord), infinite: vec![] },
