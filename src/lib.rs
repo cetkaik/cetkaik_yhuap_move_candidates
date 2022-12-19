@@ -27,6 +27,9 @@ pub trait CetkaikRepresentation {
     type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
 
+    type AbsoluteField;
+
+    type AbsoluteSide: Copy + Eq;
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
@@ -52,6 +55,10 @@ pub trait CetkaikRepresentation {
     ) -> U;
     fn empty_squares_relative(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
     fn empty_squares_absolute(current_board: &Self::AbsoluteBoard) -> Vec<Self::AbsoluteCoord>;
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)>;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -67,6 +74,7 @@ impl CetkaikRepresentation for CetkaikCore {
     type AbsolutePiece = cetkaik_core::absolute::Piece;
     type RelativePiece = cetkaik_core::relative::Piece;
 
+    type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::relative::Side;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
         cetkaik_core::perspective::to_absolute_coord(coord, p)
@@ -155,6 +163,20 @@ impl CetkaikRepresentation for CetkaikCore {
         }
         ans
     }
+    type AbsoluteField = cetkaik_core::absolute::Field;
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)> {
+        match side {
+            absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
+            absolute::Side::ASide => field.a_side_hop1zuo1.iter(),
+        }
+        .copied()
+        .map(|absolute::NonTam2Piece { color, prof }| (color, prof))
+        .collect()
+    }
+
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -172,6 +194,9 @@ impl CetkaikRepresentation for CetkaikCompact {
     type AbsolutePiece = cetkaik_compact_representation::PieceWithSide;
     type RelativePiece = cetkaik_compact_representation::PieceWithSide;
 
+    type AbsoluteField = cetkaik_compact_representation::Field;
+
+    type AbsoluteSide = cetkaik_core::absolute::Side;
     type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
     fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
         coord
@@ -228,6 +253,16 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn empty_squares_absolute(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
         Self::empty_squares_relative(board)
+    }
+
+    fn hop1zuo1_of(
+        side: Self::AbsoluteSide,
+        field: Self::AbsoluteField,
+    ) -> Vec<(Color, Profession)> {
+        match side {
+            absolute::Side::ASide => field.get_hop1zuo1().a_side_hop1zuo1_color_and_prof().collect(),
+            absolute::Side::IASide => field.get_hop1zuo1().ia_side_hop1zuo1_color_and_prof().collect(),
+        }
     }
 }
 
