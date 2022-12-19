@@ -525,7 +525,6 @@ fn candidates_tam2<T: CetkaikRepresentation>(
 fn foo(
     config: &Config,
     prof: Profession,
-    color: Color,
     tam_itself_is_tam_hue: bool,
     src: <CetkaikCore as CetkaikRepresentation>::RelativeCoord,
     f: &<CetkaikCore as CetkaikRepresentation>::RelativeField,
@@ -686,11 +685,10 @@ fn not_from_hop1zuo1_candidates_(
                     Piece::NonTam2Piece {
                         side: Side::Downward,
                         prof,
-                        color,
+                        color: _,
                     } => foo(
                         config,
                         prof,
-                        color,
                         tam_itself_is_tam_hue,
                         src,
                         f,
