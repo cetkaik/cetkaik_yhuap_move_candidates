@@ -133,9 +133,9 @@ mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
 
 #[derive(Debug, Eq, Clone, PartialEq)]
-pub struct MovablePositions {
-    pub finite: Vec<Coord>,
-    pub infinite: Vec<Coord>,
+pub struct MovablePositions<T> {
+    pub finite: Vec<T>,
+    pub infinite: Vec<T>,
 }
 
 fn can_get_occupied_by(

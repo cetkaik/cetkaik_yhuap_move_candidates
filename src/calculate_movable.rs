@@ -105,7 +105,7 @@ pub fn calculate_movable_positions_for_either_side(
     piece: Piece,
     board: Board,
     tam_itself_is_tam_hue: bool,
-) -> MovablePositions {
+) -> MovablePositions<Coord> {
     match piece {
         Piece::Tam2 => calculate_movable_positions_for_tam(coord),
         Piece::NonTam2Piece {
@@ -118,7 +118,7 @@ pub fn calculate_movable_positions_for_either_side(
     }
 }
 
-pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions {
+pub fn calculate_movable_positions_for_tam(coord: Coord) -> MovablePositions<Coord> {
     MovablePositions {
         finite: vec::eight_neighborhood(coord),
         infinite: vec![],
@@ -131,7 +131,7 @@ pub fn calculate_movable_positions_for_nontam(
     board: Board,
     tam_itself_is_tam_hue: bool,
     side: Side,
-) -> MovablePositions {
+) -> MovablePositions<Coord> {
     const DIAGONAL: [[isize; 2]; 32] = [
         // UP_LEFT:
         [-8, -8],
