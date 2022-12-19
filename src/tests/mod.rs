@@ -1,3 +1,5 @@
+use cetkaik_core::absolute::PureMove;
+
 use super::*;
 
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
