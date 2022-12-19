@@ -268,35 +268,26 @@ impl CetkaikRepresentation for CetkaikCompact {
 ///         .collect(),
 ///     }
 /// );
-/// 
+///
 /// assert_eq!(vec.len(), 80 * 2)
-/// 
+///
 /// ```
 #[must_use]
 pub fn from_hop1zuo1_candidates_vec(
     whose_turn: absolute::Side,
     field: &absolute::Field,
 ) -> Vec<PureMove> {
-    let mut ans = vec![];
-    let hop1zuo1: Vec<cetkaik_core::relative::NonTam2PieceDownward> =
-        match whose_turn {
-            absolute::Side::IASide => field.ia_side_hop1zuo1.iter().copied(),
-            absolute::Side::ASide => field.a_side_hop1zuo1.iter().copied(),
-        }
-        .map(|absolute::NonTam2Piece { color, prof }| {
-            cetkaik_core::relative::NonTam2PieceDownward { color, prof }
-        })
-        .collect();
-    for piece in &hop1zuo1 {
-        for empty_square in CetkaikCore::empty_squares_absolute(&field.board) {
-            ans.push(PureMove::NonTamMoveFromHopZuo {
-                color: piece.color,
-                prof: piece.prof,
-                dest: empty_square,
-            });
-        }
+    match whose_turn {
+        absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
+        absolute::Side::ASide => field.a_side_hop1zuo1.iter(),
     }
-    ans
+    .copied()
+    .flat_map(|absolute::NonTam2Piece { color, prof }| {
+        CetkaikCore::empty_squares_absolute(&field.board)
+            .into_iter()
+            .map(move |dest| PureMove::NonTamMoveFromHopZuo { color, prof, dest })
+    })
+    .collect()
 }
 
 pub use pure_move::PureMove;
