@@ -386,21 +386,6 @@ pub struct MovablePositions<T> {
     pub infinite: Vec<T>,
 }
 
-fn can_get_occupied_by<T: CetkaikRepresentation>(
-    side: T::RelativeSide,
-    dest: T::RelativeCoord,
-    piece_to_move: T::RelativePiece,
-    board: T::RelativeBoard,
-    tam_itself_is_tam_hue: bool,
-) -> bool {
-    if piece_to_move == T::tam2() {
-        /* It is allowed to enter an empty square */
-        T::relative_get(board, dest).is_none()
-    } else {
-        can_get_occupied_by_non_tam::<T>(side, dest, board, tam_itself_is_tam_hue)
-    }
-}
-
 fn empty_neighbors_of<T: CetkaikRepresentation>(
     board: T::RelativeBoard,
     c: T::RelativeCoord,
@@ -590,10 +575,9 @@ fn foo(
             [
                 &candidates
                     .flat_map(|final_dest| {
-                        if can_get_occupied_by::<CetkaikCore>(
+                        if can_get_occupied_by_non_tam::<CetkaikCore>(
                             side,
                             final_dest,
-                            Piece::NonTam2Piece { color, prof, side },
                             subtracted_board,
                             tam_itself_is_tam_hue,
                         ) {
@@ -611,10 +595,9 @@ fn foo(
                     .collect::<Vec<cetkaik_core::PureMove_<absolute::Coord>>>()[..],
                 &candidates_inf
                     .flat_map(|planned_dest| {
-                        if !can_get_occupied_by::<CetkaikCore>(
+                        if !can_get_occupied_by_non_tam::<CetkaikCore>(
                             side,
                             planned_dest,
-                            Piece::NonTam2Piece { color, prof, side },
                             subtracted_board,
                             tam_itself_is_tam_hue,
                         ) {
@@ -658,10 +641,9 @@ fn foo(
                 // opponent's piece; stepping and taking both attainable
 
                 // except when protected by tam2 hue a uai1
-                if can_get_occupied_by::<CetkaikCore>(
+                if can_get_occupied_by_non_tam::<CetkaikCore>(
                     side,
                     tentative_dest,
-                    Piece::NonTam2Piece { color, prof, side },
                     f.current_board,
                     tam_itself_is_tam_hue,
                 ) {
