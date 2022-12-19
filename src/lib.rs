@@ -559,7 +559,10 @@ fn foo(
 
     let candidates: Vec<Coord> = [&finite[..], &infinite[..]].concat();
     for tentative_dest in candidates {
-        let dest_piece = f.current_board[tentative_dest[0]][tentative_dest[1]];
+        let dest_piece = <CetkaikCore as CetkaikRepresentation>::relative_get(
+            *<CetkaikCore as CetkaikRepresentation>::as_board_relative(f),
+            tentative_dest,
+        );
 
         let candidates_when_stepping = || {
             let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
@@ -567,8 +570,11 @@ fn foo(
             let perspective = perspective;
             let tam_itself_is_tam_hue: bool = tam_itself_is_tam_hue;
             /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-            let mut subtracted_board = f.current_board;
-            subtracted_board[src[0]][src[1]] = None; /* must remove the piece to prevent self-occlusion */
+            let subtracted_board = <CetkaikCore as CetkaikRepresentation>::relative_clone_and_set(
+                <CetkaikCore as CetkaikRepresentation>::as_board_relative(f),
+                src,
+                None,
+            ); /* must remove the piece to prevent self-occlusion */
 
             let MovablePositions { finite, infinite } =
                 calculate_movable::calculate_movable_positions_for_nontam::<CetkaikCore>(
@@ -655,11 +661,7 @@ fn foo(
                 if can_get_occupied_by::<CetkaikCore>(
                     side,
                     tentative_dest,
-                    Piece::NonTam2Piece {
-                        color,
-                        prof,
-                        side,
-                    },
+                    Piece::NonTam2Piece { color, prof, side },
                     f.current_board,
                     tam_itself_is_tam_hue,
                 ) {
