@@ -271,6 +271,29 @@ const fn is_ciurl_required(dest: Coord, moving_piece_prof: Profession, src: Coor
     is_water(dest) && !is_water(src) && !matches!(moving_piece_prof, Profession::Nuak1)
 }
 
+#[must_use]
+pub fn not_from_hop1zuo1_candidates2(
+    config: &Config,
+    tam_itself_is_tam_hue: bool,
+    opponent_has_just_moved_tam: bool,
+    whose_turn: absolute::Side,
+    f: &absolute::Field
+) -> Vec<PureMove> {
+    let perspective = match whose_turn {
+        absolute::Side::IASide => cetkaik_core::perspective::Perspective::IaIsUpAndPointsDownward,
+        absolute::Side::ASide => cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward,
+    };
+    not_from_hop1zuo1_candidates_(
+        config,
+        &PureGameState {
+            perspective,
+            opponent_has_just_moved_tam,
+            tam_itself_is_tam_hue,
+            f: cetkaik_core::perspective::to_relative_field(f.clone(), perspective),
+        },
+    )
+}
+
 /// Spits out all the possible opponent (downward)'s move that is played by moving a piece on the board, not from the hop1zuo1.
 #[must_use]
 pub fn not_from_hop1zuo1_candidates_(config: &Config, game_state: &PureGameState) -> Vec<PureMove> {
