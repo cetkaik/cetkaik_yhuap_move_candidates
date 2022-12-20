@@ -11,8 +11,10 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct CetkaikCore;
 
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct CetkaikCompact;
 
 pub trait CetkaikRepresentation {
