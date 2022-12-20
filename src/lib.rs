@@ -20,7 +20,7 @@ pub struct CetkaikCompact;
 pub trait CetkaikRepresentation {
     type Perspective: Copy + Eq;
 
-    type AbsoluteCoord: Copy + Eq;
+    type AbsoluteCoord: Copy + Eq + core::fmt::Debug;
     type RelativeCoord: Copy + Eq;
 
     type AbsoluteBoard: Clone + core::fmt::Debug;
