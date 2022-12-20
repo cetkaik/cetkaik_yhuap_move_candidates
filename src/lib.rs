@@ -67,7 +67,7 @@ pub trait CetkaikRepresentation {
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
         field: &Self::AbsoluteField,
-    ) -> Vec<(Color, Profession)>;
+    ) -> Vec<cetkaik_core::ColorAndProf>;
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
     fn is_water_relative(c: Self::RelativeCoord) -> bool;
@@ -213,14 +213,11 @@ impl CetkaikRepresentation for CetkaikCore {
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
         field: &Self::AbsoluteField,
-    ) -> Vec<(Color, Profession)> {
+    ) -> Vec<cetkaik_core::ColorAndProf> {
         match side {
-            absolute::Side::IASide => field.ia_side_hop1zuo1.iter(),
-            absolute::Side::ASide => field.a_side_hop1zuo1.iter(),
+            absolute::Side::IASide => field.ia_side_hop1zuo1.clone(),
+            absolute::Side::ASide => field.a_side_hop1zuo1.clone(),
         }
-        .copied()
-        .map(|absolute::NonTam2Piece { color, prof }| (color, prof))
-        .collect()
     }
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
         &field.board
@@ -373,7 +370,7 @@ impl CetkaikRepresentation for CetkaikCompact {
     fn hop1zuo1_of(
         side: Self::AbsoluteSide,
         field: &Self::AbsoluteField,
-    ) -> Vec<(Color, Profession)> {
+    ) -> Vec<cetkaik_core::ColorAndProf> {
         match side {
             absolute::Side::ASide => field
                 .to_hop1zuo1()
@@ -451,7 +448,7 @@ impl CetkaikRepresentation for CetkaikCompact {
 /// use cetkaik_yhuap_move_candidates::from_hop1zuo1_candidates_vec;
 /// use cetkaik_core::*;
 /// use cetkaik_core::absolute::Field;
-/// use cetkaik_core::absolute::NonTam2Piece;
+/// use cetkaik_core::ColorAndProf;
 /// use cetkaik_core::absolute::Coord;
 /// use cetkaik_core::absolute::Column::*;
 /// use cetkaik_core::absolute::Row::*;
@@ -462,14 +459,14 @@ impl CetkaikRepresentation for CetkaikCompact {
 /// let vec = from_hop1zuo1_candidates_vec::<CetkaikCore>(
 ///     cetkaik_core::absolute::Side::IASide,
 ///     &Field {
-///         a_side_hop1zuo1: vec![NonTam2Piece {
+///         a_side_hop1zuo1: vec![ColorAndProf {
 ///             color: Color::Huok2,
 ///             prof: Profession::Gua2,
 ///         }],
-///         ia_side_hop1zuo1: vec![NonTam2Piece {
+///         ia_side_hop1zuo1: vec![ColorAndProf {
 ///             color: Color::Kok1,
 ///             prof: Profession::Kauk2,
-///         }, NonTam2Piece {
+///         }, ColorAndProf {
 ///             color: Color::Huok2,
 ///             prof: Profession::Nuak1,
 ///         }],
@@ -495,7 +492,7 @@ pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
 ) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
     T::hop1zuo1_of(whose_turn, field)
         .into_iter()
-        .flat_map(|(color, prof)| {
+        .flat_map(|cetkaik_core::ColorAndProf { color, prof }| {
             T::empty_squares_absolute(T::as_board_absolute(field))
                 .into_iter()
                 .map(move |dest| cetkaik_core::PureMove_::NonTamMoveFromHopZuo {

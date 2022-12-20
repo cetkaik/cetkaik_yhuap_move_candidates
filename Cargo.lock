@@ -10,18 +10,18 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "cetkaik_compact_representation"
-version = "0.2.11"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46c99661f0cae61d307ec2d8a98d6c3bb1082618391d44d527a5788f1e5d3134"
+checksum = "2ea1d723e77bebddec915fe3091d580b20672f7bfadbbf9cf8067a5c1e358378"
 dependencies = [
  "cetkaik_core",
 ]
 
 [[package]]
 name = "cetkaik_core"
-version = "0.4.2"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6ee44ae2990852a5ad9ed2b3eb10e78918c93ba7df28f2e4bfcaa847b0413f9"
+checksum = "0594a3274b8bea89061f0315e86b1dd14c1d09b0d6ea556188c60227c354586d"
 dependencies = [
  "maplit",
  "serde",
@@ -29,7 +29,7 @@ dependencies = [
 
 [[package]]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.6.3"
+version = "0.7.0"
 dependencies = [
  "cetkaik_compact_representation",
  "cetkaik_core",
