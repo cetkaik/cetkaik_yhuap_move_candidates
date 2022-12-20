@@ -54,7 +54,8 @@ pub trait CetkaikRepresentation {
         coord: Self::AbsoluteCoord,
     ) -> Option<Self::AbsolutePiece>;
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
-    fn tam2() -> Self::RelativePiece;
+    fn relative_tam2() -> Self::RelativePiece;
+    fn absolute_tam2() -> Self::AbsolutePiece;
     fn is_upward(s: Self::RelativeSide) -> bool;
     fn match_on_piece_and_apply<U>(
         piece: Self::RelativePiece,
@@ -156,8 +157,11 @@ impl CetkaikRepresentation for CetkaikCore {
             || coord == [6, 2]
             || coord == [6, 6]
     }
-    fn tam2() -> Self::RelativePiece {
+    fn relative_tam2() -> Self::RelativePiece {
         cetkaik_core::relative::Piece::Tam2
+    }
+    fn absolute_tam2() -> Self::AbsolutePiece {
+        cetkaik_core::absolute::Piece::Tam2
     }
     fn is_upward(s: Self::RelativeSide) -> bool {
         s == cetkaik_core::relative::Side::Upward
@@ -323,7 +327,10 @@ impl CetkaikRepresentation for CetkaikCompact {
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
         Self::RelativeCoord::is_tam_hue_by_default(coord)
     }
-    fn tam2() -> Self::RelativePiece {
+    fn relative_tam2() -> Self::RelativePiece {
+        unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
+    }
+    fn absolute_tam2() -> Self::AbsolutePiece {
         unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
     }
     fn is_upward(s: Self::RelativeSide) -> bool {

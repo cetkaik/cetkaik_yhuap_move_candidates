@@ -16,13 +16,13 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
         return true;
     }
 
-    if tam_itself_is_tam_hue && T::relative_get(board, coord) == Some(T::tam2()) {
+    if tam_itself_is_tam_hue && T::relative_get(board, coord) == Some(T::relative_tam2()) {
         return true;
     }
 
     // is Tam2 available at any neighborhood?
     iter::eight_neighborhood::<T>(coord)
-        .any(|coord| T::relative_get(board, coord) == Some(T::tam2()))
+        .any(|coord| T::relative_get(board, coord) == Some(T::relative_tam2()))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
