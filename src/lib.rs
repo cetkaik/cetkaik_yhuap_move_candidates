@@ -23,7 +23,7 @@ pub trait CetkaikRepresentation {
     type AbsoluteCoord: Copy + Eq + core::fmt::Debug;
     type RelativeCoord: Copy + Eq;
 
-    type AbsoluteBoard: Clone + core::fmt::Debug;
+    type AbsoluteBoard: Clone + core::fmt::Debug + IsAbsoluteBoard;
     type RelativeBoard: Copy;
 
     type AbsolutePiece: Copy + Eq;
@@ -312,6 +312,7 @@ impl CetkaikRepresentation for CetkaikCompact {
         board: Self::RelativeBoard,
         coord: Self::RelativeCoord,
     ) -> Option<Self::RelativePiece> {
+        use cetkaik_core::IsBoard;
         board.peek(coord)
     }
     fn relative_clone_and_set(
@@ -319,6 +320,7 @@ impl CetkaikRepresentation for CetkaikCompact {
         coord: Self::RelativeCoord,
         p: Option<Self::RelativePiece>,
     ) -> Self::RelativeBoard {
+        use cetkaik_core::IsBoard;
         let mut new_board = *board;
         new_board.put(coord, p);
         new_board
@@ -327,6 +329,7 @@ impl CetkaikRepresentation for CetkaikCompact {
         board: &Self::AbsoluteBoard,
         coord: Self::AbsoluteCoord,
     ) -> Option<Self::AbsolutePiece> {
+        use cetkaik_core::IsBoard;
         board.peek(coord)
     }
     fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
@@ -994,7 +997,7 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     ans
 }
 
-use cetkaik_core::PureMove_;
+use cetkaik_core::{IsAbsoluteBoard, PureMove_};
 
 pub use cetkaik_core::absolute;
 
