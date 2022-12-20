@@ -168,7 +168,9 @@ impl CetkaikRepresentation for CetkaikCore {
             } => f_piece(prof, side),
         }
     }
-    fn empty_squares_relative(board: &cetkaik_core::relative::Board) -> Vec<cetkaik_core::relative::Coord> {
+    fn empty_squares_relative(
+        board: &cetkaik_core::relative::Board,
+    ) -> Vec<cetkaik_core::relative::Coord> {
         let mut ans = vec![];
         for rand_i in 0..9 {
             for rand_j in 0..9 {
@@ -704,7 +706,7 @@ pub fn not_from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     let perspective = T::get_one_perspective();
     not_from_hop1zuo1_candidates_::<T>(
         T::to_relative_side(whose_turn, perspective),
-        config,
+        *config,
         perspective,
         tam_itself_is_tam_hue,
         &T::to_relative_field((*f).clone(), perspective),
@@ -777,13 +779,12 @@ fn candidates_tam2<T: CetkaikRepresentation>(
     }
 }
 
-fn foo<T: CetkaikRepresentation>(
+fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
     side: T::RelativeSide,
-    config: &Config,
+    config: Config2,
     prof: Profession,
-    tam_itself_is_tam_hue: bool,
     src: T::RelativeCoord,
-    f: &T::RelativeField,
+    field: &T::RelativeField,
     perspective: T::Perspective,
     ans: &mut Vec<PureMove_<T::AbsoluteCoord>>,
 ) {
@@ -791,22 +792,23 @@ fn foo<T: CetkaikRepresentation>(
         calculate_movable::calculate_movable_positions_for_nontam::<T>(
             src,
             prof,
-            *T::as_board_relative(f),
-            tam_itself_is_tam_hue,
+            *T::as_board_relative(field),
+            config.tam_itself_is_tam_hue,
             side,
         );
 
     let candidates: Vec<T::RelativeCoord> = [&finite[..], &infinite[..]].concat();
     for tentative_dest in candidates {
-        let dest_piece = T::relative_get(*T::as_board_relative(f), tentative_dest);
+        let dest_piece = T::relative_get(*T::as_board_relative(field), tentative_dest);
 
         let candidates_when_stepping = || {
             let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
 
             let perspective = perspective;
-            let tam_itself_is_tam_hue: bool = tam_itself_is_tam_hue;
+            let tam_itself_is_tam_hue: bool = config.tam_itself_is_tam_hue;
             /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-            let subtracted_board = T::relative_clone_and_set(T::as_board_relative(f), src, None); /* must remove the piece to prevent self-occlusion */
+            let subtracted_board =
+                T::relative_clone_and_set(T::as_board_relative(field), src, None); /* must remove the piece to prevent self-occlusion */
 
             let MovablePositions { finite, infinite } =
                 calculate_movable::calculate_movable_positions_for_nontam::<T>(
@@ -883,8 +885,8 @@ fn foo<T: CetkaikRepresentation>(
                         if can_get_occupied_by_non_tam::<T>(
                             side,
                             tentative_dest,
-                            *T::as_board_relative(f),
-                            tam_itself_is_tam_hue,
+                            *T::as_board_relative(field),
+                            config.tam_itself_is_tam_hue,
                         ) {
                             [
                                 &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
@@ -919,22 +921,24 @@ fn foo<T: CetkaikRepresentation>(
 
 fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     side: T::RelativeSide,
-    config: &Config,
+    config: Config,
     perspective: T::Perspective,
     tam_itself_is_tam_hue: bool,
-    f: &T::RelativeField,
+    field: &T::RelativeField,
 ) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
     let mut ans = vec![];
-    T::loop_over_one_side_and_tam(T::as_board_relative(f), side, &mut |src, maybe_prof| {
+    T::loop_over_one_side_and_tam(T::as_board_relative(field), side, &mut |src, maybe_prof| {
         match maybe_prof {
-            None => candidates_tam2::<T>(src, f, perspective, &mut ans),
-            Some(prof) => foo::<T>(
+            None => candidates_tam2::<T>(src, field, perspective, &mut ans),
+            Some(prof) => append_possible_movement_of_a_piece::<T>(
                 side,
-                config,
+                Config2 {
+                    tam_itself_is_tam_hue,
+                    allow_kut2tam2: config.allow_kut2tam2,
+                },
                 prof,
-                tam_itself_is_tam_hue,
                 src,
-                f,
+                field,
                 perspective,
                 &mut ans,
             ),
@@ -947,9 +951,15 @@ use cetkaik_core::PureMove_;
 
 pub use cetkaik_core::absolute;
 
-
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Config {
     pub allow_kut2tam2: bool,
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+struct Config2 {
+    pub allow_kut2tam2: bool,
+    pub tam_itself_is_tam_hue: bool,
 }
 
 #[cfg(test)]

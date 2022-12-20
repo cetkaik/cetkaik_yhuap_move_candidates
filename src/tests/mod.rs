@@ -5,7 +5,7 @@ use cetkaik_core::{absolute::PureMove, relative::Side};
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hop1zuo1_candidates_::<CetkaikCore>(
         Side::Downward,
-        &Config {
+        Config {
             allow_kut2tam2: false,
         },
         game_state.perspective,
@@ -17,7 +17,7 @@ fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
     not_from_hop1zuo1_candidates_::<CetkaikCore>(
         Side::Downward,
-        &Config {
+        Config {
             allow_kut2tam2: true,
         },
         game_state.perspective,
