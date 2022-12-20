@@ -78,6 +78,7 @@ pub trait CetkaikRepresentation {
     fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField;
     fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide;
     fn get_one_perspective() -> Self::Perspective;
+    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -224,10 +225,9 @@ impl CetkaikRepresentation for CetkaikCore {
         side: Self::RelativeSide,
         f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
     ) {
-        for rand_i in 0..9 {
-            for rand_j in 0..9 {
+        for (rand_i, row) in board.iter().enumerate() {
+            for (rand_j, &piece) in row.iter().enumerate() {
                 let src = [rand_i, rand_j];
-                let piece = board[rand_i][rand_j];
                 if let Some(p) = piece {
                     match p {
                         Self::RelativePiece::Tam2 => f_tam_or_piece(src, None),
@@ -251,6 +251,9 @@ impl CetkaikRepresentation for CetkaikCore {
     fn get_one_perspective() -> Self::Perspective {
         // arbitrary
         cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward
+    }
+    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
+        cetkaik_core::absolute::distance(a, b)
     }
 }
 
@@ -393,6 +396,10 @@ impl CetkaikRepresentation for CetkaikCompact {
     fn get_one_perspective() -> Self::Perspective {
         // the sole choice available
         cetkaik_compact_representation::Perspective::IaIsDownAndPointsUpward
+    }
+
+    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
+        cetkaik_compact_representation::Coord::distance(a, b)
     }
 }
 
