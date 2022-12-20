@@ -32,7 +32,7 @@ pub trait CetkaikRepresentation {
     type AbsoluteField: Clone + core::fmt::Debug;
     type RelativeField;
 
-    type AbsoluteSide: Copy + Eq + core::fmt::Debug;
+    type AbsoluteSide: Copy + Eq + core::fmt::Debug + core::ops::Not;
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
@@ -85,6 +85,8 @@ pub trait CetkaikRepresentation {
         a: Self::AbsoluteCoord,
         b: Self::AbsoluteCoord,
     ) -> bool;
+    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side;
+    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -271,6 +273,12 @@ impl CetkaikRepresentation for CetkaikCore {
     ) -> bool {
         cetkaik_core::absolute::same_direction(origin, a, b)
     }
+    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side {
+        a
+    }
+    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
+        a
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -427,6 +435,12 @@ impl CetkaikRepresentation for CetkaikCompact {
         b: Self::AbsoluteCoord,
     ) -> bool {
         cetkaik_compact_representation::Coord::same_direction(origin, a, b)
+    }
+    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side {
+        a
+    }
+    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
+        a
     }
 }
 
