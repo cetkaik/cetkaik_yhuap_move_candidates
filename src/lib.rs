@@ -23,7 +23,7 @@ pub trait CetkaikRepresentation {
     type AbsoluteCoord: Copy;
     type RelativeCoord: Copy + Eq;
 
-    type AbsoluteBoard;
+    type AbsoluteBoard: Clone + core::fmt::Debug;
     type RelativeBoard: Copy;
 
     type AbsolutePiece: Copy + Eq;
@@ -32,7 +32,7 @@ pub trait CetkaikRepresentation {
     type AbsoluteField: Clone + core::fmt::Debug;
     type RelativeField;
 
-    type AbsoluteSide: Copy + Eq;
+    type AbsoluteSide: Copy + Eq + core::fmt::Debug;
     type RelativeSide: Copy + Eq;
     fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
     fn add_delta(
