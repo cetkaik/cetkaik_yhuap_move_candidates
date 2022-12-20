@@ -1,6 +1,6 @@
 [package]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.6.1"
+version = "0.6.2"
 authors = ["jekto_vatimeliju <jekto.vatimeliju@gmail.com>"]
 edition = "2021"
 description = "See https://sites.google.com/view/cet2kaik/the-standardized-rule-in-english and https://github.com/sozysozbot/cerke_online_utility for context."
@@ -11,7 +11,7 @@ exclude = [ "renovate.json" ]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cetkaik_compact_representation = "0.2.10"
+cetkaik_compact_representation = "0.2.11"
 cetkaik_core = "0.4.2"
 
 [dependencies.num]

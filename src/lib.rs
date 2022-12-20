@@ -79,6 +79,11 @@ pub trait CetkaikRepresentation {
     fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide;
     fn get_one_perspective() -> Self::Perspective;
     fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32;
+    fn absolute_same_direction(
+        origin: Self::AbsoluteCoord,
+        a: Self::AbsoluteCoord,
+        b: Self::AbsoluteCoord,
+    ) -> bool;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -255,6 +260,13 @@ impl CetkaikRepresentation for CetkaikCore {
     fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
         cetkaik_core::absolute::distance(a, b)
     }
+    fn absolute_same_direction(
+        origin: Self::AbsoluteCoord,
+        a: Self::AbsoluteCoord,
+        b: Self::AbsoluteCoord,
+    ) -> bool {
+        cetkaik_core::absolute::same_direction(origin, a, b)
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -400,6 +412,14 @@ impl CetkaikRepresentation for CetkaikCompact {
 
     fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
         cetkaik_compact_representation::Coord::distance(a, b)
+    }
+
+    fn absolute_same_direction(
+        origin: Self::AbsoluteCoord,
+        a: Self::AbsoluteCoord,
+        b: Self::AbsoluteCoord,
+    ) -> bool {
+        cetkaik_compact_representation::Coord::same_direction(origin, a, b)
     }
 }
 
