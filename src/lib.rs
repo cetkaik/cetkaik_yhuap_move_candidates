@@ -29,7 +29,7 @@ pub trait CetkaikRepresentation {
     type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
 
-    type AbsoluteField: Clone;
+    type AbsoluteField: Clone + core::fmt::Debug;
     type RelativeField;
 
     type AbsoluteSide: Copy + Eq;
