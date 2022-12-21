@@ -101,6 +101,8 @@ pub trait CetkaikRepresentation {
     ) -> bool;
     fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side;
     fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide;
+
+    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool;
 }
 
 /// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
@@ -296,6 +298,9 @@ impl CetkaikRepresentation for CetkaikCore {
     fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
         a
     }
+    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool {
+        piece.has_prof(prof)
+    }
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -467,6 +472,14 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
         a
+    }
+
+    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool {
+        use cetkaik_compact_representation::MaybeTam2;
+        match piece.prof() {
+            MaybeTam2::Tam2 => false,
+            MaybeTam2::NotTam2(self_prof) => prof == self_prof,
+        }
     }
 }
 
