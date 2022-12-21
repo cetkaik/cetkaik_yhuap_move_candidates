@@ -1,11 +1,9 @@
-use cetkaik_core::absolute::PureMove;
-
 #[test]
 fn test_simple_board_sample_3() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_3(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &["PI片PU"],
     );
 }
@@ -15,7 +13,7 @@ fn test_simple_board_sample_1_ia_is_down_true() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_1(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "KA片LA", /* horizontal */
             "KA片KE",
@@ -42,7 +40,7 @@ fn test_simple_board_sample_2_ia_is_down_false() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::simple_board_sample_2(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "PIA片MIA", /* horizontal */
             "PIA片PAU",
@@ -69,7 +67,7 @@ fn test_initial_board_sample() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-        PureMove::serialize,
+        |a| a.to_string(),
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
     );
 }
@@ -79,7 +77,7 @@ fn test_complicated_board_sample_1() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::complicated_board_sample_1(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "XA片XE",
             "TE片ZI水",
@@ -398,7 +396,7 @@ fn test_complicated_board_sample_2() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::complicated_board_sample_2(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "ZA片ZE",
             "KE皇LI[KE]KA",
@@ -747,7 +745,7 @@ fn test_tam_corner_sample() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::tam_corner_sample(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "CAI片XAI",
             "CAI片CY",
@@ -768,7 +766,7 @@ fn test_tam_itself_is_not_tam_hue_sample() {
     super::run_test(
         super::not_from_hop1zuo1_candidates,
         &crate::tests::test_cases::TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE,
-        PureMove::serialize,
+        |a| a.to_string(),
         &crate::tests::test_cases::INITIAL_MOVES_NO_KUT_TAM,
     );
 }

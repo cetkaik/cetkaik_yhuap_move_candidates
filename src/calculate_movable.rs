@@ -1,7 +1,7 @@
 use alloc::vec::Vec;
 
-use crate::CetkaikRepresentation;
-use cetkaik_core::Profession;
+use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_fundamental::Profession;
 use super::MovablePositions;
 
 pub mod iter;
@@ -26,13 +26,13 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
-/// Supports both `cetkaik_core` and `cetkaik_compact_representation`.
+/// Supports both `cetkaik_naive_representation` and `cetkaik_compact_representation`.
 /// # Examples
 /// 
-/// With `cetkaik_core`:
+/// With `cetkaik_naive_representation`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
-/// use cetkaik_core::*;
+/// use cetkaik_naive_representation::*;
 /// use std::collections::HashSet;
 ///
 /// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
@@ -46,14 +46,14 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 /// }
 ///
 /// let MovablePositions { finite, infinite } =
-///     calculate_movable_positions_for_either_side::<CetkaikCore>(
+///     calculate_movable_positions_for_either_side::<CetkaikNaive>(
 ///         [2, 0], /* if, at [2,0], */
 ///         relative::Piece::NonTam2Piece {
 ///             color: Color::Huok2,
 ///             prof: Profession::Kua2,
 ///             side: relative::Side::Downward,
 ///         }, /* a black Kua2 belonging to the opponent exists, */
-///         [
+///         cetkaik_naive_representation::relative::Board([
 ///             [
 ///                 Some(relative::Piece::NonTam2Piece {
 ///                     color: Color::Huok2,
@@ -91,7 +91,7 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 ///             ],
 ///             [None, None, None, None, None, None, None, None, None],
 ///             [None, None, None, None, None, None, None, None, None],
-///         ],
+///         ]),
 ///         false
 ///     );
 ///
@@ -106,7 +106,6 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 /// With `cetkaik_compact_representation`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
-/// use cetkaik_core::*;
 /// use cetkaik_compact_representation::*;
 /// use std::collections::HashSet;
 ///

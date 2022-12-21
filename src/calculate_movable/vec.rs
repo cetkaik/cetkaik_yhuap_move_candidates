@@ -1,4 +1,4 @@
-use crate::CetkaikRepresentation;
+use cetkaik_interface::CetkaikRepresentation;
 
 use super::{iter, Vec};
 pub fn eight_neighborhood<T: CetkaikRepresentation>(

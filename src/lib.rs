@@ -11,495 +11,27 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
-use cetkaik_core::{IsAbsoluteBoard, IsField, IsAbsoluteField, PureMove_};
-
-pub use cetkaik_core::absolute;
-
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-pub struct CetkaikCore;
-
-#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-pub struct CetkaikCompact;
-
-pub trait CetkaikRepresentation {
-    type Perspective: Copy + Eq;
-
-    type AbsoluteCoord: Copy + Eq + core::fmt::Debug;
-    type RelativeCoord: Copy + Eq;
-
-    type AbsoluteBoard: Clone
-        + core::fmt::Debug
-        + IsAbsoluteBoard<PieceWithSide = Self::AbsolutePiece, Coord = Self::AbsoluteCoord>;
-    type RelativeBoard: Copy;
-
-    type AbsolutePiece: Copy + Eq;
-    type RelativePiece: Copy + Eq;
-
-    type AbsoluteField: Clone
-        + core::fmt::Debug
-        + IsField<
-            PieceWithSide = Self::AbsolutePiece,
-            Coord = Self::AbsoluteCoord,
-            Side = Self::AbsoluteSide,
-        > + IsAbsoluteField;
-    type RelativeField;
-
-    type AbsoluteSide: Copy + Eq + core::fmt::Debug + core::ops::Not;
-    type RelativeSide: Copy + Eq;
-    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord;
-    fn add_delta(
-        coord: Self::RelativeCoord,
-        row_delta: isize,
-        col_delta: isize,
-    ) -> Option<Self::RelativeCoord>;
-    fn relative_get(
-        board: Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-    ) -> Option<Self::RelativePiece>;
-    fn relative_clone_and_set(
-        board: &Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-        p: Option<Self::RelativePiece>,
-    ) -> Self::RelativeBoard;
-    fn absolute_get(
-        board: &Self::AbsoluteBoard,
-        coord: Self::AbsoluteCoord,
-    ) -> Option<Self::AbsolutePiece>;
-    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool;
-    fn relative_tam2() -> Self::RelativePiece;
-    fn absolute_tam2() -> Self::AbsolutePiece;
-    fn is_upward(s: Self::RelativeSide) -> bool;
-    fn match_on_piece_and_apply<U>(
-        piece: Self::RelativePiece,
-        f_tam: &dyn Fn() -> U,
-        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
-    ) -> U;
-    fn empty_squares_relative(current_board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord>;
-    fn empty_squares_absolute(current_board: &Self::AbsoluteBoard) -> Vec<Self::AbsoluteCoord>;
-    fn hop1zuo1_of(
-        side: Self::AbsoluteSide,
-        field: &Self::AbsoluteField,
-    ) -> Vec<cetkaik_core::ColorAndProf>;
-    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
-    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard;
-    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
-    fn is_water_relative(c: Self::RelativeCoord) -> bool;
-    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool;
-    fn loop_over_one_side_and_tam(
-        board: &Self::RelativeBoard,
-        side: Self::RelativeSide,
-        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
-    );
-    fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField;
-    fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide;
-    fn get_one_perspective() -> Self::Perspective;
-    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32;
-    fn absolute_same_direction(
-        origin: Self::AbsoluteCoord,
-        a: Self::AbsoluteCoord,
-        b: Self::AbsoluteCoord,
-    ) -> bool;
-    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side;
-    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide;
-
-    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool;
-}
-
-/// `cetkaik_core` クレートに基づいており、視点に依らない絶対座標での表現と、視点に依る相対座標への表現を正しく相互変換できる。
-impl CetkaikRepresentation for CetkaikCore {
-    type Perspective = crate::Perspective;
-
-    type AbsoluteCoord = cetkaik_core::absolute::Coord;
-    type RelativeCoord = cetkaik_core::relative::Coord;
-
-    type AbsoluteBoard = cetkaik_core::absolute::Board;
-    type RelativeBoard = cetkaik_core::relative::Board;
-
-    type AbsolutePiece = cetkaik_core::absolute::Piece;
-    type RelativePiece = cetkaik_core::relative::Piece;
-
-    type AbsoluteSide = cetkaik_core::absolute::Side;
-    type RelativeSide = cetkaik_core::relative::Side;
-
-    type AbsoluteField = cetkaik_core::absolute::Field;
-    type RelativeField = cetkaik_core::relative::Field;
-
-    fn to_absolute_coord(coord: Self::RelativeCoord, p: Self::Perspective) -> Self::AbsoluteCoord {
-        cetkaik_core::perspective::to_absolute_coord(coord, p)
-    }
-    fn add_delta(
-        coord: Self::RelativeCoord,
-        row_delta: isize,
-        col_delta: isize,
-    ) -> Option<Self::RelativeCoord> {
-        let [i, j] = coord;
-        match (
-            i.checked_add_signed(row_delta),
-            j.checked_add_signed(col_delta),
-        ) {
-            (Some(l @ 0..=8), Some(m @ 0..=8)) => Some([l, m]),
-            _ => None,
-        }
-    }
-    fn relative_get(
-        board: Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-    ) -> Option<Self::RelativePiece> {
-        let [i, j] = coord;
-        board[i][j]
-    }
-    fn relative_clone_and_set(
-        board: &Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-        p: Option<Self::RelativePiece>,
-    ) -> Self::RelativeBoard {
-        let [i, j] = coord;
-        let mut new_board = *board;
-        new_board[i][j] = p;
-        new_board
-    }
-    fn absolute_get(
-        board: &Self::AbsoluteBoard,
-        coord: Self::AbsoluteCoord,
-    ) -> Option<Self::AbsolutePiece> {
-        board.get(&coord).copied()
-    }
-    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
-        coord == [2, 2]
-            || coord == [2, 6]
-            || coord == [3, 3]
-            || coord == [3, 5]
-            || coord == [4, 4]
-            || coord == [5, 3]
-            || coord == [5, 5]
-            || coord == [6, 2]
-            || coord == [6, 6]
-    }
-    fn relative_tam2() -> Self::RelativePiece {
-        cetkaik_core::relative::Piece::Tam2
-    }
-    fn absolute_tam2() -> Self::AbsolutePiece {
-        cetkaik_core::absolute::Piece::Tam2
-    }
-    fn is_upward(s: Self::RelativeSide) -> bool {
-        s == cetkaik_core::relative::Side::Upward
-    }
-    fn match_on_piece_and_apply<U>(
-        piece: Self::RelativePiece,
-        f_tam: &dyn Fn() -> U,
-        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
-    ) -> U {
-        match piece {
-            Self::RelativePiece::Tam2 => f_tam(),
-            Self::RelativePiece::NonTam2Piece {
-                color: _,
-                prof,
-                side,
-            } => f_piece(prof, side),
-        }
-    }
-    fn empty_squares_relative(
-        board: &cetkaik_core::relative::Board,
-    ) -> Vec<cetkaik_core::relative::Coord> {
-        let mut ans = vec![];
-        for rand_i in 0..9 {
-            for rand_j in 0..9 {
-                let coord: cetkaik_core::relative::Coord = [rand_i, rand_j];
-                if Self::relative_get(*board, coord).is_none() {
-                    ans.push(coord);
-                }
-            }
-        }
-        ans
-    }
-    fn empty_squares_absolute(board: &cetkaik_core::absolute::Board) -> Vec<Self::AbsoluteCoord> {
-        use absolute::Column::{C, K, L, M, N, P, T, X, Z};
-        use absolute::Row::{A, AI, AU, E, I, IA, O, U, Y};
-        let mut ans = vec![];
-        for row in &[A, E, I, U, O, Y, AI, AU, IA] {
-            for column in &[K, L, N, T, Z, X, C, M, P] {
-                let coord = absolute::Coord(*row, *column);
-                if Self::absolute_get(board, coord).is_none() {
-                    ans.push(coord);
-                }
-            }
-        }
-        ans
-    }
-    fn hop1zuo1_of(
-        side: Self::AbsoluteSide,
-        field: &Self::AbsoluteField,
-    ) -> Vec<cetkaik_core::ColorAndProf> {
-        match side {
-            absolute::Side::IASide => field.ia_side_hop1zuo1.clone(),
-            absolute::Side::ASide => field.a_side_hop1zuo1.clone(),
-        }
-    }
-    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
-        &field.board
-    }
-    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard {
-        &mut field.board
-    }
-    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
-        &field.current_board
-    }
-    fn is_water_relative(c: Self::RelativeCoord) -> bool {
-        cetkaik_core::relative::is_water(c)
-    }
-    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool {
-        cetkaik_core::absolute::is_water(c)
-    }
-    fn loop_over_one_side_and_tam(
-        board: &Self::RelativeBoard,
-        side: Self::RelativeSide,
-        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
-    ) {
-        for (rand_i, row) in board.iter().enumerate() {
-            for (rand_j, &piece) in row.iter().enumerate() {
-                let src = [rand_i, rand_j];
-                if let Some(p) = piece {
-                    match p {
-                        Self::RelativePiece::Tam2 => f_tam_or_piece(src, None),
-                        Self::RelativePiece::NonTam2Piece {
-                            side: side_,
-                            prof,
-                            color: _,
-                        } if side_ == side => f_tam_or_piece(src, Some(prof)),
-                        Self::RelativePiece::NonTam2Piece { .. } => {}
-                    }
-                }
-            }
-        }
-    }
-    fn to_relative_field(field: Self::AbsoluteField, p: Self::Perspective) -> Self::RelativeField {
-        cetkaik_core::perspective::to_relative_field(field, p)
-    }
-    fn to_relative_side(side: Self::AbsoluteSide, p: Self::Perspective) -> Self::RelativeSide {
-        cetkaik_core::perspective::to_relative_side(side, p)
-    }
-    fn get_one_perspective() -> Self::Perspective {
-        // arbitrary
-        cetkaik_core::perspective::Perspective::IaIsDownAndPointsUpward
-    }
-    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
-        cetkaik_core::absolute::distance(a, b)
-    }
-    fn absolute_same_direction(
-        origin: Self::AbsoluteCoord,
-        a: Self::AbsoluteCoord,
-        b: Self::AbsoluteCoord,
-    ) -> bool {
-        cetkaik_core::absolute::same_direction(origin, a, b)
-    }
-    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side {
-        a
-    }
-    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
-        a
-    }
-    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool {
-        piece.has_prof(prof)
-    }
-}
-
-/// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
-/// この impl においては、IAは常に一番下の行であり、初期状態でIA行を占有していたプレイヤーは駒が上向き（=あなた）である。
-/// つまり、`Upward` は常に `IASide` へと読み替えられる。
-impl CetkaikRepresentation for CetkaikCompact {
-    type Perspective = cetkaik_compact_representation::Perspective;
-
-    type AbsoluteCoord = cetkaik_compact_representation::Coord;
-    type RelativeCoord = cetkaik_compact_representation::Coord;
-
-    type AbsoluteBoard = cetkaik_compact_representation::Board;
-    type RelativeBoard = cetkaik_compact_representation::Board;
-
-    type AbsolutePiece = cetkaik_compact_representation::PieceWithSide;
-    type RelativePiece = cetkaik_compact_representation::PieceWithSide;
-
-    type AbsoluteField = cetkaik_compact_representation::Field;
-    type RelativeField = cetkaik_compact_representation::Field;
-
-    type AbsoluteSide = cetkaik_core::absolute::Side;
-    type RelativeSide = cetkaik_core::absolute::Side; // ここも absolute
-    fn to_absolute_coord(coord: Self::RelativeCoord, _p: Self::Perspective) -> Self::AbsoluteCoord {
-        coord
-    }
-    fn add_delta(
-        coord: Self::RelativeCoord,
-        row_delta: isize,
-        col_delta: isize,
-    ) -> Option<Self::RelativeCoord> {
-        cetkaik_compact_representation::Coord::add_delta(coord, row_delta, col_delta)
-    }
-    fn relative_get(
-        board: Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-    ) -> Option<Self::RelativePiece> {
-        use cetkaik_core::IsBoard;
-        board.peek(coord)
-    }
-    fn relative_clone_and_set(
-        board: &Self::RelativeBoard,
-        coord: Self::RelativeCoord,
-        p: Option<Self::RelativePiece>,
-    ) -> Self::RelativeBoard {
-        use cetkaik_core::IsBoard;
-        let mut new_board = *board;
-        new_board.put(coord, p);
-        new_board
-    }
-    fn absolute_get(
-        board: &Self::AbsoluteBoard,
-        coord: Self::AbsoluteCoord,
-    ) -> Option<Self::AbsolutePiece> {
-        use cetkaik_core::IsBoard;
-        board.peek(coord)
-    }
-    fn is_tam_hue_by_default(coord: Self::RelativeCoord) -> bool {
-        Self::RelativeCoord::is_tam_hue_by_default(coord)
-    }
-    fn relative_tam2() -> Self::RelativePiece {
-        unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
-    }
-    fn absolute_tam2() -> Self::AbsolutePiece {
-        unsafe { cetkaik_compact_representation::PieceWithSide::new_unchecked(0o300) }
-    }
-    fn is_upward(s: Self::RelativeSide) -> bool {
-        s == cetkaik_core::absolute::Side::IASide
-    }
-    fn match_on_piece_and_apply<U>(
-        piece: Self::RelativePiece,
-        f_tam: &dyn Fn() -> U,
-        f_piece: &dyn Fn(Profession, Self::RelativeSide) -> U,
-    ) -> U {
-        match piece.prof_and_side() {
-            cetkaik_compact_representation::MaybeTam2::Tam2 => f_tam(),
-            cetkaik_compact_representation::MaybeTam2::NotTam2((prof, side)) => f_piece(prof, side),
-        }
-    }
-    fn empty_squares_relative(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
-        let mut ans = vec![];
-        for rand_i in 0..9 {
-            for rand_j in 0..9 {
-                let coord: Self::RelativeCoord = Self::RelativeCoord::new(rand_i, rand_j).unwrap();
-                if Self::relative_get(*board, coord).is_none() {
-                    ans.push(coord);
-                }
-            }
-        }
-        ans
-    }
-    fn empty_squares_absolute(board: &Self::RelativeBoard) -> Vec<Self::RelativeCoord> {
-        Self::empty_squares_relative(board)
-    }
-
-    fn hop1zuo1_of(
-        side: Self::AbsoluteSide,
-        field: &Self::AbsoluteField,
-    ) -> Vec<cetkaik_core::ColorAndProf> {
-        match side {
-            absolute::Side::ASide => field
-                .to_hop1zuo1()
-                .a_side_hop1zuo1_color_and_prof()
-                .collect(),
-            absolute::Side::IASide => field
-                .to_hop1zuo1()
-                .ia_side_hop1zuo1_color_and_prof()
-                .collect(),
-        }
-    }
-    fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
-        field.as_board()
-    }
-    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard {
-        field.as_board_mut()
-    }
-    fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
-        field.as_board()
-    }
-    fn is_water_relative(c: Self::RelativeCoord) -> bool {
-        cetkaik_compact_representation::Coord::is_water(c)
-    }
-    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool {
-        cetkaik_compact_representation::Coord::is_water(c)
-    }
-    fn loop_over_one_side_and_tam(
-        board: &Self::RelativeBoard,
-        side: Self::RelativeSide,
-        f_tam_or_piece: &mut dyn FnMut(Self::RelativeCoord, Option<Profession>),
-    ) {
-        let fun = |(src, piece): (Self::RelativeCoord, Self::RelativePiece)| match piece
-            .prof_and_side()
-        {
-            cetkaik_compact_representation::MaybeTam2::Tam2 => f_tam_or_piece(src, None),
-            cetkaik_compact_representation::MaybeTam2::NotTam2((prof, _)) => {
-                f_tam_or_piece(src, Some(prof));
-            }
-        };
-        match side {
-            absolute::Side::ASide => board.a_side_and_tam().for_each(fun),
-            absolute::Side::IASide => board.ia_side_and_tam().for_each(fun),
-        }
-    }
-
-    fn to_relative_field(field: Self::AbsoluteField, _p: Self::Perspective) -> Self::RelativeField {
-        field
-    }
-
-    fn to_relative_side(side: Self::AbsoluteSide, _p: Self::Perspective) -> Self::RelativeSide {
-        side
-    }
-    fn get_one_perspective() -> Self::Perspective {
-        // the sole choice available
-        cetkaik_compact_representation::Perspective::IaIsDownAndPointsUpward
-    }
-
-    fn absolute_distance(a: Self::AbsoluteCoord, b: Self::AbsoluteCoord) -> i32 {
-        cetkaik_compact_representation::Coord::distance(a, b)
-    }
-
-    fn absolute_same_direction(
-        origin: Self::AbsoluteCoord,
-        a: Self::AbsoluteCoord,
-        b: Self::AbsoluteCoord,
-    ) -> bool {
-        cetkaik_compact_representation::Coord::same_direction(origin, a, b)
-    }
-    fn to_cetkaikcore_absolute_side(a: Self::AbsoluteSide) -> cetkaik_core::absolute::Side {
-        a
-    }
-    fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
-        a
-    }
-
-    fn has_prof_absolute(piece: Self::AbsolutePiece, prof: Profession) -> bool {
-        use cetkaik_compact_representation::MaybeTam2;
-        match piece.prof() {
-            MaybeTam2::Tam2 => false,
-            MaybeTam2::NotTam2(self_prof) => prof == self_prof,
-        }
-    }
-}
+use cetkaik_fundamental::{AbsoluteSide, PureMove_};
+use cetkaik_interface::CetkaikRepresentation;
 
 /// # Example
 ///
-/// Using `cetkaik_core`:
+/// Using `cetkaik_naive_representation`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::from_hop1zuo1_candidates_vec;
-/// use cetkaik_core::*;
-/// use cetkaik_core::absolute::Field;
-/// use cetkaik_core::ColorAndProf;
-/// use cetkaik_core::absolute::Coord;
-/// use cetkaik_core::absolute::Column::*;
-/// use cetkaik_core::absolute::Row::*;
-/// use cetkaik_yhuap_move_candidates::CetkaikCore;
+/// use cetkaik_naive_representation::*;
+/// use cetkaik_naive_representation::absolute::Field;
+/// use cetkaik_fundamental::*;
+/// use cetkaik_naive_representation::absolute::Coord;
+/// use cetkaik_naive_representation::absolute::Column::*;
+/// use cetkaik_naive_representation::absolute::Row::*;
+/// use cetkaik_naive_representation::CetkaikNaive;
+/// use cetkaik_naive_representation::absolute::Board;
 /// use std::collections::HashSet;
 ///
 /// // There are eighty unoccupied squares on the board, and `IASide` has two pieces in hop1zuo1
-/// let vec = from_hop1zuo1_candidates_vec::<CetkaikCore>(
-///     cetkaik_core::absolute::Side::IASide,
+/// let vec = from_hop1zuo1_candidates_vec::<CetkaikNaive>(
+///     cetkaik_fundamental::AbsoluteSide::IASide,
 ///     &Field {
 ///         a_side_hop1zuo1: vec![ColorAndProf {
 ///             color: Color::Huok2,
@@ -512,15 +44,15 @@ impl CetkaikRepresentation for CetkaikCompact {
 ///             color: Color::Huok2,
 ///             prof: Profession::Nuak1,
 ///         }],
-///         board: vec![
+///         board: Board(vec![
 ///             (Coord(AU, C), absolute::Piece::NonTam2Piece {
 ///             color: Color::Kok1,
 ///             prof: Profession::Nuak1,
-///             side: absolute::Side::IASide
+///             side: AbsoluteSide::IASide
 ///         })
 ///         ]
 ///         .into_iter()
-///         .collect(),
+///         .collect()),
 ///     }
 /// );
 ///
@@ -529,19 +61,15 @@ impl CetkaikRepresentation for CetkaikCompact {
 /// ```
 #[must_use]
 pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
-    whose_turn: T::AbsoluteSide,
+    whose_turn: AbsoluteSide,
     field: &T::AbsoluteField,
-) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
+) -> Vec<PureMove_<T::AbsoluteCoord>> {
     T::hop1zuo1_of(whose_turn, field)
         .into_iter()
-        .flat_map(|cetkaik_core::ColorAndProf { color, prof }| {
+        .flat_map(|cetkaik_fundamental::ColorAndProf { color, prof }| {
             T::empty_squares_absolute(T::as_board_absolute(field))
                 .into_iter()
-                .map(move |dest| cetkaik_core::PureMove_::NonTamMoveFromHopZuo {
-                    color,
-                    prof,
-                    dest,
-                })
+                .map(move |dest| PureMove_::NonTamMoveFromHopZuo { color, prof, dest })
         })
         .collect()
 }
@@ -616,12 +144,14 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// ```
 /// use cetkaik_yhuap_move_candidates::not_from_hop1zuo1_candidates_vec;
 /// use cetkaik_yhuap_move_candidates::Config;
-/// use cetkaik_yhuap_move_candidates::CetkaikCore;
-/// use cetkaik_core::*;
-/// use cetkaik_core::absolute::*;
-/// use cetkaik_core::absolute::Row::*;
-/// use cetkaik_core::absolute::Column::*;
-/// use cetkaik_core::PureMove_::*;
+/// use cetkaik_naive_representation::CetkaikNaive;
+/// use cetkaik_naive_representation::*;
+/// use cetkaik_naive_representation::absolute::*;
+/// use cetkaik_naive_representation::absolute::Row::*;
+/// use cetkaik_naive_representation::absolute::Column::*;
+/// use cetkaik_fundamental::*;
+/// use cetkaik_fundamental::PureMove_::*;
+/// use PureMove_::*;
 /// use std::collections::HashSet;
 ///
 /// fn assert_eq_ignoring_order<T>(a: &[T], b: &[T])
@@ -636,24 +166,24 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 ///
 /// // 船一つ
 /// assert_eq_ignoring_order(
-///     &not_from_hop1zuo1_candidates_vec::<CetkaikCore>(
+///     &not_from_hop1zuo1_candidates_vec::<CetkaikNaive>(
 ///         &Config {
 ///             allow_kut2tam2: false,
 ///         },
 ///         false,
-///         absolute::Side::IASide,
+///         AbsoluteSide::IASide,
 ///         &absolute::Field {
 ///              a_side_hop1zuo1: vec![],
 ///              ia_side_hop1zuo1: vec![],
-///              board: vec![
+///              board: Board(vec![
 ///                  (absolute::Coord(AU, C), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Kok1,
 ///                      prof: Profession::Nuak1,
-///                      side: absolute::Side::IASide
+///                      side: AbsoluteSide::IASide
 ///                  })
 ///             ]
 ///             .into_iter()
-///             .collect()
+///             .collect())
 ///         }
 ///     ),
 ///     &[
@@ -670,44 +200,44 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 ///
 /// // 弓が色々踏む
 /// assert_eq_ignoring_order(
-///     &not_from_hop1zuo1_candidates_vec::<CetkaikCore>(
+///     &not_from_hop1zuo1_candidates_vec::<CetkaikNaive>(
 ///         &Config {
 ///             allow_kut2tam2: false,
 ///         },
 ///         false,
-///         absolute::Side::IASide,
+///         AbsoluteSide::IASide,
 ///         &absolute::Field {
 ///              a_side_hop1zuo1: vec![],
 ///              ia_side_hop1zuo1: vec![],
-///              board: vec![
+///              board: Board(vec![
 ///                  (absolute::Coord(AI, L), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Huok2,
 ///                      prof: Profession::Gua2,
-///                      side: absolute::Side::IASide
+///                      side: AbsoluteSide::IASide
 ///                  }),
 ///                  (absolute::Coord(I, L), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Huok2,
 ///                      prof: Profession::Kauk2,
-///                      side: absolute::Side::ASide
+///                      side: AbsoluteSide::ASide
 ///                  }),
 ///                  (absolute::Coord(I, N), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Kok1,
 ///                      prof: Profession::Uai1,
-///                      side: absolute::Side::ASide
+///                      side: AbsoluteSide::ASide
 ///                  }),
 ///                  (absolute::Coord(AI, N), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Huok2,
 ///                      prof: Profession::Kaun1,
-///                      side: absolute::Side::ASide
+///                      side: AbsoluteSide::ASide
 ///                  }),
 ///                  (absolute::Coord(AU, L), absolute::Piece::NonTam2Piece {
 ///                      color: Color::Huok2,
 ///                      prof: Profession::Kauk2,
-///                      side: absolute::Side::ASide
+///                      side: AbsoluteSide::ASide
 ///                  }),
 ///             ]
 ///             .into_iter()
-///             .collect()
+///             .collect())
 ///         }
 ///     ),
 ///     &[
@@ -789,9 +319,9 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 pub fn not_from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     config: &Config,
     tam_itself_is_tam_hue: bool,
-    whose_turn: T::AbsoluteSide,
+    whose_turn: AbsoluteSide,
     f: &T::AbsoluteField,
-) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
+) -> Vec<PureMove_<T::AbsoluteCoord>> {
     let perspective = T::get_one_perspective();
     not_from_hop1zuo1_candidates_::<T>(
         T::to_relative_side(whose_turn, perspective),
@@ -824,7 +354,7 @@ fn candidates_tam2<T: CetkaikRepresentation>(
                                 neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
-                                vec![cetkaik_core::PureMove_::TamMoveNoStep {
+                                vec![PureMove_::TamMoveNoStep {
                                     second_dest: T::to_absolute_coord(snd_dst, perspective),
                                     first_dest: T::to_absolute_coord(fst_dst, perspective),
                                     src: T::to_absolute_coord(src, perspective),
@@ -834,15 +364,15 @@ fn candidates_tam2<T: CetkaikRepresentation>(
                                 let step: T::RelativeCoord = neighbor;
                                 empty_neighbors_of::<T>(subtracted_board, step)
                                     .flat_map(|snd_dst| {
-                                    vec![cetkaik_core::PureMove_::TamMoveStepsDuringLatter {
+                                    vec![PureMove_::TamMoveStepsDuringLatter {
                                         first_dest: T::to_absolute_coord(fst_dst, perspective),
                                         second_dest: T::to_absolute_coord(snd_dst, perspective),
                                         src: T::to_absolute_coord(src, perspective),
                                         step: T::to_absolute_coord(step, perspective),
                                     }].into_iter()
-                                }).collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>().into_iter()
+                                }).collect::<Vec<PureMove_<T::AbsoluteCoord>>>().into_iter()
                             }
-                        }).collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>());
+                        }).collect::<Vec<PureMove_<T::AbsoluteCoord>>>());
         } else {
             /* not an empty square: must complete the first move */
             let step = tentative_dest;
@@ -851,7 +381,7 @@ fn candidates_tam2<T: CetkaikRepresentation>(
                     .flat_map(|fst_dst| {
                         let v = empty_neighbors_of::<T>(subtracted_board, fst_dst);
                         v.flat_map(move |snd_dst| {
-                            vec![cetkaik_core::PureMove_::TamMoveStepsDuringFormer {
+                            vec![PureMove_::TamMoveStepsDuringFormer {
                                 first_dest: T::to_absolute_coord(fst_dst, perspective),
                                 second_dest: T::to_absolute_coord(snd_dst, perspective),
                                 src: T::to_absolute_coord(src, perspective),
@@ -859,10 +389,10 @@ fn candidates_tam2<T: CetkaikRepresentation>(
                             }]
                             .into_iter()
                         })
-                        .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>()
+                        .collect::<Vec<PureMove_<T::AbsoluteCoord>>>()
                         .into_iter()
                     })
-                    .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>(),
+                    .collect::<Vec<PureMove_<T::AbsoluteCoord>>>(),
             );
         }
     }
@@ -919,7 +449,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
                         subtracted_board,
                         tam_itself_is_tam_hue,
                     ) {
-                        vec![cetkaik_core::PureMove_::NonTamMoveSrcStepDstFinite {
+                        vec![PureMove_::NonTamMoveSrcStepDstFinite {
                             src: T::to_absolute_coord(src, perspective),
                             step: T::to_absolute_coord(step, perspective),
                             dest: T::to_absolute_coord(final_dest, perspective),
@@ -930,7 +460,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
                         vec![].into_iter()
                     }
                 })
-                .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>();
+                .collect::<Vec<PureMove_<T::AbsoluteCoord>>>();
             let candidates_inf_abs = candidates_inf
                 .flat_map(|planned_dest| {
                     if !can_get_occupied_by_non_tam::<T>(
@@ -942,15 +472,14 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
                         return vec![].into_iter();
                         // retry
                     }
-                    let obj: cetkaik_core::PureMove_<T::AbsoluteCoord> =
-                        cetkaik_core::PureMove_::InfAfterStep {
-                            src: T::to_absolute_coord(src, perspective),
-                            step: T::to_absolute_coord(step, perspective),
-                            planned_direction: T::to_absolute_coord(planned_dest, perspective),
-                        };
+                    let obj: PureMove_<T::AbsoluteCoord> = PureMove_::InfAfterStep {
+                        src: T::to_absolute_coord(src, perspective),
+                        step: T::to_absolute_coord(step, perspective),
+                        planned_direction: T::to_absolute_coord(planned_dest, perspective),
+                    };
                     vec![obj].into_iter()
                 })
-                .collect::<Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>>>();
+                .collect::<Vec<PureMove_<T::AbsoluteCoord>>>();
             [&candidates_abs[..], &candidates_inf_abs[..]].concat()
         };
         if let Some(piece) = dest_piece {
@@ -978,7 +507,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
                             config.tam_itself_is_tam_hue,
                         ) {
                             [
-                                &[cetkaik_core::PureMove_::NonTamMoveSrcDst {
+                                &[PureMove_::NonTamMoveSrcDst {
                                     src: T::to_absolute_coord(src, perspective),
                                     dest: T::to_absolute_coord(tentative_dest, perspective),
                                     is_water_entry_ciurl: is_ciurl_required::<T>(
@@ -999,7 +528,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
             ans.append(&mut a);
         } else {
             // cannot step
-            ans.append(&mut vec![cetkaik_core::PureMove_::NonTamMoveSrcDst {
+            ans.append(&mut vec![PureMove_::NonTamMoveSrcDst {
                 src: T::to_absolute_coord(src, perspective),
                 dest: T::to_absolute_coord(tentative_dest, perspective),
                 is_water_entry_ciurl: is_ciurl_required::<T>(tentative_dest, prof, src),
@@ -1014,7 +543,7 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     perspective: T::Perspective,
     tam_itself_is_tam_hue: bool,
     field: &T::RelativeField,
-) -> Vec<cetkaik_core::PureMove_<T::AbsoluteCoord>> {
+) -> Vec<PureMove_<T::AbsoluteCoord>> {
     let mut ans = vec![];
     T::loop_over_one_side_and_tam(T::as_board_relative(field), side, &mut |src, maybe_prof| {
         match maybe_prof {
@@ -1050,8 +579,7 @@ struct Config2 {
 #[cfg(test)]
 mod tests;
 
-pub use cetkaik_core::perspective::{to_absolute_coord, Perspective};
-pub use cetkaik_core::{Color, Profession};
+pub use cetkaik_fundamental::{Color, Profession};
 
 /// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,
 /// this function was a bottleneck that accounted for roughly fifty percent of all the runtime

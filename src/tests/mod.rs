@@ -1,9 +1,9 @@
 use self::test_cases::PureGameState;
 use super::*;
-use cetkaik_core::{absolute::PureMove, relative::Side};
-
+use cetkaik_naive_representation::CetkaikNaive;
+use cetkaik_naive_representation::{absolute::PureMove, relative::Side};
 fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_::<CetkaikCore>(
+    not_from_hop1zuo1_candidates_::<CetkaikNaive>(
         Side::Downward,
         Config {
             allow_kut2tam2: false,
@@ -15,7 +15,7 @@ fn not_from_hop1zuo1_candidates(game_state: &PureGameState) -> Vec<PureMove> {
 }
 
 fn not_from_hop1zuo1_candidates_with_kut2tam2(game_state: &PureGameState) -> Vec<PureMove> {
-    not_from_hop1zuo1_candidates_::<CetkaikCore>(
+    not_from_hop1zuo1_candidates_::<CetkaikNaive>(
         Side::Downward,
         Config {
             allow_kut2tam2: true,
@@ -55,12 +55,13 @@ mod not_from_hop1zuo1_candidates;
 mod test_cases;
 
 mod empty_squares {
-    use cetkaik_core::relative;
+    use cetkaik_interface::CetkaikRepresentation;
+    use cetkaik_naive_representation::relative;
+    use cetkaik_naive_representation::CetkaikNaive;
     #[test]
     fn test_initial_board_sample() {
-        use crate::CetkaikRepresentation;
         super::run_test(
-            |game_state| crate::CetkaikCore::empty_squares_relative(&game_state.f.current_board),
+            |game_state| <CetkaikNaive as CetkaikRepresentation>::empty_squares_relative(&game_state.f.current_board),
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             relative::serialize_coord,
             &[
@@ -92,12 +93,12 @@ mod get_opponent_pieces_rotated {
         }
     }
 
-    impl From<TamOrUpwardPiece> for cetkaik_core::relative::Piece {
-        fn from(p: TamOrUpwardPiece) -> cetkaik_core::relative::Piece {
+    impl From<TamOrUpwardPiece> for cetkaik_naive_representation::relative::Piece {
+        fn from(p: TamOrUpwardPiece) -> cetkaik_naive_representation::relative::Piece {
             match p {
-                TamOrUpwardPiece::Tam2 => cetkaik_core::relative::Piece::Tam2,
+                TamOrUpwardPiece::Tam2 => cetkaik_naive_representation::relative::Piece::Tam2,
                 TamOrUpwardPiece::NonTam2Piece { color, prof } => {
-                    cetkaik_core::relative::Piece::NonTam2Piece {
+                    cetkaik_naive_representation::relative::Piece::NonTam2Piece {
                         color,
                         prof,
                         side: Side::Upward,
@@ -111,8 +112,8 @@ mod get_opponent_pieces_rotated {
         rotated_piece: TamOrUpwardPiece,
         rotated_coord: Coord,
     }
-    use cetkaik_core::relative::Side;
-    use cetkaik_core::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
+    use cetkaik_naive_representation::relative::Side;
+    use cetkaik_naive_representation::relative::{self, rotate_coord, Coord, NonTam2PieceUpward};
 
     use crate::Vec;
 
@@ -132,14 +133,14 @@ mod get_opponent_pieces_rotated {
         for rand_i in 0..9 {
             for rand_j in 0..9 {
                 let coord = [rand_i, rand_j];
-                let piece = game_state.f.current_board[rand_i][rand_j];
+                let piece = game_state.f.current_board.0[rand_i][rand_j];
                 if let Some(p) = piece {
                     match p {
-                        cetkaik_core::relative::Piece::Tam2 => ans.push(Rotated {
+                        cetkaik_naive_representation::relative::Piece::Tam2 => ans.push(Rotated {
                             rotated_piece: TamOrUpwardPiece::Tam2,
                             rotated_coord: rotate_coord(coord),
                         }),
-                        cetkaik_core::relative::Piece::NonTam2Piece {
+                        cetkaik_naive_representation::relative::Piece::NonTam2Piece {
                             side: Side::Downward,
                             prof,
                             color,
@@ -150,7 +151,7 @@ mod get_opponent_pieces_rotated {
                                 rotated_coord: rotate_coord(coord),
                             });
                         }
-                        cetkaik_core::relative::Piece::NonTam2Piece {
+                        cetkaik_naive_representation::relative::Piece::NonTam2Piece {
                             side: Side::Upward, ..
                         } => {}
                     }

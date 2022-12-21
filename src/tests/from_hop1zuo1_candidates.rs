@@ -1,14 +1,13 @@
-use cetkaik_core::{absolute::PureMove, perspective::to_absolute_coord};
-
-use crate::{CetkaikCore, CetkaikRepresentation};
-
 use super::PureGameState;
+use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_naive_representation::CetkaikNaive;
+use cetkaik_naive_representation::{absolute::PureMove, perspective::to_absolute_coord};
 
 #[must_use]
 fn from_hop1zuo1_candidates_old(game_state: &PureGameState) -> Vec<PureMove> {
     let mut ans = vec![];
     for piece in &game_state.f.hop1zuo1of_downward {
-        for empty_square in CetkaikCore::empty_squares_relative(&game_state.f.current_board) {
+        for empty_square in CetkaikNaive::empty_squares_relative(&game_state.f.current_board) {
             ans.push(PureMove::NonTamMoveFromHopZuo {
                 color: piece.color,
                 prof: piece.prof,
@@ -24,7 +23,7 @@ fn test_initial_board_sample() {
     super::run_test(
         from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
-        PureMove::serialize,
+        |a| a.to_string(),
         &[],
     );
 }
@@ -34,7 +33,7 @@ fn test_simple_board_sample_4() {
     super::run_test(
         from_hop1zuo1_candidates_old,
         &crate::tests::test_cases::simple_board_sample_4(),
-        PureMove::serialize,
+        |a| a.to_string(),
         &[
             "黒弓KA",
             "黒弓LA",

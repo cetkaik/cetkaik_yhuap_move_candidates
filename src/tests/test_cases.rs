@@ -1,5 +1,9 @@
 use super::*;
-use cetkaik_core::relative::{Field, Piece};
+use cetkaik_naive_representation::relative;
+use cetkaik_naive_representation::{
+    perspective::Perspective,
+    relative::{Field, Piece},
+};
 
 #[derive(Debug)]
 pub struct PureGameState {
@@ -28,7 +32,7 @@ pub const TAM_ITSELF_IS_NOT_TAM_HUE_SAMPLE: PureGameState = PureGameState {
     },
 };
 
-pub const SIMPLE_BOARD: cetkaik_core::relative::Board = [
+pub const SIMPLE_BOARD: relative::Board = relative::Board([
     [
         Some(Piece::NonTam2Piece {
             color: Color::Huok2,
@@ -66,10 +70,10 @@ pub const SIMPLE_BOARD: cetkaik_core::relative::Board = [
     ],
     [None, None, None, None, None, None, None, None, None],
     [None, None, None, None, None, None, None, None, None],
-];
+]);
 
-pub const fn complicated_board() -> cetkaik_core::relative::Board {
-    [
+pub const fn complicated_board() -> cetkaik_naive_representation::relative::Board {
+    relative::Board([
         [
             None,
             None,
@@ -361,11 +365,11 @@ pub const fn complicated_board() -> cetkaik_core::relative::Board {
             None,
             None,
         ],
-    ]
+    ])
 }
 
-pub const fn tam_corner() -> cetkaik_core::relative::Board {
-    [
+pub const fn tam_corner() -> cetkaik_naive_representation::relative::Board {
+    relative::Board([
         [None, None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None, None],
         [None, None, None, None, None, None, None, None, None],
@@ -437,7 +441,7 @@ pub const fn tam_corner() -> cetkaik_core::relative::Board {
             }),
             Some(Piece::Tam2),
         ],
-    ]
+    ])
 }
 
 pub const fn simple_board_sample_1() -> PureGameState {
@@ -471,15 +475,15 @@ pub fn simple_board_sample_3() -> PureGameState {
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
-            current_board: rotate_board(SIMPLE_BOARD),
+            current_board: rotate_board(&SIMPLE_BOARD),
         },
     }
 }
 
-use cetkaik_core::relative::{rotate_board, NonTam2PieceDownward};
+use cetkaik_naive_representation::relative::{rotate_board, NonTam2PieceDownward};
 
 pub fn simple_board_sample_4() -> PureGameState {
-    use cetkaik_core::relative::NonTam2PieceUpward;
+    use cetkaik_naive_representation::relative::NonTam2PieceUpward;
     PureGameState {
         perspective: Perspective::IaIsDownAndPointsUpward,
         tam_itself_is_tam_hue: true,
@@ -492,7 +496,7 @@ pub fn simple_board_sample_4() -> PureGameState {
                 color: Color::Kok1,
                 prof: Profession::Kauk2,
             }],
-            current_board: rotate_board(SIMPLE_BOARD),
+            current_board: rotate_board(&SIMPLE_BOARD),
         },
     }
 }
@@ -516,7 +520,7 @@ pub fn complicated_board_sample_2() -> PureGameState {
         f: Field {
             hop1zuo1of_downward: vec![],
             hop1zuo1of_upward: vec![],
-            current_board: rotate_board(complicated_board()),
+            current_board: rotate_board(&complicated_board()),
         },
     }
 }
@@ -533,7 +537,7 @@ pub const fn tam_corner_sample() -> PureGameState {
     }
 }
 
-const INITIAL_BOARD: cetkaik_core::relative::Board = [
+const INITIAL_BOARD: cetkaik_naive_representation::relative::Board = relative::Board([
     [
         Some(Piece::NonTam2Piece {
             color: Color::Huok2,
@@ -805,7 +809,7 @@ const INITIAL_BOARD: cetkaik_core::relative::Board = [
             side: Side::Upward,
         }),
     ],
-];
+]);
 
 pub const INITIAL_MOVES_NO_KUT_TAM: [&str; 240] = [
     "KA片LAKA",
