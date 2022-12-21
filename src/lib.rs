@@ -84,6 +84,7 @@ pub trait CetkaikRepresentation {
     fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard;
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
     fn is_water_relative(c: Self::RelativeCoord) -> bool;
+    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool;
     fn loop_over_one_side_and_tam(
         board: &Self::RelativeBoard,
         side: Self::RelativeSide,
@@ -243,6 +244,9 @@ impl CetkaikRepresentation for CetkaikCore {
     }
     fn is_water_relative(c: Self::RelativeCoord) -> bool {
         cetkaik_core::relative::is_water(c)
+    }
+    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool {
+        cetkaik_core::absolute::is_water(c)
     }
     fn loop_over_one_side_and_tam(
         board: &Self::RelativeBoard,
@@ -411,6 +415,9 @@ impl CetkaikRepresentation for CetkaikCompact {
         field.as_board()
     }
     fn is_water_relative(c: Self::RelativeCoord) -> bool {
+        cetkaik_compact_representation::Coord::is_water(c)
+    }
+    fn is_water_absolute(c: Self::AbsoluteCoord) -> bool {
         cetkaik_compact_representation::Coord::is_water(c)
     }
     fn loop_over_one_side_and_tam(
