@@ -55,7 +55,7 @@ mod not_from_hop1zuo1_candidates;
 mod test_cases;
 
 mod empty_squares {
-    use cetkaik_interface::CetkaikRepresentation;
+    use cetkaik_traits::CetkaikRepresentation;
     use cetkaik_naive_representation::relative;
     use cetkaik_naive_representation::CetkaikNaive;
     #[test]

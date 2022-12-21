@@ -1,4 +1,4 @@
-use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_traits::CetkaikRepresentation;
 
 pub fn eight_neighborhood<T: CetkaikRepresentation>(
     coord: T::RelativeCoord,

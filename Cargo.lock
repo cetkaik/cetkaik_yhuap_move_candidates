@@ -10,43 +10,51 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "cetkaik_compact_representation"
-version = "0.3.5"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "24a56d1181a54009f4eb99fa1e17acc947bea817d6340104c8c85bf9cec1c99a"
 dependencies = [
  "cetkaik_fundamental",
- "cetkaik_interface",
+ "cetkaik_traits",
 ]
 
 [[package]]
 name = "cetkaik_fundamental"
-version = "0.1.0"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "417052f5b4ff1d26b5985f1c3a5f672bbd6c512a0a1f1eade759169c8a40469b"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "cetkaik_interface"
-version = "0.1.0"
-dependencies = [
- "cetkaik_fundamental",
 ]
 
 [[package]]
 name = "cetkaik_naive_representation"
-version = "0.1.0"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45089d8736500c0df86fe937558d736e03af785047d887657f974f139b31e612"
 dependencies = [
  "cetkaik_fundamental",
- "cetkaik_interface",
+ "cetkaik_traits",
  "serde",
 ]
 
 [[package]]
+name = "cetkaik_traits"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3695d04b0c0cee144c970ec55e2f55ca75a1607fc43bae9827ceb8c619c6479e"
+dependencies = [
+ "cetkaik_fundamental",
+]
+
+[[package]]
 name = "cetkaik_yhuap_move_candidates"
-version = "0.7.5"
+version = "1.0.0"
 dependencies = [
  "cetkaik_compact_representation",
  "cetkaik_fundamental",
- "cetkaik_interface",
  "cetkaik_naive_representation",
+ "cetkaik_traits",
  "num",
 ]
 

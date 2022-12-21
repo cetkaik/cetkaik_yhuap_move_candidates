@@ -1,5 +1,5 @@
 use super::PureGameState;
-use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_traits::CetkaikRepresentation;
 use cetkaik_naive_representation::CetkaikNaive;
 use cetkaik_naive_representation::{absolute::PureMove, perspective::to_absolute_coord};
 

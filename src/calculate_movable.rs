@@ -1,6 +1,6 @@
 use alloc::vec::Vec;
 
-use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_traits::CetkaikRepresentation;
 use cetkaik_fundamental::Profession;
 use super::MovablePositions;
 

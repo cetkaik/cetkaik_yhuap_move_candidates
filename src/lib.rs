@@ -12,7 +12,7 @@ extern crate alloc;
 use alloc::vec::Vec;
 
 use cetkaik_fundamental::{AbsoluteSide, PureMove_};
-use cetkaik_interface::CetkaikRepresentation;
+use cetkaik_traits::CetkaikRepresentation;
 
 /// # Example
 ///
