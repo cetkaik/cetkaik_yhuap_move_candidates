@@ -11,6 +11,10 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
+use cetkaik_core::{IsAbsoluteBoard, PureMove_};
+
+pub use cetkaik_core::absolute;
+
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct CetkaikCore;
 
@@ -23,7 +27,9 @@ pub trait CetkaikRepresentation {
     type AbsoluteCoord: Copy + Eq + core::fmt::Debug;
     type RelativeCoord: Copy + Eq;
 
-    type AbsoluteBoard: Clone + core::fmt::Debug + IsAbsoluteBoard;
+    type AbsoluteBoard: Clone
+        + core::fmt::Debug
+        + IsAbsoluteBoard<PieceWithSide = Self::AbsolutePiece, Coord = Self::AbsoluteCoord>;
     type RelativeBoard: Copy;
 
     type AbsolutePiece: Copy + Eq;
@@ -280,8 +286,6 @@ impl CetkaikRepresentation for CetkaikCore {
     fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
         a
     }
-
-    
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -1005,10 +1009,6 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     });
     ans
 }
-
-use cetkaik_core::{IsAbsoluteBoard, PureMove_};
-
-pub use cetkaik_core::absolute;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Config {
