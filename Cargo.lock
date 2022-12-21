@@ -10,9 +10,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "cetkaik_compact_representation"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f14e6d1c4558492422158d4a412a7afda8fe6982b4f6d07e383acfc61aefc5d"
+checksum = "0f7b43ffce540d43aa7337354e4859be88a4b52d74d777632f1a89d0bb1759a8"
 dependencies = [
  "cetkaik_core",
 ]

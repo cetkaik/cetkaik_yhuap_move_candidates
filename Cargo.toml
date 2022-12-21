@@ -11,7 +11,7 @@ exclude = [ "renovate.json" ]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cetkaik_compact_representation = "0.3.1"
+cetkaik_compact_representation = "0.3.2"
 cetkaik_core = "0.5.2"
 
 [dependencies.num]

@@ -69,6 +69,7 @@ pub trait CetkaikRepresentation {
         field: &Self::AbsoluteField,
     ) -> Vec<cetkaik_core::ColorAndProf>;
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard;
+    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard;
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard;
     fn is_water_relative(c: Self::RelativeCoord) -> bool;
     fn loop_over_one_side_and_tam(
@@ -222,6 +223,9 @@ impl CetkaikRepresentation for CetkaikCore {
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
         &field.board
     }
+    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard {
+        &mut field.board
+    }
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
         &field.current_board
     }
@@ -276,6 +280,8 @@ impl CetkaikRepresentation for CetkaikCore {
     fn from_cetkaikcore_absolute_side(a: cetkaik_core::absolute::Side) -> Self::AbsoluteSide {
         a
     }
+
+    
 }
 
 /// `cetkaik_compact_representation` クレートに基づいており、視点を決め打ちして絶対座標=相対座標として表現する。
@@ -387,6 +393,9 @@ impl CetkaikRepresentation for CetkaikCompact {
     }
     fn as_board_absolute(field: &Self::AbsoluteField) -> &Self::AbsoluteBoard {
         field.as_board()
+    }
+    fn as_board_mut_absolute(field: &mut Self::AbsoluteField) -> &mut Self::AbsoluteBoard {
+        field.as_board_mut()
     }
     fn as_board_relative(field: &Self::RelativeField) -> &Self::RelativeBoard {
         field.as_board()
