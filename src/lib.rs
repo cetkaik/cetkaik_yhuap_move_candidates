@@ -11,7 +11,7 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
-use cetkaik_core::{IsAbsoluteBoard, PureMove_};
+use cetkaik_core::{IsAbsoluteBoard, IsField, PureMove_};
 
 pub use cetkaik_core::absolute;
 
@@ -35,7 +35,13 @@ pub trait CetkaikRepresentation {
     type AbsolutePiece: Copy + Eq;
     type RelativePiece: Copy + Eq;
 
-    type AbsoluteField: Clone + core::fmt::Debug;
+    type AbsoluteField: Clone
+        + core::fmt::Debug
+        + IsField<
+            PieceWithSide = Self::AbsolutePiece,
+            Coord = Self::AbsoluteCoord,
+            Side = Self::AbsoluteSide,
+        >;
     type RelativeField;
 
     type AbsoluteSide: Copy + Eq + core::fmt::Debug + core::ops::Not;
