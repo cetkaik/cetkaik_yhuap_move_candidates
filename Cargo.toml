@@ -1,6 +1,6 @@
 [package]
 name = "cetkaik_yhuap_move_candidates"
-version = "1.0.0"
+version = "1.2.0"
 authors = ["jekto_vatimeliju <jekto.vatimeliju@gmail.com>"]
 edition = "2021"
 description = "See https://sites.google.com/view/cet2kaik/the-standardized-rule-in-english and https://github.com/sozysozbot/cerke_online_utility for context."
@@ -12,11 +12,11 @@ exclude = [ "renovate.json" ]
 
 [dependencies]
 cetkaik_fundamental = "1.0.0"
-cetkaik_traits = "1.0.0"
+cetkaik_traits = "1.2.0"
 
 [dev-dependencies]
-cetkaik_naive_representation = "1.0.0"
-cetkaik_compact_representation = "1.0.0"
+cetkaik_naive_representation = "1.2.0"
+cetkaik_compact_representation = "1.2.0"
 
 
 [dependencies.num]

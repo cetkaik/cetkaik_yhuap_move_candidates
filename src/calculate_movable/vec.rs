@@ -1,4 +1,4 @@
-use cetkaik_traits::CetkaikRepresentation;
+use cetkaik_traits::{CetkaikRepresentation, IsBoard};
 
 use super::{iter, Vec};
 pub fn eight_neighborhood<T: CetkaikRepresentation>(
@@ -37,7 +37,7 @@ pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
     let mut blocker = iter::apply_deltas::<T>(coord, crate::get_blocker_deltas::ultrafast(delta));
 
     // if nothing is blocking the way
-    if blocker.all(|block| T::relative_get(board, block).is_none()) {
+    if blocker.all(|block| board.peek(block).is_none()) {
         apply_deltas::<T>(coord, &[delta])
     } else {
         vec![]

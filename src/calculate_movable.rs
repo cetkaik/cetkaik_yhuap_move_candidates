@@ -1,13 +1,13 @@
 use alloc::vec::Vec;
 
-use cetkaik_traits::CetkaikRepresentation;
-use cetkaik_fundamental::Profession;
 use super::MovablePositions;
+use cetkaik_fundamental::Profession;
+use cetkaik_traits::{CetkaikRepresentation, IsBoard, IsPieceWithSide};
 
 pub mod iter;
 pub mod vec;
 
-pub fn is_tam_hue<T: CetkaikRepresentation>(
+pub fn is_tam_hue_relative<T: CetkaikRepresentation>(
     coord: T::RelativeCoord,
     board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
@@ -16,19 +16,18 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
         return true;
     }
 
-    if tam_itself_is_tam_hue && T::relative_get(board, coord) == Some(T::relative_tam2()) {
+    if tam_itself_is_tam_hue && board.peek(coord) == Some(T::relative_tam2()) {
         return true;
     }
 
     // is Tam2 available at any neighborhood?
-    iter::eight_neighborhood::<T>(coord)
-        .any(|coord| T::relative_get(board, coord) == Some(T::relative_tam2()))
+    iter::eight_neighborhood::<T>(coord).any(|coord| board.peek(coord) == Some(T::relative_tam2()))
 }
 
 /// Returns the list of all possible locations that a piece can move to / step on.
 /// Supports both `cetkaik_naive_representation` and `cetkaik_compact_representation`.
 /// # Examples
-/// 
+///
 /// With `cetkaik_naive_representation`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
@@ -102,7 +101,7 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 ///  * Note that you need two calls to this function in order to handle stepping. */
 /// assert_eq_ignoring_order(&infinite, &vec![[3, 0], [4, 0], [5, 0], [6, 0], [1, 0], [0, 0]]);
 /// ```
-/// 
+///
 /// With `cetkaik_compact_representation`:
 /// ```
 /// use cetkaik_yhuap_move_candidates::*;
@@ -146,11 +145,11 @@ pub fn is_tam_hue<T: CetkaikRepresentation>(
 /// /* or it can run to anywhere from [0,0] to [6,0].
 ///  * Note that you need two calls to this function in order to handle stepping. */
 /// assert_eq_ignoring_order(&infinite, &[
-///     Coord::new(3, 0).unwrap(), 
-///     Coord::new(4, 0).unwrap(), 
-///     Coord::new(5, 0).unwrap(), 
-///     Coord::new(6, 0).unwrap(), 
-///     Coord::new(1, 0).unwrap(), 
+///     Coord::new(3, 0).unwrap(),
+///     Coord::new(4, 0).unwrap(),
+///     Coord::new(5, 0).unwrap(),
+///     Coord::new(6, 0).unwrap(),
+///     Coord::new(1, 0).unwrap(),
 ///     Coord::new(0, 0).unwrap()
 /// ]);
 /// ```
@@ -161,10 +160,9 @@ pub fn calculate_movable_positions_for_either_side<T: CetkaikRepresentation>(
     board: T::RelativeBoard,
     tam_itself_is_tam_hue: bool,
 ) -> MovablePositions<T::RelativeCoord> {
-    T::match_on_piece_and_apply(
-        piece,
+    piece.match_on_piece_and_apply(
         &|| calculate_movable_positions_for_tam::<T>(coord),
-        &|prof, side| {
+        &|_color, prof, side| {
             calculate_movable_positions_for_nontam::<T>(
                 coord,
                 prof,
@@ -270,7 +268,7 @@ pub fn calculate_movable_positions_for_nontam<T: CetkaikRepresentation>(
     ];
 
     let piece_prof = prof;
-    if is_tam_hue::<T>(coord, board, tam_itself_is_tam_hue) {
+    if is_tam_hue_relative::<T>(coord, board, tam_itself_is_tam_hue) {
         match piece_prof {
            Profession::Io | Profession::Uai1 => // General, 将, varxle
             MovablePositions { finite: vec::eight_neighborhood::<T>(coord), infinite: vec![] },
@@ -369,7 +367,7 @@ pub fn calculate_movable_positions_for_nontam<T: CetkaikRepresentation>(
                   );
                   let mut blocker = iter::apply_deltas::<T>(coord, blocker_deltas);
                   // if nothing is blocking the way
-                  if blocker.all(|block| T::relative_get(board, block).is_none()) {
+                  if blocker.all(|block| board.peek(block).is_none()) {
                     inf.append(&mut vec::apply_deltas::<T>(coord, &[*delta]));
                   }
                 }

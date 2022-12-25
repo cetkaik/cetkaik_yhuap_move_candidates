@@ -1,4 +1,4 @@
-use cetkaik_traits::CetkaikRepresentation;
+use cetkaik_traits::{CetkaikRepresentation, IsBoard};
 
 pub fn eight_neighborhood<T: CetkaikRepresentation>(
     coord: T::RelativeCoord,
@@ -35,7 +35,7 @@ pub fn apply_single_delta_if_no_intervention<T: CetkaikRepresentation>(
     // if nothing is blocking the way
     apply_deltas::<T>(
         coord,
-        if blocker.all(|coord| T::relative_get(board, coord).is_none()) {
+        if blocker.all(|coord| board.peek(coord).is_none()) {
             Some(delta)
         } else {
             None
@@ -69,11 +69,7 @@ pub fn apply_single_delta_if_zero_or_one_intervention<T: CetkaikRepresentation>(
     // if no piece or a single piece is blocking the way
     apply_deltas::<T>(
         coord,
-        if blocker
-            .filter(|block| T::relative_get(board, *block).is_some())
-            .count()
-            <= 1
-        {
+        if blocker.filter(|block| board.peek(*block).is_some()).count() <= 1 {
             Some(delta)
         } else {
             None

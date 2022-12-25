@@ -76,6 +76,7 @@ pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
 
 mod calculate_movable;
 pub use calculate_movable::calculate_movable_positions_for_either_side;
+pub use calculate_movable::is_tam_hue_relative;
 
 #[derive(Debug, Eq, Clone, PartialEq)]
 pub struct MovablePositions<T> {
@@ -88,7 +89,7 @@ fn empty_neighbors_of<T: CetkaikRepresentation>(
     c: T::RelativeCoord,
 ) -> impl Iterator<Item = T::RelativeCoord> {
     calculate_movable::iter::eight_neighborhood::<T>(c)
-        .filter(move |coord| T::relative_get(board, *coord).is_none())
+        .filter(move |coord| board.peek(*coord).is_none())
 }
 
 fn can_get_occupied_by_non_tam<T: CetkaikRepresentation>(
@@ -102,11 +103,15 @@ fn can_get_occupied_by_non_tam<T: CetkaikRepresentation>(
         calculate_movable::vec::eight_neighborhood::<T>(coord)
             .into_iter()
             .filter(|ab| {
-                T::relative_get(board, *ab).map_or(false, |piece| {
-                    T::match_on_piece_and_apply(piece, &|| false, &|piece_prof, piece_side| {
+                board.peek(*ab).map_or(false, |piece| {
+                    piece.match_on_piece_and_apply(&|| false, &|_, piece_prof, piece_side| {
                         piece_prof == Profession::Uai1
                             && piece_side != side
-                            && calculate_movable::is_tam_hue::<T>(*ab, board, tam_itself_is_tam_hue)
+                            && calculate_movable::is_tam_hue_relative::<T>(
+                                *ab,
+                                board,
+                                tam_itself_is_tam_hue,
+                            )
                     })
                 })
             })
@@ -114,11 +119,10 @@ fn can_get_occupied_by_non_tam<T: CetkaikRepresentation>(
             > 0
     };
 
-    T::relative_get(board, dest).map_or(true, |piece| {
-        T::match_on_piece_and_apply(
-            piece,
+    board.peek(dest).map_or(true, |piece| {
+        piece.match_on_piece_and_apply(
             &|| false, /* Tam2 can never be taken */
-            &|_, piece_side| {
+            &|_, _, piece_side| {
                 piece_side != side /* cannot take your own piece */ &&
         !is_protected_by_opponent_tam_hue_auai(
             side,
@@ -340,17 +344,18 @@ fn candidates_tam2<T: CetkaikRepresentation>(
 ) {
     let candidates: Vec<T::RelativeCoord> = calculate_movable::vec::eight_neighborhood::<T>(src);
     for tentative_dest in candidates {
-        let dest_piece = T::relative_get(*T::as_board_relative(f), tentative_dest);
+        let dest_piece = T::as_board_relative(f).peek(tentative_dest);
 
         /* avoid self-occlusion */
-        let subtracted_board = T::relative_clone_and_set(T::as_board_relative(f), src, None);
+        let mut subtracted_board = *T::as_board_relative(f);
+        subtracted_board.put(src, None);
         if dest_piece.is_none() {
             /* empty square; first move is completed without stepping */
             let fst_dst: T::RelativeCoord = tentative_dest;
             ans.append(&mut calculate_movable::iter::eight_neighborhood::<T>(fst_dst).flat_map(|neighbor| {
                             /* if the neighbor is empty, that is the second destination */
                             let snd_dst: T::RelativeCoord = neighbor;
-                            if T::relative_get(*T::as_board_relative(f), neighbor).is_none() /* the neighbor is utterly occupied */ ||
+                            if T::as_board_relative(f).peek(neighbor).is_none() /* the neighbor is utterly occupied */ ||
                                 neighbor == src
                             /* the neighbor is occupied by yourself, which means it is actually empty */
                             {
@@ -418,7 +423,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
 
     let candidates: Vec<T::RelativeCoord> = [&finite[..], &infinite[..]].concat();
     for tentative_dest in candidates {
-        let dest_piece = T::relative_get(*T::as_board_relative(field), tentative_dest);
+        let dest_piece = T::as_board_relative(field).peek(tentative_dest);
 
         let candidates_when_stepping = || {
             let step = tentative_dest; // tentative_dest becomes the position on which the stepping occurs
@@ -426,8 +431,8 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
             let perspective = perspective;
             let tam_itself_is_tam_hue: bool = config.tam_itself_is_tam_hue;
             /* now, to decide the final position, we must remove the piece to prevent self-occlusion */
-            let subtracted_board =
-                T::relative_clone_and_set(T::as_board_relative(field), src, None); /* must remove the piece to prevent self-occlusion */
+            let mut subtracted_board = *T::as_board_relative(field);
+            subtracted_board.put(src, None); /* must remove the piece to prevent self-occlusion */
 
             let MovablePositions { finite, infinite } =
                 calculate_movable::calculate_movable_positions_for_nontam::<T>(
@@ -483,8 +488,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
             [&candidates_abs[..], &candidates_inf_abs[..]].concat()
         };
         if let Some(piece) = dest_piece {
-            let mut a = T::match_on_piece_and_apply(
-                piece,
+            let mut a = piece.match_on_piece_and_apply(
                 &|| {
                     // if allowed by config, allow stepping on Tam2;
                     if config.allow_kut2tam2 {
@@ -493,7 +497,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
                         vec![]
                     }
                 },
-                &|prof, side_| {
+                &|_color, prof, side_| {
                     if side_ == side {
                         candidates_when_stepping()
                     } else {
@@ -580,6 +584,8 @@ struct Config2 {
 mod tests;
 
 pub use cetkaik_fundamental::{Color, Profession};
+use cetkaik_traits::IsBoard;
+use cetkaik_traits::IsPieceWithSide;
 
 /// According to <https://github.com/cetkaik/cetkaik_yhuap_move_candidates/pull/7>,
 /// this function was a bottleneck that accounted for roughly fifty percent of all the runtime
