@@ -147,7 +147,7 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// # Example
 /// ```
 /// use cetkaik_yhuap_move_candidates::not_from_hop1zuo1_candidates_vec;
-/// use cetkaik_yhuap_move_candidates::Config;
+/// use cetkaik_yhuap_move_candidates::AllowKut2Tam2;
 /// use cetkaik_naive_representation::CetkaikNaive;
 /// use cetkaik_naive_representation::*;
 /// use cetkaik_naive_representation::absolute::*;
@@ -171,7 +171,7 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// // 船一つ
 /// assert_eq_ignoring_order(
 ///     &not_from_hop1zuo1_candidates_vec::<CetkaikNaive>(
-///         &Config {
+///         &AllowKut2Tam2 {
 ///             allow_kut2tam2: false,
 ///         },
 ///         false,
@@ -205,7 +205,7 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// // 弓が色々踏む
 /// assert_eq_ignoring_order(
 ///     &not_from_hop1zuo1_candidates_vec::<CetkaikNaive>(
-///         &Config {
+///         &AllowKut2Tam2 {
 ///             allow_kut2tam2: false,
 ///         },
 ///         false,
@@ -321,7 +321,7 @@ fn is_ciurl_required<T: CetkaikRepresentation>(
 /// ```
 #[must_use]
 pub fn not_from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
-    config: &Config,
+    allow_kut2tam2: &AllowKut2Tam2,
     tam_itself_is_tam_hue: bool,
     whose_turn: AbsoluteSide,
     f: &T::AbsoluteField,
@@ -329,7 +329,7 @@ pub fn not_from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     let perspective = T::get_one_perspective();
     not_from_hop1zuo1_candidates_::<T>(
         T::to_relative_side(whose_turn, perspective),
-        *config,
+        *allow_kut2tam2,
         perspective,
         tam_itself_is_tam_hue,
         &T::to_relative_field((*f).clone(), perspective),
@@ -543,7 +543,7 @@ fn append_possible_movement_of_a_piece<T: CetkaikRepresentation>(
 
 fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
     side: T::RelativeSide,
-    config: Config,
+    allow_kut2tam2: AllowKut2Tam2,
     perspective: T::Perspective,
     tam_itself_is_tam_hue: bool,
     field: &T::RelativeField,
@@ -556,7 +556,7 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
                 side,
                 Config2 {
                     tam_itself_is_tam_hue,
-                    allow_kut2tam2: config.allow_kut2tam2,
+                    allow_kut2tam2: allow_kut2tam2.allow_kut2tam2,
                 },
                 prof,
                 src,
@@ -570,7 +570,7 @@ fn not_from_hop1zuo1_candidates_<T: CetkaikRepresentation>(
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub struct Config {
+pub struct AllowKut2Tam2 {
     pub allow_kut2tam2: bool,
 }
 
