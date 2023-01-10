@@ -64,11 +64,12 @@ pub fn from_hop1zuo1_candidates_vec<T: CetkaikRepresentation>(
     whose_turn: AbsoluteSide,
     field: &T::AbsoluteField,
 ) -> Vec<PureMove_<T::AbsoluteCoord>> {
-    T::hop1zuo1_of(whose_turn, field)
-        .into_iter()
+    use cetkaik_traits::IsAbsoluteField;
+    field
+        .hop1zuo1_of(whose_turn)
         .flat_map(|cetkaik_fundamental::ColorAndProf { color, prof }| {
-            T::empty_squares_absolute(T::as_board_absolute(field))
-                .into_iter()
+            T::as_board_absolute(field)
+                .empty_squares()
                 .map(move |dest| PureMove_::NonTamMoveFromHopZuo { color, prof, dest })
         })
         .collect()

@@ -1,7 +1,7 @@
 use super::PureGameState;
-use cetkaik_traits::CetkaikRepresentation;
 use cetkaik_naive_representation::CetkaikNaive;
 use cetkaik_naive_representation::{absolute::PureMove, perspective::to_absolute_coord};
+use cetkaik_traits::CetkaikRepresentation;
 
 #[must_use]
 fn from_hop1zuo1_candidates_old(game_state: &PureGameState) -> Vec<PureMove> {

@@ -55,13 +55,17 @@ mod not_from_hop1zuo1_candidates;
 mod test_cases;
 
 mod empty_squares {
-    use cetkaik_traits::CetkaikRepresentation;
     use cetkaik_naive_representation::relative;
     use cetkaik_naive_representation::CetkaikNaive;
+    use cetkaik_traits::CetkaikRepresentation;
     #[test]
     fn test_initial_board_sample() {
         super::run_test(
-            |game_state| <CetkaikNaive as CetkaikRepresentation>::empty_squares_relative(&game_state.f.current_board),
+            |game_state| {
+                <CetkaikNaive as CetkaikRepresentation>::empty_squares_relative(
+                    &game_state.f.current_board,
+                )
+            },
             &crate::tests::test_cases::INITIAL_BOARD_SAMPLE,
             relative::serialize_coord,
             &[
@@ -152,7 +156,8 @@ mod get_opponent_pieces_rotated {
                             });
                         }
                         cetkaik_naive_representation::relative::Piece::NonTam2Piece {
-                            side: Side::Upward, ..
+                            side: Side::Upward,
+                            ..
                         } => {}
                     }
                 }
